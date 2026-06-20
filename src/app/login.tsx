@@ -77,7 +77,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create((theme) => ({
   safe: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.semantic.bgPrimary,
   },
   keyboard: {
     flex: 1,

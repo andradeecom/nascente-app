@@ -25,14 +25,14 @@ export function InputField({
       <View style={styles.labelRow}>
         <Text variant="label">{label}</Text>
         {rightLabel && (
-          <Text variant="label" color="mutedForeground" onPress={onRightLabelPress}>
+          <Text variant="label" color="textSecondary" onPress={onRightLabelPress}>
             {rightLabel}
           </Text>
         )}
       </View>
       <Input leftIcon={leftIcon} rightIcon={rightIcon} error={!!error} {...inputProps} />
       {error && (
-        <Text variant="caption" color="destructive">
+        <Text variant="caption" color="danger">
           {error}
         </Text>
       )}

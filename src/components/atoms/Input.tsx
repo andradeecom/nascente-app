@@ -22,26 +22,26 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: theme.colors.border,
+    borderColor: theme.colors.semantic.bgTertiary,
     borderRadius: theme.radius.lg,
-    backgroundColor: theme.colors.card,
+    backgroundColor: theme.colors.semantic.bgSecondary,
     paddingHorizontal: theme.spacing[4],
     height: 52,
   },
   error: {
-    borderColor: theme.colors.destructive,
+    borderColor: theme.colors.semantic.danger,
   },
   iconContainer: {
     marginRight: theme.spacing[2],
   },
   input: {
     flex: 1,
-    fontSize: theme.font.sizes.sm,
+    fontSize: theme.font.sizes.callout,
     fontFamily: theme.font.family,
-    color: theme.colors.foreground,
+    color: theme.colors.semantic.textPrimary,
     height: '100%',
   },
   placeholder: {
-    color: theme.colors.mutedForeground,
+    color: theme.colors.semantic.textSecondary,
   },
 }));

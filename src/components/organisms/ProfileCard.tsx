@@ -15,8 +15,8 @@ export function ProfileCard({ name, email, avatar, onLogout }: ProfileCardProps)
     <View style={styles.card}>
       <View style={styles.info}>
         <Avatar uri={avatar} fallback={name} size="xl" />
-        <Text variant="h3">{name}</Text>
-        <Text variant="bodySmall" color="mutedForeground">
+        <Text variant="title3">{name}</Text>
+        <Text variant="callout" color="textSecondary">
           {email}
         </Text>
       </View>
@@ -24,34 +24,34 @@ export function ProfileCard({ name, email, avatar, onLogout }: ProfileCardProps)
       <View style={styles.section}>
         <View style={styles.row}>
           <Text variant="label">{translate('profile.account')}</Text>
-          <Text variant="bodySmall" color="mutedForeground">
+          <Text variant="callout" color="textSecondary">
             {email}
           </Text>
         </View>
         <View style={styles.separator} />
         <View style={styles.row}>
           <Text variant="label">{translate('profile.theme')}</Text>
-          <Text variant="bodySmall" color="mutedForeground">
+          <Text variant="callout" color="textSecondary">
             {translate('profile.themeSystem')}
           </Text>
         </View>
         <View style={styles.separator} />
         <View style={styles.row}>
           <Text variant="label">{translate('profile.notifications')}</Text>
-          <Text variant="bodySmall" color="mutedForeground">
+          <Text variant="callout" color="textSecondary">
             {translate('profile.notificationsEnabled')}
           </Text>
         </View>
       </View>
 
-      <Button label={translate('common.signOut')} variant="outline" fullWidth onPress={onLogout} />
+      <Button label={translate('common.signOut')} variant="secondary" fullWidth onPress={onLogout} />
     </View>
   );
 }
 
 const styles = StyleSheet.create((theme) => ({
   card: {
-    backgroundColor: theme.colors.card,
+    backgroundColor: theme.colors.semantic.bgSecondary,
     borderRadius: theme.radius.xl,
     padding: theme.spacing[6],
     gap: theme.spacing[6],
@@ -62,7 +62,7 @@ const styles = StyleSheet.create((theme) => ({
     gap: theme.spacing[2],
   },
   section: {
-    backgroundColor: theme.colors.muted,
+    backgroundColor: theme.colors.semantic.bgTertiary,
     borderRadius: theme.radius.lg,
     padding: theme.spacing[4],
   },
@@ -74,6 +74,6 @@ const styles = StyleSheet.create((theme) => ({
   },
   separator: {
     height: 1,
-    backgroundColor: theme.colors.border,
+    backgroundColor: theme.colors.semantic.bgTertiary,
   },
 }));

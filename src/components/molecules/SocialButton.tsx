@@ -39,15 +39,15 @@ const styles = StyleSheet.create((theme) => ({
     paddingHorizontal: theme.spacing[4],
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    borderColor: theme.colors.border,
-    backgroundColor: theme.colors.card,
+    borderColor: theme.colors.semantic.bgTertiary,
+    backgroundColor: theme.colors.semantic.bgSecondary,
     gap: theme.spacing[2],
   },
   pressed: {
     opacity: 0.8,
-    backgroundColor: theme.colors.muted,
+    backgroundColor: theme.colors.semantic.bgTertiary,
   },
   icon: {
-    color: theme.colors.foreground,
+    color: theme.colors.semantic.textPrimary,
   },
 }));

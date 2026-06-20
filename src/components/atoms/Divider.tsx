@@ -11,7 +11,7 @@ export function Divider({ label }: DividerProps) {
     <View style={styles.container}>
       <View style={styles.line} />
       {label && (
-        <Text variant="overline" color="mutedForeground" style={styles.label}>
+        <Text variant="overline" color="textSecondary" style={styles.label}>
           {label}
         </Text>
       )}
@@ -29,7 +29,7 @@ const styles = StyleSheet.create((theme) => ({
   line: {
     flex: 1,
     height: 1,
-    backgroundColor: theme.colors.border,
+    backgroundColor: theme.colors.semantic.bgTertiary,
   },
   label: {
     paddingHorizontal: theme.spacing[1],

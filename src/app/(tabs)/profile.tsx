@@ -28,7 +28,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create((theme) => ({
   safe: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.semantic.bgPrimary,
   },
   scroll: {
     flexGrow: 1,

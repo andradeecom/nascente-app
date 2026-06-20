@@ -1,22 +1,18 @@
 {
   "expo": {
-    "name": "rn-template",
-    "slug": "rn-template",
-    "version": "1.1.0",
+    "name": "Nascente App",
+    "slug": "nascente-app",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "rntemplate",
+    "scheme": "nascenteapp",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
       "infoPlist": {
-        "CFBundleLocalizations": [
-          "en",
-          "es",
-          "pt"
-        ]
+        "CFBundleLocalizations": ["en", "es", "pt"]
       },
-      "bundleIdentifier": "com.andradee.rntemplate"
+      "bundleIdentifier": "com.andradee.nascenteapp"
     },
     "android": {
       "adaptiveIcon": {
@@ -26,7 +22,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.andradee.rntemplate"
+      "package": "com.andradee.nascenteapp"
     },
     "web": {
       "output": "static",
@@ -48,16 +44,8 @@
         "expo-localization",
         {
           "supportedLocales": {
-            "ios": [
-              "en",
-              "es",
-              "pt"
-            ],
-            "android": [
-              "en",
-              "es",
-              "pt"
-            ]
+            "ios": ["en", "es", "pt"],
+            "android": ["en", "es", "pt"]
           }
         }
       ],
@@ -68,9 +56,56 @@
           "iosUrlScheme": "com.googleusercontent.apps.397336416856-dosvk0v405lhmucnd3ietr86lravpj61"
         }
       ],
-      "expo-font",
       "expo-image",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/Literata-Regular.ttf",
+            "./assets/fonts/SourceSerif4Roman-Regular.ttf",
+            "./assets/fonts/Lato-Regular.ttf"
+          ],
+          "ios": {
+            "fonts": [
+              "./assets/fonts/Literata-Regular.ttf",
+              "./assets/fonts/SourceSerif4Roman-Regular.ttf",
+              "./assets/fonts/Lato-Regular.ttf"
+            ]
+          },
+          "android": {
+            "fonts": [
+              {
+                "fontFamily": "Literata-Regular",
+                "fontDefinitions": [
+                  {
+                    "path": "./assets/fonts/Literata-Regular.ttf",
+                    "weight": 400
+                  }
+                ]
+              },
+              {
+                "fontFamily": "SourceSerif4Roman-Regular",
+                "fontDefinitions": [
+                  {
+                    "path": "./assets/fonts/SourceSerif4Roman-Regular.ttf",
+                    "weight": 400
+                  }
+                ]
+              },
+              {
+                "fontFamily": "Lato-Regular",
+                "fontDefinitions": [
+                  {
+                    "path": "./assets/fonts/Lato-Regular.ttf",
+                    "weight": 400
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

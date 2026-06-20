@@ -2,7 +2,7 @@ import { Pressable, type PressableProps, type ViewStyle } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { Text } from './Text';
 
-type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive';
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive' | 'pro';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 type ButtonProps = PressableProps & {
@@ -87,43 +87,46 @@ const sizeStyles = StyleSheet.create((theme) => ({
 
 const variantStyles = StyleSheet.create((theme) => ({
   primary: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: theme.colors.semantic.accent,
   },
   secondary: {
-    backgroundColor: theme.colors.secondary,
-  },
-  outline: {
-    backgroundColor: 'transparent',
+    backgroundColor: theme.colors.semantic.bgSecondary,
     borderWidth: 1,
-    borderColor: theme.colors.border,
+    borderColor: theme.colors.semantic.accent,
   },
   ghost: {
     backgroundColor: 'transparent',
   },
   destructive: {
-    backgroundColor: theme.colors.destructive,
+    backgroundColor: theme.colors.semantic.danger,
+  },
+  pro: {
+    backgroundColor: theme.colors.semantic.accentSubtle,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: theme.colors.semantic.accent,
   },
 }));
 
 const textVariantStyles = StyleSheet.create((theme) => ({
   primary: {
-    color: theme.colors.primaryForeground,
+    color: theme.colors.semantic.bgPrimary,
     fontWeight: theme.font.weights.semibold,
   },
   secondary: {
-    color: theme.colors.secondaryForeground,
-    fontWeight: theme.font.weights.medium,
-  },
-  outline: {
-    color: theme.colors.foreground,
+    color: theme.colors.semantic.accent,
     fontWeight: theme.font.weights.medium,
   },
   ghost: {
-    color: theme.colors.foreground,
+    color: theme.colors.semantic.accent,
     fontWeight: theme.font.weights.medium,
   },
   destructive: {
-    color: theme.colors.destructiveForeground,
+    color: theme.colors.semantic.bgPrimary,
     fontWeight: theme.font.weights.semibold,
+  },
+  pro: {
+    color: theme.colors.semantic.accent,
+    fontWeight: theme.font.weights.medium,
   },
 }));

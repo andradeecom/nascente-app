@@ -60,10 +60,10 @@ export function LoginCard({
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Text variant="h2" style={styles.title}>
+        <Text variant="title1" style={styles.title}>
           {translate('login.title')}
         </Text>
-        <Text variant="bodySmall" color="mutedForeground">
+        <Text variant="callout" color="textSecondary">
           {translate('login.subtitle')}
         </Text>
       </View>
@@ -128,7 +128,7 @@ export function LoginCard({
 
 const styles = StyleSheet.create((theme) => ({
   card: {
-    backgroundColor: theme.colors.card,
+    backgroundColor: theme.colors.semantic.bgSecondary,
     borderRadius: theme.radius.xl,
     padding: theme.spacing[6],
     gap: theme.spacing[6],
@@ -148,6 +148,6 @@ const styles = StyleSheet.create((theme) => ({
     gap: theme.spacing[3],
   },
   eyeIcon: {
-    color: theme.colors.mutedForeground,
+    color: theme.colors.semantic.textSecondary,
   },
 }));

@@ -11,8 +11,8 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.container}>
-        <Text variant="h1">{translate('home.greeting', { name: user?.firstName ?? 'Guest' })}</Text>
-        <Text variant="bodySmall" color="mutedForeground">
+        <Text variant="title1">{translate('home.greeting', { name: user?.firstName ?? 'Guest' })}</Text>
+        <Text variant="callout" color="textSecondary">
           {translate('home.welcomeBack')}
         </Text>
       </View>
@@ -23,7 +23,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create((theme) => ({
   safe: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.semantic.bgPrimary,
   },
   container: {
     flex: 1,

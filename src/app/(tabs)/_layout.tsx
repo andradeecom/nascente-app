@@ -38,19 +38,19 @@ export default function TabsLayout() {
 
 const styles = StyleSheet.create((theme) => ({
   tabBar: {
-    backgroundColor: theme.colors.card,
-    borderTopColor: theme.colors.border,
+    backgroundColor: theme.colors.semantic.bgSecondary,
+    borderTopColor: theme.colors.semantic.bgTertiary,
     borderTopWidth: 1,
     paddingTop: theme.spacing[1],
   },
   activeColor: {
-    color: theme.colors.foreground,
+    color: theme.colors.semantic.textPrimary,
   },
   inactiveColor: {
-    color: theme.colors.mutedForeground,
+    color: theme.colors.semantic.textSecondary,
   },
   tabLabel: {
-    fontSize: theme.font.sizes.xs,
+    fontSize: theme.font.sizes.caption,
     fontWeight: theme.font.weights.medium,
   },
 }));

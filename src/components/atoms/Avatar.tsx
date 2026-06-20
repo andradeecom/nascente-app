@@ -32,7 +32,7 @@ export function Avatar({ uri, fallback, size = 'md' }: AvatarProps) {
       {uri ? (
         <Image source={{ uri }} style={styles.image} contentFit="cover" />
       ) : (
-        <Text variant={size === 'xl' ? 'h2' : size === 'lg' ? 'h3' : 'label'} color="mutedForeground">
+        <Text variant={size === 'xl' ? 'title1' : size === 'lg' ? 'title3' : 'label'} color="textSecondary">
           {initials}
         </Text>
       )}
@@ -44,7 +44,7 @@ const styles = StyleSheet.create((theme) => ({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.colors.muted,
+    backgroundColor: theme.colors.semantic.bgSecondary,
     overflow: 'hidden',
   },
   image: {

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Expo + React Native + TypeScript starter template (`rn-template`). Entry point is `src/index.ts`, routing is file-based via `expo-router` (`src/app/`). Uses pnpm as package manager.
+Expo + React Native + TypeScript app for **Nascente**, an offline-first Bible app (see `../CLAUDE.md` and `../.docs/` for product context). This package currently implements the auth shell and design system; Bible reading/study features are not yet built. Entry point is `src/index.ts` (which imports `expo-router/entry` then `./theme/config` to initialize Unistyles before anything renders). Routing is file-based via `expo-router` (`src/app/`). Uses pnpm as package manager.
 
 ## Commands
 
@@ -37,18 +37,26 @@ Husky + lint-staged run `prettier --write` and `expo lint --fix` on staged `*.{j
 
 Screens (`src/app/**`) compose organisms/atoms directly; they hold screen logic (handlers, mutations) and delegate presentation to organisms.
 
+### Route folders with co-located logic
+When a screen's handlers/mutations grow beyond trivial, convert the route file into a folder so the logic can be extracted to a hook without leaving `src/app/`: `src/app/login.tsx` → `src/app/login/index.tsx` (the route, UI-only) + `src/app/login/use-login-screen.ts` (the extracted hook). Expo Router resolves `login/index.tsx` to the same `/login` route, so nothing else (e.g. `Stack.Screen name="login"` guards in `_layout.tsx`) needs to change. Use this pattern instead of growing `src/hooks/` with screen-specific hooks that aren't reused elsewhere — only promote a hook to `src/hooks/` if more than one screen needs it.
+
+Both the route file and its co-located hook use **default export** in this pattern — the hook is exempted from the named-export convention below because it's screen-private, not a shared module imported by name from elsewhere.
+
 ### Styling — react-native-unistyles
-`src/unistyles.ts` defines the entire design system and must be imported once at app startup (it has no exports consumed elsewhere — its side effect of calling `StyleSheet.configure` is what matters). It exports a `light`/`dark` theme pair built from shared tokens (`font`, `spacing`, `radius`, `zIndex`, `opacity`) plus per-theme `colors` and `shadows`, and registers `UnistylesThemes`/`UnistylesBreakpoints` via module augmentation. Components style with `StyleSheet.create((theme) => ({...}))` from `react-native-unistyles`, never `react-native`'s `StyleSheet`. Always pull tokens off `theme` (`theme.spacing[4]`, `theme.colors.background`) rather than hardcoding values.
+`src/theme/config.ts` calls `StyleSheet.configure` (the side effect that matters — it's imported once, by `src/index.ts`, before the router entry renders) and registers `UnistylesThemes`/`UnistylesBreakpoints` via module augmentation. It composes three themes — `light`, `dark`, `sepia` (sepia reuses the `light` shadows) — each built from shared tokens (`font`, `typography`, `spacing`/`gap`, `radius`, `zIndex`, `opacity`, `motion`, `highlights`) plus a per-theme `colors` and `shadows` pulled from `src/theme/colors.ts` / `shadows.ts`. Token files live individually in `src/theme/` (`font.ts`, `typography.ts`, `spacing.ts`, `radius.ts`, `z-index.ts`, `opacity.ts`, `motion.ts`, `colors.ts`, `shadows.ts`) — add new tokens to the relevant file and wire them into `sharedTokens`/the per-theme objects in `config.ts`.
+
+Components style with `StyleSheet.create((theme) => ({...}))` from `react-native-unistyles`, never `react-native`'s `StyleSheet`. Color tokens are nested under `theme.colors.semantic.*` (e.g. `bgPrimary`, `bgSecondary`, `textPrimary`, `accent`, `accentSubtle`, `danger`) — components should read `theme.colors.semantic.X`, not the flat shadcn-style aliases (`primary`, `accent`, `muted`, etc.) that also exist on the color object for reference/legacy parity. Always pull tokens off `theme` (`theme.spacing[4]`, `theme.colors.semantic.bgPrimary`) rather than hardcoding values.
 
 ### Auth flow
 Layered: `src/app/login.tsx` (screen) → `src/hooks/use-auth.ts` (React Query mutations/queries + Zustand writes) → `src/services/auth.ts` (`authApi`, raw HTTP calls) → `src/lib/api-client.ts` (axios instance).
 
 - `useAuthStore` (`src/stores/auth.ts`, Zustand) holds `user`, `isAuthenticated`, `isHydrated` in memory. `hydrate()` reads the persisted token (`src/lib/secure-store.ts`, Expo SecureStore) and user (`src/lib/user-storage.ts`) on launch.
-- `src/app/_layout.tsx` calls `hydrate()` once and gates navigation: while `!isHydrated` it shows a spinner; once hydrated, `useAuthGuard` redirects between `/login` and `/(tabs)` based on `isAuthenticated`.
+- `src/app/_layout.tsx` calls `hydrate()` once via a `useHydrate` hook defined inline. While `!isHydrated` it renders `null` (holding the native splash screen, via `expo-splash-screen`'s `preventAutoHideAsync`); once hydrated, it renders the animated `SplashScreen` organism (`src/components/organisms/SplashScreen.tsx`) until it signals `onReady` (hides the native splash) and `onFinish` (flips local `splashDone` state). Only then does it mount the `Stack`, which uses `Stack.Protected` guards keyed on `isAuthenticated` to show either `(tabs)` or `login` — there is no separate auth-guard hook or redirect call.
 - `api-client.ts` attaches the bearer token to every request and implements silent-refresh-on-401 with a request queue (so concurrent 401s only trigger one refresh call).
 - Login/Google-login mutations persist the token + user (secure store + `user-storage`) and sync both the Zustand store and the React Query cache (`authKeys.me`) so `useMe()` doesn't have to refetch immediately.
 - `useMockLogin` is a `__DEV__`-only escape hatch (wired into `src/app/login.tsx`) that signs in a hardcoded mock user without hitting the network — use this pattern for any other dev-only shortcuts.
 - Logout clears secure store, stored user, cookies (`react-native-nitro-cookies`), the Zustand store, and the whole React Query cache.
+- Google sign-in uses `@react-native-google-signin/google-signin`, configured once at module load in `use-auth.ts` from `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` / `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID` env vars. Apple Sign-In is wired up as a no-op handler in `login.tsx` (`handleAppleLogin` — TODO, not implemented).
 
 ### Forms & validation
 React Hook Form + Zod, wired through `@hookform/resolvers`. Schemas live in `src/schemas/` as factory functions (`createLoginSchema()`, not a static export) because validation messages call `translate(...)` and need to read the current i18n locale at schema-creation time, not at module-load time.
@@ -69,4 +77,4 @@ Domain types live in `src/types/*.ts` (e.g. `User`, `LoginRequest`, `LoginRespon
 
 - ESLint config (`eslint.config.js`) is `eslint-config-expo` flat config + Prettier + `eslint-plugin-react-compiler` (recommended ruleset is enforced — write components compatible with the React Compiler, e.g. no manual memoization workarounds it would conflict with).
 - Prettier: single quotes, semicolons, 120 print width, ES5 trailing commas, LF line endings (`.prettierrc`).
-- Components/hooks/services follow named exports (no default exports except Expo Router screens, which require default export).
+- Components/hooks/services follow named exports (no default exports except Expo Router screens, which require default export, and their co-located screen-private hooks — see "Route folders with co-located logic" above).

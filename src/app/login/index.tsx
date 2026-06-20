@@ -1,51 +1,12 @@
 import { Button } from '@/components/atoms';
 import { LoginCard, LoginFooter } from '@/components/organisms';
-import { useGoogleLogin, useLogin, useMockLogin } from '@/hooks/use-auth';
-import { translate } from '@/i18n';
 import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Toast from 'react-native-toast-message';
 import { StyleSheet } from 'react-native-unistyles';
+import useLoginScreen from './use-login-screen';
 
 export default function LoginScreen() {
-  const loginMutation = useLogin();
-  const googleLoginMutation = useGoogleLogin();
-  const mockLogin = useMockLogin();
-
-  const handleLogin = (email: string, password: string) => {
-    loginMutation.mutate(
-      { email, password },
-      {
-        onError: (error) => {
-          Toast.show({
-            type: 'error',
-            text1: translate('errors.loginFailed'),
-            text2: error instanceof Error ? error.message : translate('errors.invalidCredentials'),
-          });
-        },
-      }
-    );
-  };
-
-  const handleGoogleLogin = () => {
-    googleLoginMutation.mutate(undefined, {
-      onError: (error) => {
-        if (error instanceof Error && error.message === 'Google sign-in was cancelled') {
-          return;
-        }
-        console.log('Google login error:', error);
-        Toast.show({
-          type: 'error',
-          text1: translate('errors.loginFailed'),
-          text2: error instanceof Error ? error.message : translate('errors.invalidCredentials'),
-        });
-      },
-    });
-  };
-
-  const handleAppleLogin = () => {
-    // TODO: Implement Apple OAuth
-  };
+  const { handleLogin, handleGoogleLogin, handleAppleLogin, mockLogin, isLoading } = useLoginScreen();
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -55,7 +16,7 @@ export default function LoginScreen() {
             onLogin={handleLogin}
             onLoginWithGoogle={handleGoogleLogin}
             onLoginWithApple={handleAppleLogin}
-            isLoading={loginMutation.isPending}
+            isLoading={isLoading}
           />
           <LoginFooter />
           {__DEV__ && (

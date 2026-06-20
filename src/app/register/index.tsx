@@ -1,43 +1,30 @@
-import { Button, Text } from '@/components/atoms';
-import { LoginCard, LoginFooter } from '@/components/organisms';
+import { RegisterCard } from '@/components/organisms';
 import { translate } from '@/i18n';
 import { Link } from 'expo-router';
 import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StyleSheet } from 'react-native-unistyles';
-import useLoginScreen from './use-login-screen';
+import { Text } from '@/components/atoms';
+import useRegisterScreen from './use-register-screen';
 
-export default function LoginScreen() {
-  const { handleLogin, handleGoogleLogin, handleAppleLogin, handleForgotPassword, mockLogin, isLoading } =
-    useLoginScreen();
+export default function RegisterScreen() {
+  const { handleRegister, handleGoogleRegister, handleAppleRegister, isLoading } = useRegisterScreen();
 
   return (
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView style={styles.keyboard} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-          <LoginCard
-            onLogin={handleLogin}
-            onLoginWithGoogle={handleGoogleLogin}
-            onLoginWithApple={handleAppleLogin}
-            onForgotPassword={handleForgotPassword}
+          <RegisterCard
+            onRegister={handleRegister}
+            onRegisterWithGoogle={handleGoogleRegister}
+            onRegisterWithApple={handleAppleRegister}
             isLoading={isLoading}
           />
-          <Link href="/register" style={styles.footerLink}>
+          <Link href="/login" style={styles.footerLink}>
             <Text variant="callout" color="textSecondary">
-              {translate('login.noAccount')} {translate('login.signUp')}
+              {translate('register.alreadyHaveAccount')} {translate('register.signIn')}
             </Text>
           </Link>
-          <LoginFooter />
-          {__DEV__ && (
-            <Button
-              label="[DEV] Skip login with mock user"
-              variant="ghost"
-              size="sm"
-              fullWidth
-              onPress={mockLogin}
-              style={styles.devButton}
-            />
-          )}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -57,9 +44,6 @@ const styles = StyleSheet.create((theme) => ({
     justifyContent: 'center',
     paddingHorizontal: theme.spacing[5],
     paddingVertical: theme.spacing[6],
-  },
-  devButton: {
-    marginTop: theme.spacing[4],
   },
   footerLink: {
     alignSelf: 'center',

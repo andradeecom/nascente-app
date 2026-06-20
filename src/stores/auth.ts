@@ -1,13 +1,12 @@
 import { create } from 'zustand';
-import type { User } from '@/types/auth';
-import { getAccessToken } from '@/lib/secure-store';
-import { getStoredUser } from '@/lib/user-storage';
+import { supabase } from '@/lib/supabase';
+import { toAppUser, type AppUser } from '@/types/auth';
 
 type AuthState = {
-  user: User | null;
+  user: AppUser | null;
   isAuthenticated: boolean;
   isHydrated: boolean;
-  setAuth: (user: User) => void;
+  setAuth: (user: AppUser) => void;
   clearAuth: () => void;
   hydrate: () => Promise<void>;
 };
@@ -17,7 +16,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   isAuthenticated: false,
   isHydrated: false,
 
-  setAuth: (user: User) => {
+  setAuth: (user: AppUser) => {
     set({ user, isAuthenticated: true });
   },
 
@@ -26,11 +25,21 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   hydrate: async () => {
-    const [token, user] = await Promise.all([getAccessToken(), getStoredUser()]);
-    if (token && user) {
-      set({ user, isAuthenticated: true, isHydrated: true });
+    const { data } = await supabase.auth.getSession();
+    const sessionUser = data.session?.user;
+
+    if (sessionUser) {
+      set({ user: toAppUser(sessionUser), isAuthenticated: true, isHydrated: true });
     } else {
       set({ isHydrated: true });
     }
+
+    supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        set({ user: toAppUser(session.user), isAuthenticated: true });
+      } else {
+        set({ user: null, isAuthenticated: false });
+      }
+    });
   },
 }));

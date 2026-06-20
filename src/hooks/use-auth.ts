@@ -1,11 +1,8 @@
-import { removeAccessToken, setAccessToken } from '@/lib/secure-store';
-import { removeStoredUser, setStoredUser } from '@/lib/user-storage';
-import { authApi } from '@/services/auth';
+import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/auth';
-import type { LoginRequest } from '@/types/auth';
+import { toAppUser, type AppUser, type RegisterRequest } from '@/types/auth';
 import { GoogleSignin, isSuccessResponse } from '@react-native-google-signin/google-signin';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import NitroCookies from 'react-native-nitro-cookies';
 
 GoogleSignin.configure({
   webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
@@ -21,12 +18,35 @@ export function useLogin() {
   const setAuth = useAuthStore((state) => state.setAuth);
 
   return useMutation({
-    mutationFn: (credentials: LoginRequest) => authApi.login(credentials),
-    onSuccess: async (data) => {
-      await setAccessToken(data.accessToken);
-      await setStoredUser(data.user);
-      setAuth(data.user);
-      queryClient.setQueryData(authKeys.me, data.user);
+    mutationFn: async ({ email, password }: { email: string; password: string }) => {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      return toAppUser(data.user);
+    },
+    onSuccess: (user) => {
+      setAuth(user);
+      queryClient.setQueryData(authKeys.me, user);
+    },
+  });
+}
+
+export function useRegister() {
+  const queryClient = useQueryClient();
+  const setAuth = useAuthStore((state) => state.setAuth);
+
+  return useMutation({
+    mutationFn: async ({ email, password, firstName, lastName }: RegisterRequest) => {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { firstName, lastName } },
+      });
+      if (error) throw error;
+      return toAppUser(data.user!);
+    },
+    onSuccess: (user) => {
+      setAuth(user);
+      queryClient.setQueryData(authKeys.me, user);
     },
   });
 }
@@ -49,13 +69,24 @@ export function useGoogleLogin() {
         throw new Error('No ID token received from Google');
       }
 
-      return authApi.googleLogin({ idToken });
+      const { data, error } = await supabase.auth.signInWithIdToken({ provider: 'google', token: idToken });
+      if (error) throw error;
+      return toAppUser(data.user);
     },
-    onSuccess: async (data) => {
-      await setAccessToken(data.accessToken);
-      await setStoredUser(data.user);
-      setAuth(data.user);
-      queryClient.setQueryData(authKeys.me, data.user);
+    onSuccess: (user) => {
+      setAuth(user);
+      queryClient.setQueryData(authKeys.me, user);
+    },
+  });
+}
+
+export function useForgotPassword() {
+  return useMutation({
+    mutationFn: async (email: string) => {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: 'nascenteapp://reset-password',
+      });
+      if (error) throw error;
     },
   });
 }
@@ -65,7 +96,11 @@ export function useMe() {
 
   return useQuery({
     queryKey: authKeys.me,
-    queryFn: authApi.me,
+    queryFn: async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (error) throw error;
+      return toAppUser(data.user);
+    },
     enabled: isAuthenticated,
   });
 }
@@ -75,17 +110,13 @@ export function useMockLogin() {
   const setAuth = useAuthStore((state) => state.setAuth);
 
   return async () => {
-    const mockUser: import('@/types/auth').User = {
+    const mockUser: AppUser = {
       id: 'mock-user-id',
       email: 'mock@example.com',
       firstName: 'Mock',
       lastName: 'User',
-      role: 'admin',
       profileImageUrl: null,
-      mustChangePassword: false,
     };
-    await setAccessToken('mock-access-token');
-    await setStoredUser(mockUser);
     setAuth(mockUser);
     queryClient.setQueryData(authKeys.me, mockUser);
   };
@@ -96,9 +127,7 @@ export function useLogout() {
   const clearAuth = useAuthStore((state) => state.clearAuth);
 
   return async () => {
-    await removeAccessToken();
-    await removeStoredUser();
-    await NitroCookies.clearAll();
+    await supabase.auth.signOut();
     clearAuth();
     queryClient.clear();
   };

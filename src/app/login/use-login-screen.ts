@@ -1,8 +1,10 @@
 import { useGoogleLogin, useLogin, useMockLogin } from '@/hooks/use-auth';
 import { translate } from '@/i18n';
+import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
 
 export default function useLoginScreen() {
+  const router = useRouter();
   const loginMutation = useLogin();
   const googleLoginMutation = useGoogleLogin();
   const mockLogin = useMockLogin();
@@ -42,10 +44,15 @@ export default function useLoginScreen() {
     // TODO: Implement Apple OAuth
   };
 
+  const handleForgotPassword = () => {
+    router.push('/forgot-password');
+  };
+
   return {
     handleLogin,
     handleGoogleLogin,
     handleAppleLogin,
+    handleForgotPassword,
     mockLogin,
     isLoading: loginMutation.isPending,
   };

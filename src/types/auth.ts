@@ -1,29 +1,26 @@
-export type UserRole = 'admin' | 'user' | 'manager';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
-export type User = {
+export type AppUser = {
   id: string;
   email: string;
   firstName: string;
   lastName: string;
-  role: UserRole;
   profileImageUrl?: string | null;
-  mustChangePassword: boolean;
 };
 
-export type LoginRequest = {
+export function toAppUser(user: SupabaseUser): AppUser {
+  return {
+    id: user.id,
+    email: user.email ?? '',
+    firstName: user.user_metadata.firstName ?? '',
+    lastName: user.user_metadata.lastName ?? '',
+    profileImageUrl: user.user_metadata.profileImageUrl ?? null,
+  };
+}
+
+export type RegisterRequest = {
   email: string;
   password: string;
-};
-
-export type GoogleLoginRequest = {
-  idToken: string;
-};
-
-export type LoginResponse = {
-  accessToken: string;
-  user: User;
-};
-
-export type RefreshResponse = {
-  accessToken: string;
+  firstName: string;
+  lastName: string;
 };

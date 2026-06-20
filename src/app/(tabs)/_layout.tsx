@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { StyleSheet } from 'react-native-unistyles';
-import { Ionicons } from '@expo/vector-icons';
+import { House, BookOpen, Calendar, SlidersHorizontal } from 'lucide-react-native';
 import { translate } from '@/i18n';
 
 export default function TabsLayout() {
@@ -18,17 +18,33 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: translate('tabs.home'),
+          tabBarIcon: ({ color, size, focused }) => <House size={size} color={color} strokeWidth={focused ? 2.5 : 2} />,
+        }}
+      />
+      <Tabs.Screen
+        name="reader"
+        options={{
+          title: translate('tabs.reader'),
           tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons name={focused ? 'home' : 'home-outline'} size={size} color={color} />
+            <BookOpen size={size} color={color} strokeWidth={focused ? 2.5 : 2} />
           ),
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="plans"
         options={{
-          title: translate('tabs.profile'),
+          title: translate('tabs.plans'),
           tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons name={focused ? 'person' : 'person-outline'} size={size} color={color} />
+            <Calendar size={size} color={color} strokeWidth={focused ? 2.5 : 2} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: translate('tabs.settings'),
+          tabBarIcon: ({ color, size, focused }) => (
+            <SlidersHorizontal size={size} color={color} strokeWidth={focused ? 2.5 : 2} />
           ),
         }}
       />
@@ -38,13 +54,14 @@ export default function TabsLayout() {
 
 const styles = StyleSheet.create((theme) => ({
   tabBar: {
-    backgroundColor: theme.colors.semantic.bgSecondary,
+    backgroundColor: theme.colors.semantic.bgPrimary,
     borderTopColor: theme.colors.semantic.bgTertiary,
     borderTopWidth: 1,
-    paddingTop: theme.spacing[1],
+    paddingTop: theme.spacing[2],
+    height: 90,
   },
   activeColor: {
-    color: theme.colors.semantic.textPrimary,
+    color: theme.colors.semantic.accent,
   },
   inactiveColor: {
     color: theme.colors.semantic.textSecondary,

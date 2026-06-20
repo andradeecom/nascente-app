@@ -80,7 +80,17 @@ const en = {
   },
   tabs: {
     home: 'Home',
-    profile: 'Profile',
+    reader: 'Bible',
+    plans: 'Plans',
+    settings: 'Settings',
+  },
+  reader: {
+    title: 'Bible',
+    comingSoon: 'Bible reading is coming soon',
+  },
+  plans: {
+    title: 'Plans',
+    comingSoon: 'Reading plans are coming soon',
   },
   errors: {
     loginFailed: 'Login failed',

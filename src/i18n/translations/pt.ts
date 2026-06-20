@@ -80,7 +80,17 @@ const pt = {
   },
   tabs: {
     home: 'Início',
-    profile: 'Perfil',
+    reader: 'Bíblia',
+    plans: 'Planos',
+    settings: 'Ajustes',
+  },
+  reader: {
+    title: 'Bíblia',
+    comingSoon: 'A leitura da Bíblia estará disponível brevemente',
+  },
+  plans: {
+    title: 'Planos',
+    comingSoon: 'Os planos de leitura estarão disponíveis brevemente',
   },
   errors: {
     loginFailed: 'Falha ao entrar',

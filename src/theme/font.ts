@@ -10,7 +10,7 @@ export const font = {
     body: 17,
     bodyEmphasis: 17,
     callout: 15,
-    caption: 12,
+    caption: 10,
     label: 13,
     overline: 11,
   },

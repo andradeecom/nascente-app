@@ -128,7 +128,7 @@ export function LoginCard({
 
 const styles = StyleSheet.create((theme) => ({
   card: {
-    backgroundColor: theme.colors.semantic.bgSecondary,
+    backgroundColor: theme.colors.semantic.bgPrimary,
     borderRadius: theme.radius.xl,
     padding: theme.spacing[6],
     gap: theme.spacing[6],

@@ -8,7 +8,7 @@
     "scheme": "nascenteapp",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon",
+      "icon": "./assets/images/icon.png",
       "infoPlist": {
         "CFBundleLocalizations": ["en", "es", "pt"]
       },
@@ -33,7 +33,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#FFFFFF",
           "android": {
             "image": "./assets/images/splash-icon.png",
             "imageWidth": 76
@@ -66,13 +66,6 @@
             "./assets/fonts/SourceSerif4Roman-Regular.ttf",
             "./assets/fonts/Lato-Regular.ttf"
           ],
-          "ios": {
-            "fonts": [
-              "./assets/fonts/Literata-Regular.ttf",
-              "./assets/fonts/SourceSerif4Roman-Regular.ttf",
-              "./assets/fonts/Lato-Regular.ttf"
-            ]
-          },
           "android": {
             "fonts": [
               {

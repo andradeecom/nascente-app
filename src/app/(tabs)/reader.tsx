@@ -1,10 +1,10 @@
 import { View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text } from '@/components/atoms';
-import { translate } from '@/i18n';
+import { Text, SafeAreaView } from '@/components/atoms';
+import { useTranslate } from '@/i18n';
 
 export default function ReaderScreen() {
+  const translate = useTranslate();
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.container}>

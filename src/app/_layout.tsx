@@ -7,6 +7,7 @@ import Toast from 'react-native-toast-message';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { queryClient } from '@/lib/query-client';
 import { useAuthStore } from '@/stores/auth';
+import { useThemeStore } from '@/stores/theme';
 import { getLocales } from 'expo-localization';
 import { i18n } from '@/i18n';
 
@@ -19,13 +20,14 @@ NativeSplash.setOptions({ duration: 300, fade: true });
 
 function useHydrate() {
   const hydrate = useAuthStore((s) => s.hydrate);
-  const isHydrated = useAuthStore((s) => s.isHydrated);
+  const isAuthHydrated = useAuthStore((s) => s.isHydrated);
+  const isThemeHydrated = useThemeStore((s) => s.hasHydrated);
 
   useEffect(() => {
     hydrate();
   }, [hydrate]);
 
-  return isHydrated;
+  return isAuthHydrated && isThemeHydrated;
 }
 
 function RootNavigator() {

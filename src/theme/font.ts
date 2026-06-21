@@ -1,7 +1,7 @@
 import { typography } from './typography';
 
 export const font = {
-  family: typography.reader.families.serifAlt, // TODO: Test other fonts
+  family: typography.reader.families.serif,
   sizes: {
     display: 34,
     title1: 28,

@@ -1,16 +1,29 @@
 import { Tabs } from 'expo-router';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, UnistylesRuntime } from 'react-native-unistyles';
 import { House, BookOpen, Calendar, SlidersHorizontal } from 'lucide-react-native';
-import { translate } from '@/i18n';
+import { useTranslate } from '@/i18n';
+import { useThemeStore } from '@/stores/theme';
 
 export default function TabsLayout() {
+  const translate = useTranslate();
+
+  // The tab bar is styled via navigator screenOptions (a plain object, not a
+  // Unistyles-processed component), so its themed colors don't repaint on theme
+  // change on their own. Subscribe to the theme name and read colors from the
+  // runtime so these options recompute when the theme switches.
+  const themeName = useThemeStore((s) => s.theme);
+  const { colors } = UnistylesRuntime.getTheme(themeName);
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarStyle: styles.tabBar,
-        tabBarActiveTintColor: styles.activeColor.color,
-        tabBarInactiveTintColor: styles.inactiveColor.color,
+        tabBarStyle: [
+          styles.tabBar,
+          { backgroundColor: colors.semantic.bgPrimary, borderTopColor: colors.semantic.bgTertiary },
+        ],
+        tabBarActiveTintColor: colors.semantic.accent,
+        tabBarInactiveTintColor: colors.semantic.textSecondary,
         tabBarLabelStyle: styles.tabLabel,
       }}
     >
@@ -53,18 +66,12 @@ export default function TabsLayout() {
 }
 
 const styles = StyleSheet.create((theme) => ({
+  // Colors live on screenOptions (driven by the runtime theme above); only
+  // theme-independent layout/typography tokens remain here.
   tabBar: {
-    backgroundColor: theme.colors.semantic.bgPrimary,
-    borderTopColor: theme.colors.semantic.bgTertiary,
     borderTopWidth: 1,
     paddingTop: theme.spacing[2],
     height: 90,
-  },
-  activeColor: {
-    color: theme.colors.semantic.accent,
-  },
-  inactiveColor: {
-    color: theme.colors.semantic.textSecondary,
   },
   tabLabel: {
     fontSize: theme.font.sizes.caption,

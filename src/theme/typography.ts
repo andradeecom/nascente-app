@@ -1,9 +1,13 @@
 export const typography = {
   reader: {
     families: {
-      serif: 'Literata-Regular',
-      serifAlt: 'SourceSerif4Roman-Regular',
-      sans: 'Lato-Regular',
+      // Reference variable fonts by their real family name (name ID 1) so the
+      // `wght` axis is driven by fontWeight. Addressing them by PostScript name
+      // (e.g. 'Literata-Regular') pins them to the 400 static instance and makes
+      // RN synthesize bogus names like `Literata-Regular_Medium`, dropping weights.
+      serif: 'Literata',
+      serifAlt: 'Source Serif 4',
+      sans: 'Lato',
       dyslexic: 'OpenDyslexic',
     },
     sizes: {

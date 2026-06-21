@@ -1,12 +1,12 @@
 import { View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text } from '@/components/atoms';
+import { Text, SafeAreaView } from '@/components/atoms';
 import { useAuthStore } from '@/stores/auth';
-import { translate } from '@/i18n';
+import { useTranslate } from '@/i18n';
 
 export default function HomeScreen() {
   const user = useAuthStore((state) => state.user);
+  const translate = useTranslate();
 
   return (
     <SafeAreaView style={styles.safe}>

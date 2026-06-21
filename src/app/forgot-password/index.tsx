@@ -2,9 +2,8 @@ import { ForgotPasswordCard } from '@/components/organisms';
 import { translate } from '@/i18n';
 import { Link } from 'expo-router';
 import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text } from '@/components/atoms';
+import { Text, SafeAreaView } from '@/components/atoms';
 import useForgotPasswordScreen from './use-forgot-password-screen';
 
 export default function ForgotPasswordScreen() {

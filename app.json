@@ -61,39 +61,34 @@
       [
         "expo-font",
         {
-          "fonts": [
-            "./assets/fonts/Literata-Regular.ttf",
-            "./assets/fonts/SourceSerif4Roman-Regular.ttf",
-            "./assets/fonts/Lato-Regular.ttf"
-          ],
+          "ios": {
+            "fonts": [
+              "./assets/fonts/Literata-VariableFont_opsz,wght.ttf",
+              "./assets/fonts/SourceSerif4-VariableFont_opsz,wght.ttf",
+              "./assets/fonts/Lato-Regular.ttf"
+            ]
+          },
           "android": {
             "fonts": [
               {
-                "fontFamily": "Literata-Regular",
+                "fontFamily": "Literata",
                 "fontDefinitions": [
-                  {
-                    "path": "./assets/fonts/Literata-Regular.ttf",
-                    "weight": 400
-                  }
+                  { "path": "./assets/fonts/Literata-VariableFont_opsz,wght.ttf", "weight": 400 },
+                  { "path": "./assets/fonts/Literata-VariableFont_opsz,wght.ttf", "weight": 500 },
+                  { "path": "./assets/fonts/Literata-VariableFont_opsz,wght.ttf", "weight": 700 }
                 ]
               },
               {
-                "fontFamily": "SourceSerif4Roman-Regular",
+                "fontFamily": "Source Serif 4",
                 "fontDefinitions": [
-                  {
-                    "path": "./assets/fonts/SourceSerif4Roman-Regular.ttf",
-                    "weight": 400
-                  }
+                  { "path": "./assets/fonts/SourceSerif4-VariableFont_opsz,wght.ttf", "weight": 400 },
+                  { "path": "./assets/fonts/SourceSerif4-VariableFont_opsz,wght.ttf", "weight": 500 },
+                  { "path": "./assets/fonts/SourceSerif4-VariableFont_opsz,wght.ttf", "weight": 700 }
                 ]
               },
               {
-                "fontFamily": "Lato-Regular",
-                "fontDefinitions": [
-                  {
-                    "path": "./assets/fonts/Lato-Regular.ttf",
-                    "weight": 400
-                  }
-                ]
+                "fontFamily": "Lato",
+                "fontDefinitions": [{ "path": "./assets/fonts/Lato-Regular.ttf", "weight": 400 }]
               }
             ]
           }

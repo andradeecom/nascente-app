@@ -1,6 +1,8 @@
 export { LoginCard } from './LoginCard';
 export { LoginFooter } from './LoginFooter';
-export { ProfileCard } from './ProfileCard';
 export { SplashScreen } from './SplashScreen';
 export { RegisterCard } from './RegisterCard';
 export { ForgotPasswordCard } from './ForgotPasswordCard';
+export { SettingsList } from './SettingsList';
+export { SettingsProfileCard } from './SettingsProfileCard';
+export { ScreenHeader } from './ScreenHeader';

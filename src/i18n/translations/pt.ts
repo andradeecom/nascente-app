@@ -111,6 +111,14 @@ const pt = {
     profileTitle: 'Perfil',
     themeTitle: 'Tema',
     languageTitle: 'Idioma',
+    textSizeTitle: 'Tamanho do texto',
+    textSizeOptions: {
+      small: 'Pequeno',
+      medium: 'Médio',
+      large: 'Grande',
+      xl: 'Extra grande',
+    },
+    textSizePreview: 'No princípio era o Verbo, e o Verbo estava com Deus, e o Verbo era Deus.',
   },
   tabs: {
     home: 'Início',

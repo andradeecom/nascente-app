@@ -15,9 +15,11 @@ export default function SettingsScreen() {
     isAuthenticated,
     currentThemeLabel,
     currentLanguageLabel,
+    currentTextSizeLabel,
     handleProfilePress,
     handleThemePress,
     handleLanguagePress,
+    handleTextSizePress,
     handleSupportPress,
   } = useSettingsScreen();
 
@@ -52,8 +54,8 @@ export default function SettingsScreen() {
           <SettingsRow
             icon={<Type size={20} color={styles.icon.color} />}
             label={translate('settings.textSize')}
-            value="18 pt"
-            showChevron={false}
+            value={currentTextSizeLabel}
+            onPress={handleTextSizePress}
           />
           <SettingsRow
             icon={<Download size={20} color={styles.icon.color} />}

@@ -111,6 +111,14 @@ const en = {
     profileTitle: 'Profile',
     themeTitle: 'Theme',
     languageTitle: 'Language',
+    textSizeTitle: 'Text Size',
+    textSizeOptions: {
+      small: 'Small',
+      medium: 'Medium',
+      large: 'Large',
+      xl: 'Extra Large',
+    },
+    textSizePreview: 'In the beginning was the Word, and the Word was with God, and the Word was God.',
   },
   tabs: {
     home: 'Home',

@@ -109,6 +109,16 @@ const en = {
   },
   plans: {
     title: 'Plans',
+    activeSection: 'Active plans',
+    suggestedSection: 'Suggested',
+    next: 'Next',
+    start: 'Start',
+    cadence: { daily: 'daily' },
+    duration: '{{count}} days',
+    meta: '{{duration}} · {{cadence}}',
+    emptyActive: "You don't have any active plans yet",
+    emptySuggested: 'No suggested plans right now',
+    loadError: 'Could not load plans',
     comingSoon: 'Reading plans are coming soon',
   },
   errors: {

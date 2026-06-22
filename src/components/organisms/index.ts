@@ -6,3 +6,5 @@ export { ForgotPasswordCard } from './ForgotPasswordCard';
 export { SettingsList } from './SettingsList';
 export { SettingsProfileCard } from './SettingsProfileCard';
 export { ScreenHeader } from './ScreenHeader';
+export { ActivePlanCard } from './ActivePlanCard';
+export { SuggestedPlanCard } from './SuggestedPlanCard';

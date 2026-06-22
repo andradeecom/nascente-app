@@ -109,6 +109,16 @@ const es = {
   },
   plans: {
     title: 'Planes',
+    activeSection: 'Planes activos',
+    suggestedSection: 'Sugeridos',
+    next: 'Siguiente',
+    start: 'Empezar',
+    cadence: { daily: 'diario' },
+    duration: '{{count}} días',
+    meta: '{{duration}} · {{cadence}}',
+    emptyActive: 'Aún no tienes planes activos',
+    emptySuggested: 'No hay planes sugeridos por ahora',
+    loadError: 'No se pudieron cargar los planes',
     comingSoon: 'Los planes de lectura estarán disponibles próximamente',
   },
   errors: {

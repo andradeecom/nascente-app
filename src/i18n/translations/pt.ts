@@ -109,6 +109,16 @@ const pt = {
   },
   plans: {
     title: 'Planos',
+    activeSection: 'Planos ativos',
+    suggestedSection: 'Sugeridos',
+    next: 'Próxima',
+    start: 'Começar',
+    cadence: { daily: 'diário' },
+    duration: '{{count}} dias',
+    meta: '{{duration}} · {{cadence}}',
+    emptyActive: 'Você ainda não tem planos ativos',
+    emptySuggested: 'Nenhum plano sugerido no momento',
+    loadError: 'Não foi possível carregar os planos',
     comingSoon: 'Os planos de leitura estarão disponíveis brevemente',
   },
   errors: {

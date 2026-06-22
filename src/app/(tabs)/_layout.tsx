@@ -61,6 +61,8 @@ export default function TabsLayout() {
           ),
         }}
       />
+      {/* Co-located screen hook — not a route. Keep it out of the tab bar. */}
+      <Tabs.Screen name="plans/use-plans-screen" options={{ href: null }} />
     </Tabs>
   );
 }

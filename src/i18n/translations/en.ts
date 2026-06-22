@@ -106,6 +106,12 @@ const en = {
   reader: {
     title: 'Bible',
     comingSoon: 'Bible reading is coming soon',
+    prev: 'Prev',
+    next: 'Next',
+    books: 'Books',
+    close: 'Close',
+    back: '← Back',
+    translation: 'Translation',
   },
   plans: {
     title: 'Plans',

@@ -106,6 +106,12 @@ const es = {
   reader: {
     title: 'Biblia',
     comingSoon: 'La lectura de la Biblia estará disponible próximamente',
+    prev: 'Ant',
+    next: 'Sig',
+    books: 'Libros',
+    close: 'Cerrar',
+    back: '← Volver',
+    translation: 'Traducción',
   },
   plans: {
     title: 'Planes',

@@ -1,5 +1,6 @@
 allowBuilds:
+  better-sqlite3: true
   unrs-resolver: true
-  
+
 overrides:
   "@expo/dom-webview": "56.0.5"

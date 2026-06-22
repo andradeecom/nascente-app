@@ -8,3 +8,5 @@ export { SettingsProfileCard } from './SettingsProfileCard';
 export { ScreenHeader } from './ScreenHeader';
 export { ActivePlanCard } from './ActivePlanCard';
 export { SuggestedPlanCard } from './SuggestedPlanCard';
+export { BookChapterPicker } from './BookChapterPicker';
+export { TranslationPicker } from './TranslationPicker';

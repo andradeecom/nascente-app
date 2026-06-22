@@ -4,7 +4,7 @@ import { StyleSheet } from 'react-native-unistyles';
 import { useForm, Controller } from 'react-hook-form';
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text, Button, Divider } from '@/components/atoms';
+import { Text, TextVariants, Button, Divider } from '@/components/atoms';
 import { InputField, SocialButton } from '@/components/molecules';
 import { createLoginSchema, type LoginFormData } from '@/schemas/login';
 import { translate } from '@/i18n';
@@ -60,10 +60,10 @@ export function LoginCard({
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Text variant="title1" style={styles.title}>
+        <Text variant={TextVariants.Title1} style={styles.title}>
           {translate('login.title')}
         </Text>
-        <Text variant="callout" color="textSecondary">
+        <Text variant={TextVariants.Callout} color="textSecondary">
           {translate('login.subtitle')}
         </Text>
       </View>

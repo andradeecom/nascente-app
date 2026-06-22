@@ -3,7 +3,7 @@ import { translate } from '@/i18n';
 import { Link } from 'expo-router';
 import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text, SafeAreaView } from '@/components/atoms';
+import { Text, TextVariants, SafeAreaView } from '@/components/atoms';
 import useRegisterScreen from './use-register-screen';
 
 export default function RegisterScreen() {
@@ -20,7 +20,7 @@ export default function RegisterScreen() {
             isLoading={isLoading}
           />
           <Link href="/login" style={styles.footerLink}>
-            <Text variant="callout" color="textSecondary">
+            <Text variant={TextVariants.Callout} color="textSecondary">
               {translate('register.alreadyHaveAccount')} {translate('register.signIn')}
             </Text>
           </Link>

@@ -1,6 +1,6 @@
 import { ScrollView, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { SafeAreaView, Text } from '@/components/atoms';
+import { SafeAreaView, Text, TextVariants } from '@/components/atoms';
 import { SectionHeader } from '@/components/molecules';
 import { ActivePlanCard, SuggestedPlanCard } from '@/components/organisms';
 import usePlansScreen from './use-plans-screen';
@@ -14,7 +14,7 @@ export default function PlansScreen() {
   return (
     <SafeAreaView edges={['top']} style={styles.safe}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text variant="title1" style={styles.heading}>
+        <Text variant={TextVariants.Title1} style={styles.heading}>
           {translate('plans.title')}
         </Text>
 
@@ -28,7 +28,7 @@ export default function PlansScreen() {
               ))}
             </View>
           ) : (
-            <Text variant="callout" color="textSecondary">
+            <Text variant={TextVariants.Callout} color="textSecondary">
               {activePlans.isError ? translate('plans.loadError') : translate('plans.emptyActive')}
             </Text>
           )}
@@ -51,7 +51,7 @@ export default function PlansScreen() {
               ))}
             </View>
           ) : (
-            <Text variant="callout" color="textSecondary">
+            <Text variant={TextVariants.Callout} color="textSecondary">
               {suggestedPlans.isError ? translate('plans.loadError') : translate('plans.emptySuggested')}
             </Text>
           )}

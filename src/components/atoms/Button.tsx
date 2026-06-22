@@ -1,6 +1,6 @@
 import { Pressable, type PressableProps, type ViewStyle } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text } from './Text';
+import { Text, TextVariants } from './Text';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive' | 'pro';
 type ButtonSize = 'sm' | 'md' | 'lg';
@@ -40,7 +40,7 @@ export function Button({
       {...rest}
     >
       {iconPosition === 'left' && icon}
-      <Text variant={size === 'sm' ? 'caption' : 'label'} style={[textVariantStyles[variant]]}>
+      <Text variant={size === 'sm' ? TextVariants.Caption : TextVariants.Label} style={[textVariantStyles[variant]]}>
         {label}
       </Text>
       {iconPosition === 'right' && icon}

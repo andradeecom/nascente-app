@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { Image } from 'expo-image';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text } from './Text';
+import { Text, TextVariants } from './Text';
 
 type AvatarSize = 'sm' | 'md' | 'lg' | 'xl';
 
@@ -32,7 +32,10 @@ export function Avatar({ uri, fallback, size = 'md' }: AvatarProps) {
       {uri ? (
         <Image source={{ uri }} style={styles.image} contentFit="cover" />
       ) : (
-        <Text variant={size === 'xl' ? 'title1' : size === 'lg' ? 'title3' : 'label'} color="textSecondary">
+        <Text
+          variant={size === 'xl' ? TextVariants.Title1 : size === 'lg' ? TextVariants.Title3 : TextVariants.Label}
+          color="textSecondary"
+        >
           {initials}
         </Text>
       )}

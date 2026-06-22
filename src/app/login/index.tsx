@@ -1,4 +1,4 @@
-import { Button, Text, SafeAreaView } from '@/components/atoms';
+import { Button, Text, TextVariants, SafeAreaView } from '@/components/atoms';
 import { LoginCard, LoginFooter } from '@/components/organisms';
 import { translate } from '@/i18n';
 import { Link } from 'expo-router';
@@ -22,7 +22,7 @@ export default function LoginScreen() {
             isLoading={isLoading}
           />
           <Link href="/register" style={styles.footerLink}>
-            <Text variant="callout" color="textSecondary">
+            <Text variant={TextVariants.Callout} color="textSecondary">
               {translate('login.noAccount')} {translate('login.signUp')}
             </Text>
           </Link>

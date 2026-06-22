@@ -1,24 +1,26 @@
 import { Text as RNText, type TextProps as RNTextProps } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 
-type TextVariant =
-  | 'display'
-  | 'title1'
-  | 'title2'
-  | 'title3'
-  | 'body'
-  | 'bodyEmphasis'
-  | 'callout'
-  | 'caption'
-  | 'label'
-  | 'overline';
+export enum TextVariants {
+  Display = 'display',
+  Title1 = 'title1',
+  Title2 = 'title2',
+  Title3 = 'title3',
+  Body = 'body',
+  BodyEmphasis = 'bodyEmphasis',
+  Callout = 'callout',
+  Caption = 'caption',
+  Label = 'label',
+  Overline = 'overline',
+}
+export type TextVariant = (typeof TextVariants)[keyof typeof TextVariants];
 
 type TextProps = RNTextProps & {
   variant?: TextVariant;
   color?: 'textPrimary' | 'textSecondary' | 'textTertiary' | 'accent' | 'danger';
 };
 
-export function Text({ style, variant = 'body', color = 'textPrimary', ...rest }: TextProps) {
+export function Text({ style, variant = TextVariants.Body, color = 'textPrimary', ...rest }: TextProps) {
   return <RNText style={[styles.base, variantStyles[variant], colorStyles[color], style]} {...rest} />;
 }
 

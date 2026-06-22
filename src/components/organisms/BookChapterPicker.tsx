@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { FlatList, Modal, Pressable, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { X } from 'lucide-react-native';
-import { Text, SafeAreaView } from '@/components/atoms';
+import { Text, TextVariants, SafeAreaView } from '@/components/atoms';
 import { useBooks, useChapters } from '@/hooks/use-bible';
 import { useTranslate } from '@/i18n';
 import type { TranslationId, Book } from '@/types/bible';
@@ -47,11 +47,11 @@ export function BookChapterPicker({ visible, translationId, currentBookId, curre
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <Pressable onPress={selectedBook ? handleBack : handleClose} hitSlop={8}>
-            <Text variant="callout" color="accent">
+            <Text variant={TextVariants.Callout} color="accent">
               {selectedBook ? translate('reader.back') : translate('reader.close')}
             </Text>
           </Pressable>
-          <Text variant="title3" style={styles.headerTitle}>
+          <Text variant={TextVariants.Title3} style={styles.headerTitle}>
             {selectedBook ? selectedBook.name : translate('reader.books')}
           </Text>
           <Pressable onPress={handleClose} hitSlop={8}>
@@ -80,7 +80,7 @@ export function BookChapterPicker({ visible, translationId, currentBookId, curre
                   pressed && styles.pressed,
                 ]}
               >
-                <Text variant="body" style={item.id === currentBookId ? styles.activeText : undefined}>
+                <Text variant={TextVariants.Body} style={item.id === currentBookId ? styles.activeText : undefined}>
                   {item.name}
                 </Text>
               </Pressable>
@@ -121,7 +121,7 @@ function ChapterGrid({
             pressed && styles.pressed,
           ]}
         >
-          <Text variant="body" style={item.chapter === currentChapter ? styles.activeCellText : undefined}>
+          <Text variant={TextVariants.Body} style={item.chapter === currentChapter ? styles.activeCellText : undefined}>
             {item.chapter}
           </Text>
         </Pressable>

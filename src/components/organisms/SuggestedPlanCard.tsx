@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { CalendarDays } from 'lucide-react-native';
-import { Button, Text } from '@/components/atoms';
+import { Button, Text, TextVariants } from '@/components/atoms';
 import type { SuggestedReadingPlan } from '@/types/reading-plans';
 
 type SuggestedPlanCardProps = {
@@ -21,10 +21,10 @@ export function SuggestedPlanCard({ plan, meta, startLabel, onStart, loading }: 
         <CalendarDays size={22} color={styles.icon.color} />
       </View>
       <View style={styles.body}>
-        <Text variant="bodyEmphasis" numberOfLines={2}>
+        <Text variant={TextVariants.BodyEmphasis} numberOfLines={2}>
           {plan.title}
         </Text>
-        <Text variant="callout" color="textSecondary" numberOfLines={1}>
+        <Text variant={TextVariants.Callout} color="textSecondary" numberOfLines={1}>
           {meta}
         </Text>
       </View>

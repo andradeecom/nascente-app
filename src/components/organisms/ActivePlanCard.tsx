@@ -1,6 +1,6 @@
 import { Pressable, View, type ViewStyle } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text } from '@/components/atoms';
+import { Text, TextVariants } from '@/components/atoms';
 import type { ActiveReadingPlan } from '@/types/reading-plans';
 
 type ActivePlanCardProps = {
@@ -18,16 +18,16 @@ export function ActivePlanCard({ plan, nextLabel, onPress }: ActivePlanCardProps
     <Pressable onPress={onPress} style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
       <View style={styles.header}>
         <View style={styles.badge}>
-          <Text variant="caption" color="accent" style={styles.badgeText}>
+          <Text variant={TextVariants.Caption} color="accent" style={styles.badgeText}>
             {progressPercent}%
           </Text>
         </View>
         <View style={styles.body}>
-          <Text variant="bodyEmphasis" numberOfLines={1}>
+          <Text variant={TextVariants.BodyEmphasis} numberOfLines={1}>
             {catalog.title}
           </Text>
           {subtitle ? (
-            <Text variant="callout" color="textSecondary" numberOfLines={1}>
+            <Text variant={TextVariants.Callout} color="textSecondary" numberOfLines={1}>
               {subtitle}
             </Text>
           ) : null}

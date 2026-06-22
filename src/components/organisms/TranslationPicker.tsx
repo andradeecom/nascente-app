@@ -1,7 +1,7 @@
 import { Modal, Pressable, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { Check, X } from 'lucide-react-native';
-import { Text, SafeAreaView } from '@/components/atoms';
+import { Text, TextVariants, SafeAreaView } from '@/components/atoms';
 import { useTranslate } from '@/i18n';
 import { TRANSLATIONS, type TranslationId } from '@/types/bible';
 
@@ -22,7 +22,7 @@ export function TranslationPicker({ visible, currentId, onSelect, onClose }: Pro
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <View style={styles.headerSpacer} />
-          <Text variant="title3" style={styles.headerTitle}>
+          <Text variant={TextVariants.Title3} style={styles.headerTitle}>
             {translate('reader.translation')}
           </Text>
           <Pressable onPress={onClose} hitSlop={8}>
@@ -37,8 +37,8 @@ export function TranslationPicker({ visible, currentId, onSelect, onClose }: Pro
             style={({ pressed }) => [styles.row, pressed && styles.pressed]}
           >
             <View style={styles.rowContent}>
-              <Text variant="body">{t.label}</Text>
-              <Text variant="caption" color="textSecondary">
+              <Text variant={TextVariants.Body}>{t.label}</Text>
+              <Text variant={TextVariants.Caption} color="textSecondary">
                 {t.lang.toUpperCase()}
               </Text>
             </View>

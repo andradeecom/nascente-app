@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native-unistyles';
-import { Text } from '@/components/atoms';
+import { Text, TextVariants } from '@/components/atoms';
 
 type SectionHeaderProps = {
   title: string;
@@ -8,7 +8,7 @@ type SectionHeaderProps = {
 /** Uppercase overline label that introduces a list section (e.g. "PLANOS ATIVOS"). */
 export function SectionHeader({ title }: SectionHeaderProps) {
   return (
-    <Text variant="overline" color="textSecondary" style={styles.title}>
+    <Text variant={TextVariants.Overline} color="textSecondary" style={styles.title}>
       {title}
     </Text>
   );

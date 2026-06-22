@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { ActivityIndicator, FlatList, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text, SafeAreaView } from '@/components/atoms';
+import { Text, TextVariants, SafeAreaView } from '@/components/atoms';
 import { ReaderHeader, ChapterNavBar } from '@/components/molecules';
 import { BookChapterPicker, TranslationPicker } from '@/components/organisms';
 import type { Verse } from '@/types/bible';
@@ -28,7 +28,7 @@ export default function ReaderScreen() {
   const renderVerse = useCallback(
     ({ item }: { item: Verse }) => (
       <View style={styles.verseRow}>
-        <Text variant="caption" color="textTertiary" style={styles.verseNumber}>
+        <Text variant={TextVariants.Caption} color="textTertiary" style={styles.verseNumber}>
           {item.verse}
         </Text>
         <Text style={styles.verseText}>{item.text}</Text>

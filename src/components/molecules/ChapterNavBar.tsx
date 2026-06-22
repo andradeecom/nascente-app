@@ -1,7 +1,7 @@
 import { Pressable, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
-import { Text } from '@/components/atoms';
+import { Text, TextVariants } from '@/components/atoms';
 import { useTranslate } from '@/i18n';
 
 type ChapterNavBarProps = {
@@ -18,17 +18,17 @@ export function ChapterNavBar({ bookName, chapter, onPrev, onNext }: ChapterNavB
     <View style={styles.navBar}>
       <Pressable onPress={onPrev} style={styles.navButton} hitSlop={8}>
         <ChevronLeft size={22} color={styles.chevron.color} />
-        <Text variant="label" color="accent">
+        <Text variant={TextVariants.Label} color="accent">
           {translate('reader.prev')}
         </Text>
       </Pressable>
 
-      <Text variant="label" color="textSecondary">
+      <Text variant={TextVariants.Label} color="textSecondary">
         {bookName} {chapter}
       </Text>
 
       <Pressable onPress={onNext} style={styles.navButton} hitSlop={8}>
-        <Text variant="label" color="accent">
+        <Text variant={TextVariants.Label} color="accent">
           {translate('reader.next')}
         </Text>
         <ChevronRight size={22} color={styles.chevron.color} />

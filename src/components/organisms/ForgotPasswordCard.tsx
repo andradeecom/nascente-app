@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { useForm, Controller } from 'react-hook-form';
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema';
-import { Text, Button } from '@/components/atoms';
+import { Text, TextVariants, Button } from '@/components/atoms';
 import { InputField } from '@/components/molecules';
 import { createForgotPasswordSchema, type ForgotPasswordFormData } from '@/schemas/forgot-password';
 import { translate } from '@/i18n';
@@ -35,10 +35,10 @@ export function ForgotPasswordCard({ onSubmit, isLoading, isSubmitted, submitted
     return (
       <View style={styles.card}>
         <View style={styles.header}>
-          <Text variant="title1" style={styles.title}>
+          <Text variant={TextVariants.Title1} style={styles.title}>
             {translate('forgotPassword.successTitle')}
           </Text>
-          <Text variant="callout" color="textSecondary" style={styles.title}>
+          <Text variant={TextVariants.Callout} color="textSecondary" style={styles.title}>
             {translate('forgotPassword.successMessage', { email: submittedEmail ?? '' })}
           </Text>
         </View>
@@ -49,10 +49,10 @@ export function ForgotPasswordCard({ onSubmit, isLoading, isSubmitted, submitted
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Text variant="title1" style={styles.title}>
+        <Text variant={TextVariants.Title1} style={styles.title}>
           {translate('forgotPassword.title')}
         </Text>
-        <Text variant="callout" color="textSecondary" style={styles.title}>
+        <Text variant={TextVariants.Callout} color="textSecondary" style={styles.title}>
           {translate('forgotPassword.subtitle')}
         </Text>
       </View>

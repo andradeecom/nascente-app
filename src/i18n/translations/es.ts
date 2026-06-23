@@ -150,6 +150,19 @@ const es = {
     loadError: 'No se pudieron cargar los planes',
     comingSoon: 'Los planes de lectura estarán disponibles próximamente',
   },
+  onboarding: {
+    language: {
+      title: 'Elige tu idioma',
+      subtitle: 'Elige tu idioma',
+      description: 'Define el idioma de la app y la lista de traducciones. Puedes cambiarlo después.',
+      startButton: 'Comenzar',
+      options: {
+        en: { name: 'English', region: 'Estados Unidos · en' },
+        es: { name: 'Español', region: 'Latinoamérica · es-419' },
+        pt: { name: 'Português', region: 'Brasil · pt-BR' },
+      },
+    },
+  },
   errors: {
     loginFailed: 'Error al iniciar sesión',
     invalidCredentials: 'Credenciales inválidas',

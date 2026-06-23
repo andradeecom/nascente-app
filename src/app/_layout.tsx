@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { queryClient } from '@/lib/query-client';
 import { useAuthStore } from '@/stores/auth';
 import { useThemeStore } from '@/stores/theme';
+import { useOnboardingStore } from '@/stores/onboarding';
 import { getLocales } from 'expo-localization';
 import { i18n } from '@/i18n';
 
@@ -18,22 +19,28 @@ i18n.enableFallback = true;
 NativeSplash.preventAutoHideAsync();
 NativeSplash.setOptions({ duration: 300, fade: true });
 
+// Flip to true during development to force the onboarding flow on every launch.
+const FORCE_ONBOARDING = __DEV__ && true;
+
 function useHydrate() {
   const hydrate = useAuthStore((s) => s.hydrate);
   const isAuthHydrated = useAuthStore((s) => s.isHydrated);
   const isThemeHydrated = useThemeStore((s) => s.hasHydrated);
+  const isOnboardingHydrated = useOnboardingStore((s) => s.hasHydrated);
 
   useEffect(() => {
     hydrate();
   }, [hydrate]);
 
-  return isAuthHydrated && isThemeHydrated;
+  return isAuthHydrated && isThemeHydrated && isOnboardingHydrated;
 }
 
 function RootNavigator() {
   const isHydrated = useHydrate();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const hasCompletedOnboarding = useOnboardingStore((s) => s.hasCompleted);
   const [splashDone, setSplashDone] = useState(false);
+  const shouldShowOnboarding = FORCE_ONBOARDING || !hasCompletedOnboarding;
 
   // Hold on the native splash (no JS render) until resources are ready.
   if (!isHydrated) {
@@ -45,12 +52,18 @@ function RootNavigator() {
     return <SplashScreen onReady={() => NativeSplash.hideAsync()} onFinish={() => setSplashDone(true)} />;
   }
 
+  // Keep every screen in a single Stack and let Protected guards decide which is
+  // reachable — swapping the whole Stack tree confuses Expo Router's persisted
+  // navigation state, which is why onboarding only appeared on the very first run.
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Protected guard={isAuthenticated}>
+      <Stack.Protected guard={shouldShowOnboarding}>
+        <Stack.Screen name="onboarding" />
+      </Stack.Protected>
+      <Stack.Protected guard={!shouldShowOnboarding && isAuthenticated}>
         <Stack.Screen name="(tabs)" />
       </Stack.Protected>
-      <Stack.Protected guard={!isAuthenticated}>
+      <Stack.Protected guard={!shouldShowOnboarding && !isAuthenticated}>
         <Stack.Screen name="login" />
         <Stack.Screen name="register" />
         <Stack.Screen name="forgot-password" />

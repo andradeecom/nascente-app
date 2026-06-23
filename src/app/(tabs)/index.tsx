@@ -37,7 +37,7 @@ export default function HomeScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <WelcomeHeader greeting={translate(greetingKey)} subtitle={translate('home.subtitle')} />
 

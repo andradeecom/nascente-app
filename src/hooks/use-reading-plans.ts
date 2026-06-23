@@ -52,6 +52,7 @@ export function useActivePlans() {
         };
       });
     },
+    staleTime: 1000 * 60, // 1 min; active plans change more often than suggested
   });
 }
 
@@ -82,6 +83,7 @@ export function useSuggestedPlans() {
       const startedIds = new Set((started ?? []).map((s) => s.plan_id));
       return (plans ?? []).filter((p) => !startedIds.has(p.id));
     },
+    staleTime: 1000 * 60 * 5, // 5 min; suggested plans don't change often
   });
 }
 

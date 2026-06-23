@@ -1,0 +1,86 @@
+import { Pressable, View } from 'react-native';
+import { StyleSheet } from 'react-native-unistyles';
+import { Text, TextVariants } from '@/components/atoms';
+import type { LocaleName } from '@/stores/locale';
+
+type LanguageOptionProps = {
+  code: LocaleName;
+  name: string;
+  region: string;
+  selected: boolean;
+  onSelect: () => void;
+};
+
+export function LanguageOption({ code, name, region, selected, onSelect }: LanguageOptionProps) {
+  return (
+    <Pressable
+      style={({ pressed }) => [styles.container, selected && styles.selected, pressed && styles.pressed]}
+      onPress={onSelect}
+      accessibilityRole="radio"
+      accessibilityState={{ selected }}
+    >
+      <Text style={styles.badge}>{code.toUpperCase()}</Text>
+      <View style={styles.text}>
+        <Text variant={TextVariants.BodyEmphasis}>{name}</Text>
+        <Text variant={TextVariants.Caption} color="textSecondary">
+          {region}
+        </Text>
+      </View>
+      <View style={[styles.radio, selected && styles.radioSelected]}>
+        {selected && <View style={styles.radioInner} />}
+      </View>
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create((theme) => ({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: theme.spacing[4],
+    borderRadius: theme.radius.lg,
+    borderWidth: 1,
+    borderColor: theme.colors.semantic.bgTertiary,
+    backgroundColor: theme.colors.semantic.bgPrimary,
+    gap: theme.spacing[3],
+  },
+  selected: {
+    borderColor: theme.colors.semantic.accent,
+    backgroundColor: theme.colors.semantic.accentSubtle,
+  },
+  pressed: {
+    opacity: 0.9,
+  },
+  badge: {
+    width: 40,
+    height: 40,
+    borderRadius: theme.radius.md,
+    backgroundColor: theme.colors.semantic.accentSubtle,
+    color: theme.colors.semantic.accent,
+    textAlign: 'center',
+    lineHeight: 40,
+    fontWeight: theme.font.weights.semibold,
+    fontSize: theme.font.sizes.label,
+  },
+  text: {
+    flex: 1,
+  },
+  radio: {
+    width: 22,
+    height: 22,
+    borderRadius: theme.radius.full,
+    borderWidth: 1.5,
+    borderColor: theme.colors.semantic.textTertiary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  radioSelected: {
+    borderColor: theme.colors.semantic.accent,
+  },
+  radioInner: {
+    width: 10,
+    height: 10,
+    borderRadius: theme.radius.full,
+    backgroundColor: theme.colors.semantic.accent,
+  },
+}));

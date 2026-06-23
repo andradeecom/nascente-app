@@ -150,6 +150,19 @@ const en = {
     loadError: 'Could not load plans',
     comingSoon: 'Reading plans are coming soon',
   },
+  onboarding: {
+    language: {
+      title: 'Choose your language',
+      subtitle: 'Choose your language',
+      description: 'Sets the app language and the list of translations. You can change this later.',
+      startButton: 'Get started',
+      options: {
+        en: { name: 'English', region: 'United States · en' },
+        es: { name: 'Español', region: 'Latin America · es-419' },
+        pt: { name: 'Português', region: 'Brazil · pt-BR' },
+      },
+    },
+  },
   errors: {
     loginFailed: 'Login failed',
     invalidCredentials: 'Invalid credentials',

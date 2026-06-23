@@ -5,10 +5,8 @@ import { SafeAreaView } from '@/components/atoms';
 import { Check } from 'lucide-react-native';
 import { SettingsRow } from '@/components/molecules';
 import { SettingsList, ScreenHeader } from '@/components/organisms';
-import { useThemeStore, type ThemeName } from '@/stores/theme';
+import { useThemeStore, THEME_OPTIONS, type ThemeName } from '@/stores/theme';
 import { useTranslate } from '@/i18n';
-
-const THEME_OPTIONS: ThemeName[] = ['light', 'dark', 'sepia'];
 
 export default function ThemeScreen() {
   const router = useRouter();

@@ -3,7 +3,8 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { UnistylesRuntime } from 'react-native-unistyles';
 
-export type ThemeName = 'light' | 'dark' | 'sepia';
+export const THEME_OPTIONS = ['light', 'sepia', 'dark'] as const;
+export type ThemeName = (typeof THEME_OPTIONS)[number];
 
 type ThemeState = {
   theme: ThemeName;

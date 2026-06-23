@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useLocaleStore, type LocaleName } from '@/stores/locale';
-import { useOnboardingStore } from '@/stores/onboarding';
 import { useReaderStore } from '@/stores/reader';
 import type { TranslationTier } from '@/components/molecules';
 import type { TranslationId } from '@/types/bible';
@@ -146,7 +145,6 @@ const CATALOG: Record<LocaleName, OnboardingTranslationSection[]> = {
 export default function useOnboardingTranslationScreen() {
   const router = useRouter();
   const locale = useLocaleStore((s) => s.locale);
-  const complete = useOnboardingStore((s) => s.complete);
   const setTranslation = useReaderStore((s) => s.setTranslation);
 
   const activeLocale: LocaleName = locale ?? 'pt';
@@ -176,8 +174,7 @@ export default function useOnboardingTranslationScreen() {
     if (selectedItem?.translationId) {
       setTranslation(selectedItem.translationId);
     }
-    complete();
-    router.replace('/login');
+    router.push('/onboarding/preferences');
   };
 
   const handleBack = () => router.back();

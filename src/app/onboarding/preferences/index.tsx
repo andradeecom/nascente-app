@@ -1,0 +1,160 @@
+import { ScrollView, View } from 'react-native';
+import { StyleSheet } from 'react-native-unistyles';
+import { Button, Text, TextVariants, SafeAreaView } from '@/components/atoms';
+import { OnboardingStepHeader, ThemePreviewCard, FontSizeSlider } from '@/components/molecules';
+import { useTranslate } from '@/i18n';
+import { typography } from '@/theme/typography';
+import useOnboardingPreferencesScreen from './use-onboarding-preferences-screen';
+
+export default function OnboardingPreferencesScreen() {
+  const {
+    theme,
+    themeOptions,
+    fontSizeIndex,
+    fontSizeSteps,
+    fontSizePt,
+    fontLineHeight,
+    handleSelectTheme,
+    handleSelectFontSize,
+    handleFinish,
+    handleBack,
+  } = useOnboardingPreferencesScreen();
+  const t = useTranslate();
+
+  return (
+    <SafeAreaView style={styles.safe}>
+      <OnboardingStepHeader step={3} total={4} onBack={handleBack} />
+
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <View style={styles.header}>
+          <Text variant={TextVariants.Title2}>{t('onboarding.preferences.title')}</Text>
+          <Text variant={TextVariants.Callout} color="textSecondary" style={styles.subtitle}>
+            {t('onboarding.preferences.subtitle')}
+          </Text>
+        </View>
+
+        <View style={styles.section}>
+          <View style={styles.sectionHeading}>
+            <Text variant={TextVariants.Overline} color="textTertiary">
+              {t('onboarding.preferences.themeLabel')}
+            </Text>
+            <Text variant={TextVariants.Caption} color="textTertiary">
+              {t('onboarding.preferences.themeHint')}
+            </Text>
+          </View>
+
+          <View style={styles.themeRow}>
+            {themeOptions.map((option) => (
+              <ThemePreviewCard
+                key={option}
+                name={option}
+                label={t(`settings.themeOptions.${option}`)}
+                selected={theme === option}
+                onSelect={() => handleSelectTheme(option)}
+              />
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <View style={styles.sectionHeadingRow}>
+            <Text variant={TextVariants.Overline} color="textTertiary">
+              {t('onboarding.preferences.textSizeLabel')}
+            </Text>
+            <Text variant={TextVariants.Caption} color="textSecondary">
+              {fontSizePt} pt
+            </Text>
+          </View>
+          <Text variant={TextVariants.Caption} color="textTertiary" style={styles.sectionHint}>
+            {t('onboarding.preferences.textSizeHint')}
+          </Text>
+
+          <FontSizeSlider steps={fontSizeSteps} value={fontSizeIndex} onChange={handleSelectFontSize} />
+        </View>
+
+        <View style={styles.previewCard}>
+          <Text variant={TextVariants.Overline} color="textTertiary">
+            {t('onboarding.preferences.previewReference')}
+          </Text>
+          <Text
+            style={[
+              styles.previewText,
+              { fontFamily: typography.reader.families.serif, fontSize: fontSizePt, lineHeight: fontLineHeight },
+            ]}
+          >
+            <Text style={styles.previewVerseNumber}>1 </Text>
+            {t('settings.textSizePreview')}
+          </Text>
+        </View>
+      </ScrollView>
+
+      <View style={styles.footer}>
+        <Button label={t('onboarding.preferences.finishButton')} size="lg" fullWidth onPress={handleFinish} />
+      </View>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create((theme) => ({
+  safe: {
+    flex: 1,
+    backgroundColor: theme.colors.semantic.bgPrimary,
+  },
+  scroll: {
+    flex: 1,
+  },
+  content: {
+    paddingHorizontal: theme.spacing[5],
+    paddingTop: theme.spacing[4],
+    paddingBottom: theme.spacing[6],
+  },
+  header: {
+    gap: theme.spacing[2],
+    marginBottom: theme.spacing[6],
+  },
+  subtitle: {
+    marginTop: theme.spacing[0.5],
+  },
+  section: {
+    marginBottom: theme.spacing[6],
+  },
+  sectionHeading: {
+    gap: theme.spacing[0.5],
+    marginBottom: theme.spacing[3],
+  },
+  sectionHeadingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  sectionHint: {
+    marginTop: theme.spacing[0.5],
+    marginBottom: theme.spacing[4],
+  },
+  themeRow: {
+    flexDirection: 'row',
+    gap: theme.spacing[3],
+  },
+  previewCard: {
+    borderWidth: 1,
+    borderColor: theme.colors.semantic.bgTertiary,
+    borderRadius: theme.radius.xl,
+    backgroundColor: theme.colors.semantic.bgPrimary,
+    padding: theme.spacing[4],
+    gap: theme.spacing[2],
+  },
+  previewText: {
+    color: theme.colors.semantic.textPrimary,
+  },
+  previewVerseNumber: {
+    color: theme.colors.semantic.accent,
+    fontWeight: theme.font.weights.semibold,
+  },
+  footer: {
+    paddingHorizontal: theme.spacing[5],
+    paddingBottom: theme.spacing[6],
+    paddingTop: theme.spacing[4],
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.semantic.bgTertiary,
+  },
+}));

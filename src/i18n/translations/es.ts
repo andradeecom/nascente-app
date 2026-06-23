@@ -184,6 +184,16 @@ const es = {
         },
       },
     },
+    preferences: {
+      title: 'Preferencias de lectura',
+      subtitle: 'Configura la lectura a tu manera. Todo se puede cambiar después.',
+      themeLabel: 'Tema',
+      themeHint: 'Aplicado en toda la app',
+      textSizeLabel: 'Tamaño del texto',
+      textSizeHint: 'Aplicado solo en el lector',
+      previewReference: 'Juan 1:1',
+      finishButton: 'Abrir la Biblia',
+    },
   },
   errors: {
     loginFailed: 'Error al iniciar sesión',

@@ -3,7 +3,8 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { type TranslationId, defaultTranslationForLocale } from '@/types/bible';
 
-export type ReaderFontSize = 'small' | 'medium' | 'large' | 'xl';
+export const FONT_SIZE_OPTIONS = ['small', 'medium', 'large', 'xl'] as const;
+export type ReaderFontSize = (typeof FONT_SIZE_OPTIONS)[number];
 
 type ReaderState = {
   translationId: TranslationId;

@@ -5,10 +5,8 @@ import { SafeAreaView } from '@/components/atoms';
 import { Check } from 'lucide-react-native';
 import { SettingsRow } from '@/components/molecules';
 import { SettingsList, ScreenHeader } from '@/components/organisms';
-import { useLocaleStore, type LocaleName } from '@/stores/locale';
+import { LOCALE_OPTIONS, useLocaleStore, type LocaleName } from '@/stores/locale';
 import { useTranslate } from '@/i18n';
-
-const LANGUAGE_OPTIONS: LocaleName[] = ['en', 'es', 'pt'];
 
 export default function LanguageScreen() {
   const router = useRouter();
@@ -26,7 +24,7 @@ export default function LanguageScreen() {
       <ScreenHeader title={translate('settings.languageTitle')} />
       <View style={styles.container}>
         <SettingsList>
-          {LANGUAGE_OPTIONS.map((option) => (
+          {LOCALE_OPTIONS.map((option) => (
             <SettingsRow
               key={option}
               label={translate(`settings.languageOptions.${option}`)}

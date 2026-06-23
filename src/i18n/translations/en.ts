@@ -184,6 +184,16 @@ const en = {
         },
       },
     },
+    preferences: {
+      title: 'Reading preferences',
+      subtitle: 'Set up reading your way. You can change everything later.',
+      themeLabel: 'Theme',
+      themeHint: 'Applied across the whole app',
+      textSizeLabel: 'Text size',
+      textSizeHint: 'Applied only in the reader',
+      previewReference: 'John 1:1',
+      finishButton: 'Open the Bible',
+    },
   },
   errors: {
     loginFailed: 'Login failed',

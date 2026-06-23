@@ -184,6 +184,16 @@ const pt = {
         },
       },
     },
+    preferences: {
+      title: 'Preferências de leitura',
+      subtitle: 'Ajuste a leitura do seu jeito. Tudo pode mudar depois.',
+      themeLabel: 'Tema',
+      themeHint: 'Aplicado em todo o app',
+      textSizeLabel: 'Tamanho do texto',
+      textSizeHint: 'Aplicado apenas no leitor',
+      previewReference: 'João 1.1',
+      finishButton: 'Abrir a Bíblia',
+    },
   },
   errors: {
     loginFailed: 'Falha ao entrar',

@@ -162,6 +162,28 @@ const pt = {
         pt: { name: 'Português', region: 'Brasil · pt-BR' },
       },
     },
+    translation: {
+      title: 'Escolha sua tradução',
+      subtitle: 'Você pode baixar outras traduções quando quiser.',
+      continueButton: 'Continuar',
+      offlineBadge: 'Offline',
+      proBadge: 'Pro',
+      footer: '{{name}} · pronta para leitura offline',
+      sections: {
+        publicDomain: {
+          label: 'Domínio público',
+          caption: 'Grátis · leitura offline completa',
+        },
+        freeLicensed: {
+          label: 'Gratuito licenciado',
+          caption: 'Grátis · conta para sincronizar',
+        },
+        pro: {
+          label: 'Biblioteca Pro',
+          caption: 'Assinatura',
+        },
+      },
+    },
   },
   errors: {
     loginFailed: 'Falha ao entrar',

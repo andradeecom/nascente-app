@@ -1,5 +1,5 @@
 import { Button, Text, TextVariants, SafeAreaView } from '@/components/atoms';
-import { LanguageOption } from '@/components/molecules';
+import { LanguageOption, OnboardingStepHeader } from '@/components/molecules';
 import { useTranslate } from '@/i18n';
 import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
@@ -11,6 +11,7 @@ export default function OnboardingLanguageScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <OnboardingStepHeader step={1} total={4} />
       <View style={styles.container}>
         <View style={styles.header}>
           <Text variant={TextVariants.Title2}>{t('onboarding.language.title')}</Text>

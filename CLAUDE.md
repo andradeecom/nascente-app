@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Expo + React Native + TypeScript app for **Nascente**, an offline-first Bible app (see `../CLAUDE.md` and `../.docs/` for product context). This package currently implements the auth shell and design system; Bible reading/study features are not yet built. Entry point is `src/index.ts` (which imports `expo-router/entry` then `./theme/config` to initialize Unistyles before anything renders). Routing is file-based via `expo-router` (`src/app/`). Uses pnpm as package manager.
+Expo + React Native + TypeScript app for **Nascente**, an offline-first Bible app (see `../CLAUDE.md` and `../.docs/` for product context). This package implements: a multi-step **onboarding** flow, **Supabase auth** (sign-in / sign-up / password reset), the **Reader** (offline bundled Bible), **reading plans** with progress tracking, **settings**, and the design system. AI study features (explain, word study, devotionals) are not built yet. Entry point is `src/index.ts` (which imports `expo-router/entry` then `./theme/config` to initialize Unistyles before anything renders). Routing is file-based via `expo-router` (`src/app/`). Uses pnpm as package manager.
+
+**Guest-first:** the app no longer requires an account. After onboarding, guests land in `(tabs)` and can read, browse plans, and change settings; account-gated surfaces (reading-plan progress/sync, cross-device stats) show contextual sign-in prompts (`SignInPromptCard`) instead of blocking. See the Auth flow, Home screen, and Reading plans sections.
 
 ## Commands
 
@@ -34,8 +36,8 @@ Husky + lint-staged run `prettier --write` and `expo lint --fix` on staged `*.{j
 `src/components/` is split into `atoms/`, `molecules/`, `organisms/`, each with a barrel `index.ts` that re-exports named exports. When adding a component, add it to the matching folder's `index.ts`.
 
 - **atoms**: primitive UI (`Text`, `Button`, `Input`, `Divider`, `Avatar`, `SafeAreaView`) — own their style variants (e.g. `Button` has `variant`/`size` props mapped to `StyleSheet.create` lookups). `SafeAreaView` is a thin `withUnistyles(...)` wrapper over `react-native-safe-area-context`'s so themed backgrounds stay theme-reactive — see the Styling section.
-- **molecules**: small compositions of atoms (e.g. `InputField`, `SocialButton`, `SettingsRow`).
-- **organisms**: screen-level sections composed from atoms/molecules (e.g. `LoginCard`, `LoginFooter`, `ProfileCard`, `ScreenHeader`).
+- **molecules**: small compositions of atoms (e.g. `InputField`, `SocialButton`, `SettingsRow`, `OnboardingStepHeader`, `BackButton`). `BackButton` is a floating top-left chevron that renders `null` when `router.canGoBack()` is false — used on the auth screens (which center their own content and don't use the titled `ScreenHeader`).
+- **organisms**: screen-level sections composed from atoms/molecules (e.g. `LoginCard`, `RegisterCard`, `ScreenHeader`, `ActivePlanCard`, `SuggestedPlanCard`, `SignInPromptCard`). `SignInPromptCard` is the reusable account-gate card (whole card is the CTA) used on the Plans tab and Home for guests.
 
 Screens (`src/app/**`) compose organisms/atoms directly; they hold screen logic (handlers, mutations) and delegate presentation to organisms.
 
@@ -45,7 +47,7 @@ When a screen's handlers/mutations grow beyond trivial, convert the route file i
 
 Both the route file and its co-located hook use **default export** in this pattern — the hook is exempted from the named-export convention below because it's screen-private, not a shared module imported by name from elsewhere.
 
-**Caveat under `(tabs)`:** the `(tabs)` Tabs navigator auto-registers _every_ file in its folder as a screen, so a co-located hook placed directly under it (e.g. `(tabs)/plans/use-plans-screen.ts`) renders as a phantom tab. Two ways to suppress it: (1) for a single-screen folder, register the hook with `href: null` in `(tabs)/_layout.tsx` (`<Tabs.Screen name="plans/use-plans-screen" options={{ href: null }} />`) — lightest, but you must add one entry per co-located file; (2) if the folder has (or grows) sub-routes, give it a nested `_layout.tsx` with a `Stack` (as `settings/` does) — the nested layout scopes route scanning away from the Tabs navigator, so its co-located `use-*-screen.ts` never becomes a tab and needs no `href: null`. Folders nested under a `Stack` (`login/`, `register/`, `settings/`) don't hit this at all.
+**Caveat under `(tabs)`:** the `(tabs)` Tabs navigator auto-registers _every_ file directly in its folder as a screen, so a co-located hook placed directly under it would render as a phantom tab. Two ways to suppress it: (1) for a single file, register it with `href: null` in `(tabs)/_layout.tsx` — lightest; (2) give the tab a nested `_layout.tsx` with a `Stack`, which scopes route scanning away from the Tabs navigator so co-located `use-*-screen.ts` files (and sub-routes like `plans/[planId]/`) never become tabs. **Current layout:** the Home tab is the only bare file (`(tabs)/index.tsx`); its logic lives in `src/hooks/use-home-screen.ts` (outside `(tabs)/`) to avoid the phantom. `reader/`, `plans/`, and `settings/` each have a nested `Stack` `_layout.tsx`, so their co-located hooks and sub-routes are safe. Folders nested under a `Stack` (`login/`, `register/`, `forgot-password/`, the `onboarding/*` folders) don't hit this at all.
 
 ### Styling — react-native-unistyles
 
@@ -72,14 +74,28 @@ Layered: screens (`src/app/login/`, `src/app/register/`, `src/app/forgot-passwor
 
 - `src/lib/supabase.ts` creates the single `supabase` client via `createClient`, configured with `AsyncStorage` as the session storage, `autoRefreshToken: true`, `persistSession: true`. Supabase's client handles token persistence and refresh internally — there is no custom axios instance, manual token storage, or refresh-queue logic for auth.
 - `useAuthStore` (`src/stores/auth.ts`, Zustand) holds `user` (an `AppUser`, see below), `isAuthenticated`, `isHydrated`. `hydrate()` calls `supabase.auth.getSession()` once on launch, then subscribes via `supabase.auth.onAuthStateChange` so any session change (refresh, sign-out, cross-tab) keeps the store in sync automatically — mutations don't need to manually push user state on top of what the listener already does, though `onSuccess` handlers in `use-auth.ts` call `setAuth` directly too so the UI updates without waiting on the listener's async round-trip.
-- `src/app/_layout.tsx` calls `hydrate()` once via a `useHydrate` hook defined inline. While `!isHydrated` it renders `null` (holding the native splash screen, via `expo-splash-screen`'s `preventAutoHideAsync`); once hydrated, it renders the animated `SplashScreen` organism (`src/components/organisms/SplashScreen.tsx`) until it signals `onReady` (hides the native splash) and `onFinish` (flips local `splashDone` state). Only then does it mount the `Stack`, which uses `Stack.Protected` guards keyed on `isAuthenticated` to show either `(tabs)` or the unauthenticated screens (`login`, `register`, `forgot-password`) — there is no separate auth-guard hook or redirect call.
+- `src/app/_layout.tsx` calls `hydrate()` once via a `useHydrate` hook defined inline. While `!isHydrated` it renders `null` (holding the native splash screen, via `expo-splash-screen`'s `preventAutoHideAsync`); once hydrated, it renders the animated `SplashScreen` organism (`src/components/organisms/SplashScreen.tsx`) until it signals `onReady` (hides the native splash) and `onFinish` (flips local `splashDone` state). Only then does it mount the `Stack`.
+- **Routing guards are keyed on onboarding, not auth.** The `Stack` has two `Stack.Protected` groups: one gated on `shouldShowOnboarding` (`FORCE_ONBOARDING` dev flag OR `!hasCompleted` from `useOnboardingStore`) showing `onboarding`; the other gated on `!shouldShowOnboarding` showing the app — `(tabs)`, `login`, `register`, `forgot-password` **together in one group**. So a signed-out guest still reaches `(tabs)` (initial route); `login`/`register`/`forgot-password` are optional screens pushed on top (e.g. from settings). Signing in/out does **not** swap the navigator — screens navigate explicitly (see redirect bullet). There is no auth-guard hook or redirect call in `_layout.tsx`.
 - `useLogin`/`useRegister`/`useGoogleLogin` all call the corresponding `supabase.auth.*` method (`signInWithPassword`, `signUp`, `signInWithIdToken`), map the returned Supabase `User` to the app's `AppUser` via `toAppUser()` (`src/types/auth.ts`), then `setAuth` + `queryClient.setQueryData(authKeys.me, user)` in `onSuccess`.
 - `useForgotPassword` calls `supabase.auth.resetPasswordForEmail(email, { redirectTo: 'nascenteapp://reset-password' })` — the `nascenteapp` scheme is registered in `app.json`. This only sends the email; there's no in-app reset-completion screen yet (the linked flow is out of scope until that's built).
 - `useMockLogin` is a `__DEV__`-only escape hatch (wired into `src/app/login/`) that writes a hardcoded `AppUser` straight to the Zustand store and query cache, bypassing Supabase entirely — use this pattern for any other dev-only shortcuts.
 - `useLogout` calls `supabase.auth.signOut()`, then clears the Zustand store and the whole React Query cache.
 - Google sign-in uses `@react-native-google-signin/google-signin` for the native dialog (configured once at module load in `use-auth.ts` from `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` / `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID` env vars), then exchanges the resulting ID token with Supabase via `signInWithIdToken({ provider: 'google', token })`. Apple Sign-In is wired up as a no-op handler (`handleAppleLogin` — TODO, not implemented) in both `login/use-login-screen.ts` and `register/use-register-screen.ts`.
-- Email confirmation is currently **disabled** in the Supabase project, so `signUp` returns an active session immediately and Register signs the user straight into `(tabs)` — there's no "check your email to confirm" step. If that setting changes, `useRegister`'s `onSuccess` needs to branch on whether `data.session` is null.
-- Three auth screens follow the same route-folder pattern (see "Route folders with co-located logic" above): `login/`, `register/`, `forgot-password/`. `LoginCard`'s `onForgotPassword` navigates to `/forgot-password`; `login/index.tsx` and `register/index.tsx` cross-link to each other via `expo-router`'s `Link`.
+- Email confirmation is currently **disabled** in the Supabase project, so `signUp` returns an active session immediately — there's no "check your email to confirm" step. If that setting changes, `useRegister`'s `onSuccess` needs to branch on whether `data.session` is null.
+- **Redirect-on-success (because the navigator doesn't swap on auth):** the root `login/`/`register/` screens are reached as a guest from settings, pushed on top of `(tabs)`. Their hooks call a `goToApp()` on success — `router.canDismiss() ? router.dismissAll() : router.replace('/(tabs)/settings')` — which closes the pushed auth stack and lands back on settings (now showing the signed-in profile card). The dev `mockLogin` is wrapped the same way. The **onboarding** copies of these screens redirect to `/onboarding/welcome` instead (see Onboarding flow).
+- **Root auth screens** (`login/`, `register/`, `forgot-password/`) follow the route-folder pattern, render a `BackButton` (so a guest who entered from settings can return), and cross-link: `LoginCard.onForgotPassword` → `/forgot-password`, login ⇄ register via `Link`. `useMockLogin` and Apple Sign-In (no-op TODO) are wired here and in the onboarding copies.
+
+### Onboarding flow
+
+First-run flow under `src/app/onboarding/` (gated by the `shouldShowOnboarding` guard; `hasCompleted` lives in `useOnboardingStore`, `src/stores/onboarding.ts`). Each step is a route-folder with a co-located `use-*-screen.ts` hook, and most steps use `OnboardingStepHeader` (progress dots + back). Sequence:
+
+`language (1) → translation (2) → preferences (3) → account (4) → [register | login | forgot-password] → welcome → app`
+
+- **account** (`onboarding/account/`) — "Sincronize seus dados": **Criar conta** → pushes the onboarding `register`; **Usar sem conta** → pushes `welcome` (guest). Caption notes an account can be created later in settings.
+- **account/register, account/login, account/forgot-password** — reuse the same `RegisterCard` / `LoginCard` / `ForgotPasswordCard` organisms as the root auth screens, but their hooks redirect to `/onboarding/welcome` on success (existing-account users can cross-link register ⇄ login, and login → forgot-password, all within the onboarding stack since the root `/login` etc. aren't mounted during onboarding).
+- **welcome** (`onboarding/welcome/`) — final celebratory screen (animated "sun" sunburst via `react-native-reanimated` + `react-native-svg`, twinkling stars, pulsing button glow). **Começar a ler** → `complete()` + `router.replace('/(tabs)')`; **Explorar planos de leitura** → `complete()` + `/(tabs)/plans`.
+
+`complete()` is called only at the welcome CTA, so the onboarding stack stays mounted through account/register/welcome without a premature guard switch.
 
 ### Forms & validation
 
@@ -102,7 +118,7 @@ TanStack Query. `src/lib/query-client.ts` provides the single `queryClient` inst
 
 ### Backend — Supabase
 
-`src/lib/supabase.ts` is the single Supabase client (Auth today; DB/RLS-backed tables from `.docs/data-model.md` — highlights, notes, bookmarks, reading plan progress — are not wired up yet). There is no `src/services/` layer for auth — hooks in `src/hooks/use-auth.ts` call `supabase.auth.*` directly, since the Supabase SDK already provides the typed, hook-friendly API that a hand-rolled service module would otherwise wrap. If DB access is added later and warrants a thin wrapper per domain, mirror the old `src/services/*.ts` convention then — don't add it speculatively now.
+`src/lib/supabase.ts` is the single Supabase client. **Auth** and the **reading-plan tables** (`reading_plans`, `reading_plan_days`, `user_reading_plans`, `user_reading_plan_completions` — see `.docs/data-model.md`) are wired up; highlights / notes / bookmarks are still **DRAFT** (not applied, to build with the Reader's annotation features). Generated DB types live in `src/types/database.types.ts` (regenerate via the Supabase MCP `generate_typescript_types` after any DDL). Reading-plan queries/mutations live in `src/hooks/use-reading-plans.ts` and call `supabase.from(...)` directly (no `src/services/` layer) — same rationale as auth. Plan progress tracking is **online-only today**; `.docs/plans-progress-tracking.md` is the blueprint for the later offline-first (SQLite + sync) migration, which is why completions are treated as the authoritative append-only log and `current_day`/`status`/`progress` are derived.
 
 ### Type/schema layout
 
@@ -110,11 +126,31 @@ Domain types live in `src/types/*.ts`. `types/auth.ts` defines `AppUser` (the ap
 
 ### Home screen
 
-The Home tab (`src/app/(tabs)/index.tsx`) composes five extracted organisms — `WelcomeHeader`, `VerseOfTheDayCard`, `ContinueReadingCard`, `StatsRow`, `ActivePlansSection` — plus an inline **Pro CTA card**. Screen logic lives in `src/hooks/use-home-screen.ts`.
+The Home tab (`src/app/(tabs)/index.tsx`) composes `WelcomeHeader`, `VerseOfTheDayCard`, `ContinueReadingCard`, `StatsRow`, and either `ActivePlansSection` (signed-in) or `SignInPromptCard` (guest), plus an inline **Pro CTA card**. Screen logic lives in `src/hooks/use-home-screen.ts` (exposes `isAuthenticated` + handlers `handleSignIn` → `/register`, `handleOpenPlan(planId)` → `/(tabs)/plans/[planId]`).
 
-**TODO — Pro CTA:** The Pro upgrade card currently renders unconditionally. Once subscription/premium state is available (e.g. via a `useSubscriptionStore` or user profile field), wrap the Pro CTA in a conditional so it only shows for free-tier users. Per the product spec (`.docs/user-flows/home.md`), the home screen should show at most one Pro nudge and never repeat it or use interstitials.
+**Guest vs. signed-in (gated on `isAuthenticated`):**
 
-**TODO — Stats:** Progress percentage, reading streak, and highlights count are placeholder zeros. Wire them to real tracking once the corresponding stores/services are implemented.
+- **Active plans slot:** guests see a `SignInPromptCard` (icon `CalendarCheck`) in place of `ActivePlansSection` — plans need an account, so the empty state becomes a contextual CTA. Signed-in users see their real active plans (tapping a card → plan detail).
+- **Stats (`StatsRow`):** guests see a **locked teaser** — the three tiles keep their labels but show a `Lock` glyph instead of values, and the whole row is a sign-in CTA (`locked` / `caption` / `onPress` props). Signed-in users see the values (still placeholder zeros — see TODO).
+- **Pro CTA:** hidden for guests (`{isAuthenticated && …}`) — don't stack a paid upsell on top of the create-account nudge. Still renders unconditionally for signed-in users.
+
+**TODO — Pro CTA gating:** for signed-in users the Pro card renders unconditionally; once subscription state exists, gate it to non-premium users. Per `.docs/user-flows/home.md`, show at most one Pro nudge, never interstitials.
+
+**TODO — Stats values:** progress %, streak, and highlights count are placeholder zeros for signed-in users. Wire to real tracking once those stores/services exist.
+
+### Reading plans
+
+Plans tab under `src/app/(tabs)/plans/` (nested `Stack`). Data layer is `src/hooks/use-reading-plans.ts` (`planKeys` namespace): `useActivePlans`, `useSuggestedPlans`, `useStartPlan`, `usePlanDetail(planId)`, `useMarkPlanDayComplete`, `useArchivePlan`. View-models (`ActiveReadingPlan`, `PlanDayGroup`, `PlanDetail`, …) live in `src/types/reading-plans.ts`.
+
+- **List** (`plans/index.tsx`): guests get a `SignInPromptCard`; signed-in users get active + suggested sections. Tapping a card **body** (active or suggested) → plan detail; the suggested card's **"Começar" button** still starts inline.
+- **Detail** (`plans/[planId]/`): serves both **preview** (not enrolled → days + "Começar") and **detail** (enrolled → day-by-day with completion checks + progress bar + "Remover plano" which archives). Reachable from the Plans tab and Home active-plan cards.
+- **Progress model:** completions are the source of truth; `useMarkPlanDayComplete` upserts an idempotent completion (unique `(user_plan_id, day)`), recomputes `current_day` (lowest uncompleted), and flips `status`→`completed` when full. **One-way** (no un-marking). Two triggers, both calling the same mutation: a manual check on each detail day row (offline/paper fallback), and the Reader read-through CTA (primary — see Reader). Full design + the offline-migration plan: `.docs/plans-progress-tracking.md`.
+
+### Reader
+
+Reader tab under `src/app/(tabs)/reader/` (nested `Stack`). Renders verses for the current position from `useReaderStore` (`src/stores/reader.ts`: translation/book/chapter/fontSize, persisted). Bundled offline Bible via `src/hooks/use-bible.ts` / `src/services/bible.ts`.
+
+- **Plan reading session:** opening a not-yet-done plan day from plan detail sets an ephemeral, in-memory `usePlanReadingStore` session (`src/stores/plan-reading.ts`: `userPlanId`, `day`, `bookId`, `lastChapter`, …) and navigates to the Reader. When the reader is at that session's last chapter, a **"Concluí esta leitura" footer CTA** (list footer, reachable only by scrolling through the passage) marks the day complete via `useMarkPlanDayComplete`, fires a celebration toast (day vs. whole-plan message + prayer nudge), and returns to detail. The session clears on completion or when the user manually picks different content via the book picker.
 
 ## Conventions
 

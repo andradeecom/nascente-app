@@ -192,7 +192,27 @@ const en = {
       textSizeLabel: 'Text size',
       textSizeHint: 'Applied only in the reader',
       previewReference: 'John 1:1',
-      finishButton: 'Open the Bible',
+      finishButton: 'Continue',
+    },
+    account: {
+      title: 'Sync your data',
+      subtitle: 'An account keeps your highlights, notes, and reading plans saved across all your devices.',
+      benefits: {
+        highlights: 'Highlights and notes on every device',
+        plans: 'Reading plans kept in sync',
+        backup: 'Secure backup — nothing gets lost',
+      },
+      createButton: 'Create account',
+      skipButton: 'Continue without an account',
+      footer: 'You can create an account later, in settings.',
+    },
+    welcome: {
+      overline: 'ALL SET',
+      title: 'Welcome',
+      verse: '“Your word is a lamp for my feet, a light on my path.”',
+      verseRef: 'Psalm 119:105',
+      startButton: 'Start reading',
+      plansButton: 'Explore reading plans',
     },
   },
   errors: {

@@ -192,7 +192,27 @@ const es = {
       textSizeLabel: 'Tamaño del texto',
       textSizeHint: 'Aplicado solo en el lector',
       previewReference: 'Juan 1:1',
-      finishButton: 'Abrir la Biblia',
+      finishButton: 'Continuar',
+    },
+    account: {
+      title: 'Sincroniza tus datos',
+      subtitle: 'Una cuenta mantiene tus destacados, notas y planes de lectura guardados en todos tus dispositivos.',
+      benefits: {
+        highlights: 'Destacados y notas en todos los dispositivos',
+        plans: 'Planes de lectura sincronizados',
+        backup: 'Copia de seguridad — nada se pierde',
+      },
+      createButton: 'Crear cuenta',
+      skipButton: 'Usar sin cuenta',
+      footer: 'Puedes crear una cuenta después, en los ajustes.',
+    },
+    welcome: {
+      overline: 'TODO LISTO',
+      title: 'Bienvenido',
+      verse: '« Lámpara es a mis pies tu palabra, y lumbrera a mi camino. »',
+      verseRef: 'Salmos 119:105',
+      startButton: 'Empezar a leer',
+      plansButton: 'Explorar planes de lectura',
     },
   },
   errors: {

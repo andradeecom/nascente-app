@@ -192,7 +192,27 @@ const pt = {
       textSizeLabel: 'Tamanho do texto',
       textSizeHint: 'Aplicado apenas no leitor',
       previewReference: 'João 1.1',
-      finishButton: 'Abrir a Bíblia',
+      finishButton: 'Continuar',
+    },
+    account: {
+      title: 'Sincronize seus dados',
+      subtitle: 'Uma conta mantém seus destaques, notas e planos de leitura salvos em todos os seus aparelhos.',
+      benefits: {
+        highlights: 'Destaques e notas em todos os aparelhos',
+        plans: 'Planos de leitura sincronizados',
+        backup: 'Backup seguro — nada se perde',
+      },
+      createButton: 'Criar conta',
+      skipButton: 'Usar sem conta',
+      footer: 'Você pode criar uma conta depois, nas configurações.',
+    },
+    welcome: {
+      overline: 'TUDO PRONTO',
+      title: 'Bem-vindo',
+      verse: '« A tua palavra é lâmpada para os meus pés e luz para o meu caminho. »',
+      verseRef: 'Salmos 119:105',
+      startButton: 'Começar a ler',
+      plansButton: 'Explorar planos de leitura',
     },
   },
   errors: {

@@ -1,7 +1,6 @@
 import { useRouter } from 'expo-router';
 import { THEME_OPTIONS, useThemeStore, type ThemeName } from '@/stores/theme';
 import { FONT_SIZE_OPTIONS, useReaderStore } from '@/stores/reader';
-import { useOnboardingStore } from '@/stores/onboarding';
 import { typography } from '@/theme/typography';
 
 export default function useOnboardingPreferencesScreen() {
@@ -10,7 +9,6 @@ export default function useOnboardingPreferencesScreen() {
   const setTheme = useThemeStore((s) => s.setTheme);
   const fontSize = useReaderStore((s) => s.fontSize);
   const setFontSize = useReaderStore((s) => s.setFontSize);
-  const complete = useOnboardingStore((s) => s.complete);
 
   const fontSizeIndex = Math.max(0, FONT_SIZE_OPTIONS.indexOf(fontSize));
   const fontSizePt = typography.reader.sizes[fontSize];
@@ -24,8 +22,7 @@ export default function useOnboardingPreferencesScreen() {
   };
 
   const handleFinish = () => {
-    complete();
-    router.replace('/login');
+    router.push('/onboarding/account');
   };
 
   const handleBack = () => router.back();

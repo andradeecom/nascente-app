@@ -20,7 +20,7 @@ NativeSplash.preventAutoHideAsync();
 NativeSplash.setOptions({ duration: 300, fade: true });
 
 // Flip to true during development to force the onboarding flow on every launch.
-const FORCE_ONBOARDING = __DEV__ && true;
+const FORCE_ONBOARDING = __DEV__ && false;
 
 function useHydrate() {
   const hydrate = useAuthStore((s) => s.hydrate);
@@ -37,7 +37,6 @@ function useHydrate() {
 
 function RootNavigator() {
   const isHydrated = useHydrate();
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const hasCompletedOnboarding = useOnboardingStore((s) => s.hasCompleted);
   const [splashDone, setSplashDone] = useState(false);
   const shouldShowOnboarding = FORCE_ONBOARDING || !hasCompletedOnboarding;
@@ -60,10 +59,9 @@ function RootNavigator() {
       <Stack.Protected guard={shouldShowOnboarding}>
         <Stack.Screen name="onboarding" />
       </Stack.Protected>
-      <Stack.Protected guard={!shouldShowOnboarding && isAuthenticated}>
+      <Stack.Protected guard={!shouldShowOnboarding}>
+        {/* Guests can use the app without an account; login/register stay reachable (e.g. from settings). */}
         <Stack.Screen name="(tabs)" />
-      </Stack.Protected>
-      <Stack.Protected guard={!shouldShowOnboarding && !isAuthenticated}>
         <Stack.Screen name="login" />
         <Stack.Screen name="register" />
         <Stack.Screen name="forgot-password" />

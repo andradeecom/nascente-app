@@ -62,7 +62,12 @@ export default function HomeScreen() {
           onPress={handleContinueReading}
         />
 
-        <StatsRow stats={statItems} />
+        <StatsRow
+          stats={statItems}
+          locked={!isAuthenticated}
+          caption={translate('home.statsSignIn')}
+          onPress={handleSignIn}
+        />
 
         {/* Guests can't have active plans (plans need an account), so the active-plans
             slot becomes a contextual sign-in prompt instead of a dead empty state. */}

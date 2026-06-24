@@ -9,10 +9,22 @@ export default function useLoginScreen() {
   const googleLoginMutation = useGoogleLogin();
   const mockLogin = useMockLogin();
 
+  // This screen is reached from settings (guest sign-in), pushed on top of the
+  // (tabs) stack. Auth no longer swaps the navigator, so dismiss the pushed auth
+  // screens to return to settings (origin) where the profile card now shows the user.
+  const goToApp = () => {
+    if (router.canDismiss()) {
+      router.dismissAll();
+    } else {
+      router.replace('/(tabs)/settings');
+    }
+  };
+
   const handleLogin = (email: string, password: string) => {
     loginMutation.mutate(
       { email, password },
       {
+        onSuccess: goToApp,
         onError: (error) => {
           Toast.show({
             type: 'error',
@@ -26,6 +38,7 @@ export default function useLoginScreen() {
 
   const handleGoogleLogin = () => {
     googleLoginMutation.mutate(undefined, {
+      onSuccess: goToApp,
       onError: (error) => {
         if (error instanceof Error && error.message === 'Google sign-in was cancelled') {
           return;
@@ -48,12 +61,17 @@ export default function useLoginScreen() {
     router.push('/forgot-password');
   };
 
+  const handleMockLogin = () => {
+    mockLogin();
+    goToApp();
+  };
+
   return {
     handleLogin,
     handleGoogleLogin,
     handleAppleLogin,
     handleForgotPassword,
-    mockLogin,
+    mockLogin: handleMockLogin,
     isLoading: loginMutation.isPending,
   };
 }

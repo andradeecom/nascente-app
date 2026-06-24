@@ -22,13 +22,15 @@ export default function ProfileScreen() {
         <Text variant={TextVariants.Callout} color="textSecondary">
           {user?.email ?? ''}
         </Text>
-        <Button
-          label={translate('common.signOut')}
-          variant="secondary"
-          fullWidth
-          onPress={logout}
-          style={styles.signOut}
-        />
+        {user && (
+          <Button
+            label={translate('common.signOut')}
+            variant="secondary"
+            fullWidth
+            onPress={logout}
+            style={styles.signOut}
+          />
+        )}
       </View>
     </SafeAreaView>
   );

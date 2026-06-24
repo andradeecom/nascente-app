@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
+import { CalendarCheck } from 'lucide-react-native';
 import { Text, SafeAreaView, TextVariants } from '@/components/atoms';
 import {
   WelcomeHeader,
@@ -8,12 +9,14 @@ import {
   ContinueReadingCard,
   StatsRow,
   ActivePlansSection,
+  SignInPromptCard,
 } from '@/components/organisms';
 import { useHomeScreen } from '@/hooks/use-home-screen';
 
 export default function HomeScreen() {
   const {
     translate,
+    isAuthenticated,
     greetingKey,
     verseOfTheDay,
     verseText,
@@ -25,6 +28,7 @@ export default function HomeScreen() {
     handleContinueReading,
     handleVerseOfTheDay,
     handleExplorePlans,
+    handleSignIn,
   } = useHomeScreen();
 
   const statItems = useMemo(
@@ -60,29 +64,44 @@ export default function HomeScreen() {
 
         <StatsRow stats={statItems} />
 
-        <ActivePlansSection
-          title={translate('home.activePlans')}
-          exploreLabel={translate('home.explore')}
-          emptyLabel={translate('home.noActivePlans')}
-          nextLabel={translate('plans.next')}
-          plans={activePlans.data ?? []}
-          onExplore={handleExplorePlans}
-          onPlanPress={handleContinueReading}
-        />
+        {/* Guests can't have active plans (plans need an account), so the active-plans
+            slot becomes a contextual sign-in prompt instead of a dead empty state. */}
+        {isAuthenticated ? (
+          <ActivePlansSection
+            title={translate('home.activePlans')}
+            exploreLabel={translate('home.explore')}
+            emptyLabel={translate('home.noActivePlans')}
+            nextLabel={translate('plans.next')}
+            plans={activePlans.data ?? []}
+            onExplore={handleExplorePlans}
+            onPlanPress={handleContinueReading}
+          />
+        ) : (
+          <SignInPromptCard
+            icon={CalendarCheck}
+            title={translate('plans.signIn.title')}
+            description={translate('plans.signIn.description')}
+            actionLabel={translate('plans.signIn.action')}
+            onPress={handleSignIn}
+          />
+        )}
 
         {/* ── Pro CTA ─────────────────────────────────────────────────────── */}
-        {/* TODO: Only render for non-premium users once subscription state is available */}
-        <Pressable style={({ pressed }) => [styles.proCard, pressed && styles.pressed]}>
-          <View style={styles.proBadge}>
-            <Text variant={TextVariants.Caption} style={styles.proBadgeText}>
-              PRO
+        {/* Hidden for guests — don't stack a paid upsell on top of the create-account
+            nudge. TODO: also gate on subscription state once available (non-premium only). */}
+        {isAuthenticated && (
+          <Pressable style={({ pressed }) => [styles.proCard, pressed && styles.pressed]}>
+            <View style={styles.proBadge}>
+              <Text variant={TextVariants.Caption} style={styles.proBadgeText}>
+                PRO
+              </Text>
+            </View>
+            <Text variant={TextVariants.BodyEmphasis}>{translate('home.proTitle')}</Text>
+            <Text variant={TextVariants.Callout} color="textSecondary">
+              {translate('home.proDescription')}
             </Text>
-          </View>
-          <Text variant={TextVariants.BodyEmphasis}>{translate('home.proTitle')}</Text>
-          <Text variant={TextVariants.Callout} color="textSecondary">
-            {translate('home.proDescription')}
-          </Text>
-        </Pressable>
+          </Pressable>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

@@ -1,12 +1,22 @@
 import { ScrollView, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
+import { CalendarCheck } from 'lucide-react-native';
 import { SafeAreaView, Text, TextVariants } from '@/components/atoms';
 import { SectionHeader } from '@/components/molecules';
-import { ActivePlanCard, SuggestedPlanCard } from '@/components/organisms';
+import { ActivePlanCard, SignInPromptCard, SuggestedPlanCard } from '@/components/organisms';
 import usePlansScreen from './use-plans-screen';
 
 export default function PlansScreen() {
-  const { translate, activePlans, suggestedPlans, formatMeta, handleStart, startingPlanId } = usePlansScreen();
+  const {
+    translate,
+    isAuthenticated,
+    activePlans,
+    suggestedPlans,
+    formatMeta,
+    handleStart,
+    handleSignIn,
+    startingPlanId,
+  } = usePlansScreen();
 
   const active = activePlans.data ?? [];
   const suggested = suggestedPlans.data ?? [];
@@ -18,44 +28,56 @@ export default function PlansScreen() {
           {translate('plans.title')}
         </Text>
 
-        {/* Active plans */}
-        <View style={styles.section}>
-          <SectionHeader title={translate('plans.activeSection')} />
-          {active.length > 0 ? (
-            <View style={styles.list}>
-              {active.map((plan) => (
-                <ActivePlanCard key={plan.userPlan.id} plan={plan} nextLabel={translate('plans.next')} />
-              ))}
+        {!isAuthenticated ? (
+          <SignInPromptCard
+            icon={CalendarCheck}
+            title={translate('plans.signIn.title')}
+            description={translate('plans.signIn.description')}
+            actionLabel={translate('plans.signIn.action')}
+            onPress={handleSignIn}
+          />
+        ) : (
+          <>
+            {/* Active plans */}
+            <View style={styles.section}>
+              <SectionHeader title={translate('plans.activeSection')} />
+              {active.length > 0 ? (
+                <View style={styles.list}>
+                  {active.map((plan) => (
+                    <ActivePlanCard key={plan.userPlan.id} plan={plan} nextLabel={translate('plans.next')} />
+                  ))}
+                </View>
+              ) : (
+                <Text variant={TextVariants.Callout} color="textSecondary">
+                  {activePlans.isError ? translate('plans.loadError') : translate('plans.emptyActive')}
+                </Text>
+              )}
             </View>
-          ) : (
-            <Text variant={TextVariants.Callout} color="textSecondary">
-              {activePlans.isError ? translate('plans.loadError') : translate('plans.emptyActive')}
-            </Text>
-          )}
-        </View>
 
-        {/* Suggested plans */}
-        <View style={styles.section}>
-          <SectionHeader title={translate('plans.suggestedSection')} />
-          {suggested.length > 0 ? (
-            <View style={styles.list}>
-              {suggested.map((plan) => (
-                <SuggestedPlanCard
-                  key={plan.id}
-                  plan={plan}
-                  meta={formatMeta(plan)}
-                  startLabel={translate('plans.start')}
-                  onStart={() => handleStart(plan)}
-                  loading={startingPlanId === plan.id}
-                />
-              ))}
+            {/* Suggested plans */}
+            <View style={styles.section}>
+              <SectionHeader title={translate('plans.suggestedSection')} />
+              {suggested.length > 0 ? (
+                <View style={styles.list}>
+                  {suggested.map((plan) => (
+                    <SuggestedPlanCard
+                      key={plan.id}
+                      plan={plan}
+                      meta={formatMeta(plan)}
+                      startLabel={translate('plans.start')}
+                      onStart={() => handleStart(plan)}
+                      loading={startingPlanId === plan.id}
+                    />
+                  ))}
+                </View>
+              ) : (
+                <Text variant={TextVariants.Callout} color="textSecondary">
+                  {suggestedPlans.isError ? translate('plans.loadError') : translate('plans.emptySuggested')}
+                </Text>
+              )}
             </View>
-          ) : (
-            <Text variant={TextVariants.Callout} color="textSecondary">
-              {suggestedPlans.isError ? translate('plans.loadError') : translate('plans.emptySuggested')}
-            </Text>
-          )}
-        </View>
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

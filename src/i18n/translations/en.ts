@@ -149,6 +149,11 @@ const en = {
     emptySuggested: 'No suggested plans right now',
     loadError: 'Could not load plans',
     comingSoon: 'Reading plans are coming soon',
+    signIn: {
+      title: 'Keep track of your reading plans',
+      description: 'Create an account to start plans and save your progress across all your devices.',
+      action: 'Create account',
+    },
   },
   onboarding: {
     language: {

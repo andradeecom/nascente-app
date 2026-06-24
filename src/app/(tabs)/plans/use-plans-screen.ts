@@ -1,5 +1,7 @@
 import { useCallback } from 'react';
+import { useRouter } from 'expo-router';
 import { useActivePlans, useStartPlan, useSuggestedPlans } from '@/hooks/use-reading-plans';
+import { useAuthStore } from '@/stores/auth';
 import { useTranslate } from '@/i18n';
 import type { PlanCadence, ReadingPlan } from '@/types/reading-plans';
 
@@ -15,6 +17,8 @@ const cadenceKey: Record<PlanCadence, 'plans.cadence.daily'> = {
  */
 export default function usePlansScreen() {
   const translate = useTranslate();
+  const router = useRouter();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   const activePlans = useActivePlans();
   const suggestedPlans = useSuggestedPlans();
@@ -38,12 +42,18 @@ export default function usePlansScreen() {
     [startPlan]
   );
 
+  const handleSignIn = useCallback(() => {
+    router.push('/register');
+  }, [router]);
+
   return {
     translate,
+    isAuthenticated,
     activePlans,
     suggestedPlans,
     formatMeta,
     handleStart,
+    handleSignIn,
     isStarting: startPlan.isPending,
     startingPlanId: startPlan.variables?.id ?? null,
   };

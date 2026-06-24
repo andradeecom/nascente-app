@@ -149,6 +149,11 @@ const pt = {
     emptySuggested: 'Nenhum plano sugerido no momento',
     loadError: 'Não foi possível carregar os planos',
     comingSoon: 'Os planos de leitura estarão disponíveis brevemente',
+    signIn: {
+      title: 'Acompanhe seus planos de leitura',
+      description: 'Crie uma conta para iniciar planos e salvar seu progresso em todos os seus aparelhos.',
+      action: 'Criar conta',
+    },
   },
   onboarding: {
     language: {

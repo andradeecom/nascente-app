@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { useTranslate } from '@/i18n';
+import { useAuthStore } from '@/stores/auth';
 import { useReaderStore } from '@/stores/reader';
 import { useLocaleStore } from '@/stores/locale';
 import { useBookName } from '@/hooks/use-bible';
@@ -111,6 +112,7 @@ function getGreetingKey(): GreetingKey {
 export function useHomeScreen() {
   const translate = useTranslate();
   const router = useRouter();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const locale = useLocaleStore((s) => s.locale) ?? 'pt';
 
   // Reader store — "continue reading" card
@@ -156,8 +158,13 @@ export function useHomeScreen() {
     router.push('/(tabs)/plans');
   };
 
+  const handleSignIn = () => {
+    router.push('/register');
+  };
+
   return {
     translate,
+    isAuthenticated,
     greetingKey,
     verseOfTheDay,
     verseText,
@@ -169,5 +176,6 @@ export function useHomeScreen() {
     handleContinueReading,
     handleVerseOfTheDay,
     handleExplorePlans,
+    handleSignIn,
   };
 }

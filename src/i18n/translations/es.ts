@@ -149,6 +149,11 @@ const es = {
     emptySuggested: 'No hay planes sugeridos por ahora',
     loadError: 'No se pudieron cargar los planes',
     comingSoon: 'Los planes de lectura estarán disponibles próximamente',
+    signIn: {
+      title: 'Lleva el control de tus planes de lectura',
+      description: 'Crea una cuenta para iniciar planes y guardar tu progreso en todos tus dispositivos.',
+      action: 'Crear cuenta',
+    },
   },
   onboarding: {
     language: {

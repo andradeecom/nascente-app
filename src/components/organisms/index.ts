@@ -15,3 +15,4 @@ export { VerseOfTheDayCard } from './VerseOfTheDayCard';
 export { ContinueReadingCard } from './ContinueReadingCard';
 export { StatsRow } from './StatsRow';
 export { ActivePlansSection } from './ActivePlansSection';
+export { SignInPromptCard } from './SignInPromptCard';

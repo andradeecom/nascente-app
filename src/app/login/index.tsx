@@ -1,4 +1,5 @@
 import { Button, Text, TextVariants, SafeAreaView } from '@/components/atoms';
+import { BackButton } from '@/components/molecules';
 import { LoginCard, LoginFooter } from '@/components/organisms';
 import { translate } from '@/i18n';
 import { Link } from 'expo-router';
@@ -12,6 +13,7 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <BackButton />
       <KeyboardAvoidingView style={styles.keyboard} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <LoginCard

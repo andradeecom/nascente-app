@@ -1,29 +1,30 @@
-import { RegisterCard } from '@/components/organisms';
-import { translate } from '@/i18n';
-import { Link } from 'expo-router';
 import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { Link, useRouter } from 'expo-router';
 import { StyleSheet } from 'react-native-unistyles';
 import { Text, TextVariants, SafeAreaView } from '@/components/atoms';
-import { BackButton } from '@/components/molecules';
-import useRegisterScreen from './use-register-screen';
+import { OnboardingStepHeader } from '@/components/molecules';
+import { ForgotPasswordCard } from '@/components/organisms';
+import { translate } from '@/i18n';
+import useOnboardingForgotPasswordScreen from './use-onboarding-forgot-password-screen';
 
-export default function RegisterScreen() {
-  const { handleRegister, handleGoogleRegister, handleAppleRegister, isLoading } = useRegisterScreen();
+export default function OnboardingForgotPasswordScreen() {
+  const { handleSubmit, isLoading, isSubmitted, submittedEmail } = useOnboardingForgotPasswordScreen();
+  const router = useRouter();
 
   return (
     <SafeAreaView style={styles.safe}>
-      <BackButton />
+      <OnboardingStepHeader step={4} total={4} onBack={() => router.back()} />
       <KeyboardAvoidingView style={styles.keyboard} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-          <RegisterCard
-            onRegister={handleRegister}
-            onRegisterWithGoogle={handleGoogleRegister}
-            onRegisterWithApple={handleAppleRegister}
+          <ForgotPasswordCard
+            onSubmit={handleSubmit}
             isLoading={isLoading}
+            isSubmitted={isSubmitted}
+            submittedEmail={submittedEmail ?? undefined}
           />
-          <Link href="/login" style={styles.footerLink}>
+          <Link href="/onboarding/account/login" style={styles.footerLink}>
             <Text variant={TextVariants.Callout} color="textSecondary">
-              {translate('register.alreadyHaveAccount')} {translate('register.signIn')}
+              {translate('forgotPassword.backToLogin')}
             </Text>
           </Link>
         </ScrollView>

@@ -9,3 +9,4 @@ export { TranslationOption, type TranslationTier } from './TranslationOption';
 export { OnboardingStepHeader } from './OnboardingStepHeader';
 export { ThemePreviewCard } from './ThemePreviewCard';
 export { FontSizeSlider } from './FontSizeSlider';
+export { BackButton } from './BackButton';

@@ -4,6 +4,7 @@ import { Link } from 'expo-router';
 import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { Text, TextVariants, SafeAreaView } from '@/components/atoms';
+import { BackButton } from '@/components/molecules';
 import useForgotPasswordScreen from './use-forgot-password-screen';
 
 export default function ForgotPasswordScreen() {
@@ -11,6 +12,7 @@ export default function ForgotPasswordScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <BackButton />
       <KeyboardAvoidingView style={styles.keyboard} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <ForgotPasswordCard

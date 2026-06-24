@@ -1,12 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/auth';
-import type { ActiveReadingPlan, ReadingPlan, SuggestedReadingPlan } from '@/types/reading-plans';
+import type {
+  ActiveReadingPlan,
+  PlanDayGroup,
+  PlanDetail,
+  ReadingPlan,
+  ReadingPlanDay,
+  SuggestedReadingPlan,
+} from '@/types/reading-plans';
 
 export const planKeys = {
   all: ['plans'] as const,
   active: ['plans', 'active'] as const,
   suggested: ['plans', 'suggested'] as const,
+  detail: (planId: string) => ['plans', 'detail', planId] as const,
 };
 
 /**
@@ -113,6 +121,170 @@ export function useStartPlan() {
       queryClient.invalidateQueries({ queryKey: planKeys.suggested });
     },
   });
+}
+
+/**
+ * Plan detail: the catalog plan + its grouped days + the user's enrollment (and
+ * which days they've completed). Serves both modes — enrollment null = preview.
+ */
+export function usePlanDetail(planId: string | undefined) {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  return useQuery({
+    queryKey: planKeys.detail(planId ?? ''),
+    enabled: isAuthenticated && !!planId,
+    queryFn: async (): Promise<PlanDetail> => {
+      const id = planId as string;
+
+      const [planRes, daysRes, enrollRes] = await Promise.all([
+        supabase.from('reading_plans').select('*').eq('id', id).single(),
+        supabase.from('reading_plan_days').select('*').eq('plan_id', id).order('day').order('sort_order'),
+        // Most recent non-archived enrollment for this plan, if any.
+        supabase
+          .from('user_reading_plans')
+          .select('*')
+          .eq('plan_id', id)
+          .neq('status', 'archived')
+          .order('started_at', { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ]);
+
+      if (planRes.error) throw planRes.error;
+      if (daysRes.error) throw daysRes.error;
+      if (enrollRes.error) throw enrollRes.error;
+
+      const enrollment = enrollRes.data ?? null;
+
+      let completedDays = new Set<number>();
+      if (enrollment) {
+        const { data: comps, error } = await supabase
+          .from('user_reading_plan_completions')
+          .select('day')
+          .eq('user_plan_id', enrollment.id);
+        if (error) throw error;
+        completedDays = new Set((comps ?? []).map((c) => c.day));
+      }
+
+      return {
+        plan: planRes.data,
+        days: groupPlanDays(daysRes.data ?? [], completedDays),
+        enrollment,
+      };
+    },
+    staleTime: 1000 * 60,
+  });
+}
+
+/**
+ * Mark a plan day complete (online, idempotent). Upserts the completion, then
+ * recomputes the enrollment's `current_day` (lowest uncompleted day) and flips
+ * status → completed once every day is logged. Completions are the source of
+ * truth; current_day/status are derived (see `.docs/plans-progress-tracking.md`).
+ */
+export function useMarkPlanDayComplete() {
+  const queryClient = useQueryClient();
+  const user = useAuthStore((state) => state.user);
+
+  return useMutation({
+    mutationFn: async (vars: {
+      userPlanId: string;
+      planId: string;
+      day: number;
+      totalDays: number;
+    }): Promise<{ finished: boolean }> => {
+      if (!user) throw new Error('Not authenticated');
+
+      const { error: upsertError } = await supabase
+        .from('user_reading_plan_completions')
+        .upsert(
+          { user_id: user.id, user_plan_id: vars.userPlanId, day: vars.day },
+          { onConflict: 'user_plan_id,day', ignoreDuplicates: true }
+        );
+      if (upsertError) throw upsertError;
+
+      // Recompute current_day + status from the full completion set.
+      const { data: comps, error: compError } = await supabase
+        .from('user_reading_plan_completions')
+        .select('day')
+        .eq('user_plan_id', vars.userPlanId);
+      if (compError) throw compError;
+
+      const done = new Set((comps ?? []).map((c) => c.day));
+      const finished = done.size >= vars.totalDays;
+      let nextDay = vars.totalDays;
+      for (let d = 1; d <= vars.totalDays; d += 1) {
+        if (!done.has(d)) {
+          nextDay = d;
+          break;
+        }
+      }
+
+      const { error: updateError } = await supabase
+        .from('user_reading_plans')
+        .update({
+          current_day: nextDay,
+          status: finished ? 'completed' : 'active',
+          completed_at: finished ? new Date().toISOString() : null,
+        })
+        .eq('id', vars.userPlanId);
+      if (updateError) throw updateError;
+
+      return { finished };
+    },
+    onSuccess: (_data, vars) => {
+      queryClient.invalidateQueries({ queryKey: planKeys.active });
+      queryClient.invalidateQueries({ queryKey: planKeys.detail(vars.planId) });
+    },
+  });
+}
+
+/**
+ * Soft-remove an active plan ("Remover plano") by archiving it, so it drops out
+ * of the active list and frees a slot in Sugeridos.
+ */
+export function useArchivePlan() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (vars: { userPlanId: string; planId: string }) => {
+      const { error } = await supabase
+        .from('user_reading_plans')
+        .update({ status: 'archived' })
+        .eq('id', vars.userPlanId);
+      if (error) throw error;
+    },
+    onSuccess: (_data, vars) => {
+      queryClient.invalidateQueries({ queryKey: planKeys.active });
+      queryClient.invalidateQueries({ queryKey: planKeys.suggested });
+      queryClient.invalidateQueries({ queryKey: planKeys.detail(vars.planId) });
+    },
+  });
+}
+
+/** Group flat reading_plan_days rows by day, joining labels and marking done. */
+function groupPlanDays(rows: ReadingPlanDay[], completed: Set<number>): PlanDayGroup[] {
+  const byDay = new Map<number, ReadingPlanDay[]>();
+  for (const row of rows) {
+    const list = byDay.get(row.day) ?? [];
+    list.push(row);
+    byDay.set(row.day, list);
+  }
+
+  return [...byDay.entries()]
+    .sort(([a], [b]) => a - b)
+    .map(([day, readings]) => {
+      const sorted = [...readings].sort((a, b) => a.sort_order - b.sort_order);
+      const lead = sorted[0];
+      return {
+        day,
+        label: sorted.map((r) => r.ref_label).join(' · '),
+        bookId: lead?.book_id ?? null,
+        chapter: lead?.chapter_start ?? null,
+        chapterEnd: lead?.chapter_end ?? lead?.chapter_start ?? null,
+        completed: completed.has(day),
+      };
+    });
 }
 
 /**

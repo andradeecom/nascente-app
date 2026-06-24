@@ -3,6 +3,7 @@ const en = {
     welcome: 'Welcome, {{name}}!',
     loading: 'Loading...',
     signOut: 'Sign Out',
+    cancel: 'Cancel',
   },
   login: {
     title: 'Welcome Back',
@@ -143,6 +144,8 @@ const en = {
     suggestedSection: 'Suggested',
     next: 'Next',
     start: 'Start',
+    detailTitle: 'Plan',
+    day: 'Day {{count}}',
     cadence: { daily: 'daily' },
     duration: '{{count}} days',
     meta: '{{duration}} · {{cadence}}',
@@ -154,6 +157,21 @@ const en = {
       title: 'Keep track of your reading plans',
       description: 'Create an account to start plans and save your progress across all your devices.',
       action: 'Create account',
+    },
+    remove: {
+      action: 'Remove plan',
+      title: 'Remove plan?',
+      message: 'Your progress in this plan will be discarded.',
+      confirm: 'Remove',
+    },
+    reading: {
+      finishButton: 'I finished this reading',
+    },
+    completed: {
+      dayTitle: '🎉 Reading complete!',
+      dayBody: 'Take a moment to pray and reflect on what you read.',
+      planTitle: '🙌 Plan complete!',
+      planBody: 'What a journey! Keep going in the Word.',
     },
   },
   onboarding: {

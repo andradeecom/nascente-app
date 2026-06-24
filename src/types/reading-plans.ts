@@ -33,3 +33,31 @@ export type ActiveReadingPlan = {
 
 /** A catalog plan as rendered in "Sugeridos" (not yet started by the user). */
 export type SuggestedReadingPlan = ReadingPlan;
+
+/**
+ * One day of a plan as rendered on the Plan detail screen. A plan can assign
+ * several readings to the same day (multiple `reading_plan_days` rows), so they
+ * are grouped here. `bookId`/`chapter` point at the lead reading (sort_order 0)
+ * for the Reader handoff. `completed` is per-day.
+ */
+export type PlanDayGroup = {
+  day: number;
+  /** Joined reading labels for the day, e.g. "João 1 · João 2". */
+  label: string;
+  bookId: number | null;
+  /** Lead reading's first chapter — where the Reader opens. */
+  chapter: number | null;
+  /** Lead reading's last chapter — where the day is considered "finished". */
+  chapterEnd: number | null;
+  completed: boolean;
+};
+
+/**
+ * Everything the Plan detail screen needs: the catalog plan, its grouped days,
+ * and the user's enrollment (null = not started → preview mode).
+ */
+export type PlanDetail = {
+  plan: ReadingPlan;
+  days: PlanDayGroup[];
+  enrollment: UserReadingPlan | null;
+};

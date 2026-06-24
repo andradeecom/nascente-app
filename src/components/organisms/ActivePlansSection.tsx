@@ -11,7 +11,7 @@ type ActivePlansSectionProps = {
   nextLabel: string;
   plans: ActiveReadingPlan[];
   onExplore: () => void;
-  onPlanPress?: () => void;
+  onPlanPress?: (planId: string) => void;
 };
 
 export function ActivePlansSection({
@@ -40,7 +40,12 @@ export function ActivePlansSection({
         plans
           .slice(0, 2)
           .map((plan) => (
-            <ActivePlanCard key={plan.userPlan.id} plan={plan} nextLabel={nextLabel} onPress={onPlanPress} />
+            <ActivePlanCard
+              key={plan.userPlan.id}
+              plan={plan}
+              nextLabel={nextLabel}
+              onPress={onPlanPress ? () => onPlanPress(plan.plan.id) : undefined}
+            />
           ))
       ) : (
         <View style={styles.empty}>

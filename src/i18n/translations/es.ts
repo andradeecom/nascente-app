@@ -3,6 +3,7 @@ const es = {
     welcome: 'Bienvenido, {{name}}!',
     loading: 'Cargando...',
     signOut: 'Cerrar sesión',
+    cancel: 'Cancelar',
   },
   login: {
     title: 'Bienvenido de nuevo',
@@ -143,6 +144,8 @@ const es = {
     suggestedSection: 'Sugeridos',
     next: 'Siguiente',
     start: 'Empezar',
+    detailTitle: 'Plan',
+    day: 'Día {{count}}',
     cadence: { daily: 'diario' },
     duration: '{{count}} días',
     meta: '{{duration}} · {{cadence}}',
@@ -154,6 +157,21 @@ const es = {
       title: 'Lleva el control de tus planes de lectura',
       description: 'Crea una cuenta para iniciar planes y guardar tu progreso en todos tus dispositivos.',
       action: 'Crear cuenta',
+    },
+    remove: {
+      action: 'Quitar plan',
+      title: '¿Quitar plan?',
+      message: 'Se descartará tu progreso en este plan.',
+      confirm: 'Quitar',
+    },
+    reading: {
+      finishButton: 'Terminé esta lectura',
+    },
+    completed: {
+      dayTitle: '🎉 ¡Lectura completada!',
+      dayBody: 'Tómate un momento para orar y meditar en lo que leíste.',
+      planTitle: '🙌 ¡Plan completado!',
+      planBody: '¡Qué recorrido! Sigue firme en la Palabra.',
     },
   },
   onboarding: {

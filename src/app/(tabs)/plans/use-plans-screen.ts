@@ -46,6 +46,13 @@ export default function usePlansScreen() {
     router.push('/register');
   }, [router]);
 
+  const handleOpenPlan = useCallback(
+    (planId: string) => {
+      router.push(`/(tabs)/plans/${planId}`);
+    },
+    [router]
+  );
+
   return {
     translate,
     isAuthenticated,
@@ -54,6 +61,7 @@ export default function usePlansScreen() {
     formatMeta,
     handleStart,
     handleSignIn,
+    handleOpenPlan,
     isStarting: startPlan.isPending,
     startingPlanId: startPlan.variables?.id ?? null,
   };

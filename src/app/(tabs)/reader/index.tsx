@@ -1,10 +1,12 @@
 import { useCallback } from 'react';
 import { ActivityIndicator, FlatList, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text, TextVariants, SafeAreaView } from '@/components/atoms';
+import { Check } from 'lucide-react-native';
+import { Button, Text, TextVariants, SafeAreaView } from '@/components/atoms';
 import { ReaderHeader, ChapterNavBar } from '@/components/molecules';
 import { BookChapterPicker, TranslationPicker } from '@/components/organisms';
 import { useReaderStore } from '@/stores/reader';
+import { useTranslate } from '@/i18n';
 import { typography } from '@/theme/typography';
 import type { Verse } from '@/types/bible';
 import useReaderScreen from './use-reader-screen';
@@ -25,7 +27,11 @@ export default function ReaderScreen() {
     handleTranslationSelect,
     handlePrevChapter,
     handleNextChapter,
+    isPlanDayEnd,
+    isFinishingPlanDay,
+    handleFinishPlanDay,
   } = useReaderScreen();
+  const t = useTranslate();
 
   const fontSize = useReaderStore((s) => s.fontSize);
   const readerFontSize = typography.reader.sizes[fontSize];
@@ -42,6 +48,21 @@ export default function ReaderScreen() {
     ),
     [readerFontSize, readerLineHeight]
   );
+
+  // When reading a plan day, a "finish today's reading" CTA sits at the end of
+  // the passage — only seen after scrolling through, so it confirms a read.
+  const listFooter = isPlanDayEnd ? (
+    <View style={styles.planFooter}>
+      <Button
+        size="lg"
+        fullWidth
+        label={t('plans.reading.finishButton')}
+        onPress={handleFinishPlanDay}
+        disabled={isFinishingPlanDay}
+        icon={<Check size={18} color={styles.planFooterIcon.color} strokeWidth={3} />}
+      />
+    </View>
+  ) : null;
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -65,6 +86,7 @@ export default function ReaderScreen() {
           renderItem={renderVerse}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
+          ListFooterComponent={listFooter}
         />
       )}
 
@@ -120,5 +142,14 @@ const styles = StyleSheet.create((theme) => ({
     flex: 1,
     fontFamily: theme.typography.reader.families.serif,
     color: theme.colors.semantic.textPrimary,
+  },
+  planFooter: {
+    marginTop: theme.spacing[6],
+    paddingTop: theme.spacing[4],
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.semantic.bgTertiary,
+  },
+  planFooterIcon: {
+    color: theme.colors.semantic.bgPrimary,
   },
 }));

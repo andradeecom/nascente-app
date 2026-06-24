@@ -162,6 +162,10 @@ export function useHomeScreen() {
     router.push('/register');
   };
 
+  const handleOpenPlan = (planId: string) => {
+    router.push(`/(tabs)/plans/${planId}`);
+  };
+
   return {
     translate,
     isAuthenticated,
@@ -177,5 +181,6 @@ export function useHomeScreen() {
     handleVerseOfTheDay,
     handleExplorePlans,
     handleSignIn,
+    handleOpenPlan,
   };
 }

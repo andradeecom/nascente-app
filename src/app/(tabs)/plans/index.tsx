@@ -15,6 +15,7 @@ export default function PlansScreen() {
     formatMeta,
     handleStart,
     handleSignIn,
+    handleOpenPlan,
     startingPlanId,
   } = usePlansScreen();
 
@@ -44,7 +45,12 @@ export default function PlansScreen() {
               {active.length > 0 ? (
                 <View style={styles.list}>
                   {active.map((plan) => (
-                    <ActivePlanCard key={plan.userPlan.id} plan={plan} nextLabel={translate('plans.next')} />
+                    <ActivePlanCard
+                      key={plan.userPlan.id}
+                      plan={plan}
+                      nextLabel={translate('plans.next')}
+                      onPress={() => handleOpenPlan(plan.plan.id)}
+                    />
                   ))}
                 </View>
               ) : (
@@ -66,6 +72,7 @@ export default function PlansScreen() {
                       meta={formatMeta(plan)}
                       startLabel={translate('plans.start')}
                       onStart={() => handleStart(plan)}
+                      onPress={() => handleOpenPlan(plan.id)}
                       loading={startingPlanId === plan.id}
                     />
                   ))}

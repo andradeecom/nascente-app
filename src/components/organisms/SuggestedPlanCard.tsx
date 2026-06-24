@@ -1,4 +1,4 @@
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { CalendarDays } from 'lucide-react-native';
 import { Button, Text, TextVariants } from '@/components/atoms';
@@ -11,12 +11,14 @@ type SuggestedPlanCardProps = {
   /** "Começar" button label. */
   startLabel: string;
   onStart?: () => void;
+  /** Tapping the card body (not the button) opens the plan detail/preview. */
+  onPress?: () => void;
   loading?: boolean;
 };
 
-export function SuggestedPlanCard({ plan, meta, startLabel, onStart, loading }: SuggestedPlanCardProps) {
+export function SuggestedPlanCard({ plan, meta, startLabel, onStart, onPress, loading }: SuggestedPlanCardProps) {
   return (
-    <View style={styles.card}>
+    <Pressable onPress={onPress} style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
       <View style={styles.icon}>
         <CalendarDays size={22} color={styles.icon.color} />
       </View>
@@ -29,7 +31,7 @@ export function SuggestedPlanCard({ plan, meta, startLabel, onStart, loading }: 
         </Text>
       </View>
       <Button variant="secondary" size="sm" label={startLabel} onPress={onStart} disabled={loading} />
-    </View>
+    </Pressable>
   );
 }
 
@@ -42,6 +44,9 @@ const styles = StyleSheet.create((theme) => ({
     borderRadius: theme.radius.xl,
     padding: theme.spacing[4],
     ...theme.shadows.lg,
+  },
+  pressed: {
+    opacity: 0.85,
   },
   icon: {
     width: 44,

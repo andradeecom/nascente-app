@@ -29,6 +29,7 @@ export default function HomeScreen() {
     handleVerseOfTheDay,
     handleExplorePlans,
     handleSignIn,
+    handleOpenPlan,
   } = useHomeScreen();
 
   const statItems = useMemo(
@@ -79,7 +80,7 @@ export default function HomeScreen() {
             nextLabel={translate('plans.next')}
             plans={activePlans.data ?? []}
             onExplore={handleExplorePlans}
-            onPlanPress={handleContinueReading}
+            onPlanPress={handleOpenPlan}
           />
         ) : (
           <SignInPromptCard

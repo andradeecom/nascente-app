@@ -84,7 +84,6 @@ const es = {
     activePlans: 'Planes activos',
     explore: 'Explorar',
     noActivePlans: 'Ningún plan activo',
-    statsSignIn: 'Inicia sesión para seguir tu progreso',
     proTitle: 'Conoce Nascente Pro',
     proDescription: 'Más traducciones, Biblia en audio, estudio con IA y sincronización prioritaria.',
   },

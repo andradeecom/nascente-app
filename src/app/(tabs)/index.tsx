@@ -36,7 +36,8 @@ export default function HomeScreen() {
     () => [
       { value: `${stats.progressPercent}%`, label: translate('home.progress') },
       { value: stats.streak, label: translate('home.streak') },
-      { value: stats.highlightsCount, label: translate('home.highlights') },
+      // Highlights deferred until a highlighting feature exists — muted placeholder.
+      { value: '—', label: translate('home.highlights'), muted: true },
     ],
     [stats, translate]
   );
@@ -63,12 +64,7 @@ export default function HomeScreen() {
           onPress={handleContinueReading}
         />
 
-        <StatsRow
-          stats={statItems}
-          locked={!isAuthenticated}
-          caption={translate('home.statsSignIn')}
-          onPress={handleSignIn}
-        />
+        <StatsRow stats={statItems} />
 
         {/* Guests can't have active plans (plans need an account), so the active-plans
             slot becomes a contextual sign-in prompt instead of a dead empty state. */}

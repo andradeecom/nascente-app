@@ -1,5 +1,11 @@
 export type TranslationId = 'Almeida' | 'RV1909' | 'KJV';
 
+/**
+ * Total chapters in the 66-book Protestant canon (all bundled translations).
+ * Denominator for the Home "overall Bible progress" stat — translation-independent.
+ */
+export const TOTAL_BIBLE_CHAPTERS = 1189;
+
 export type TranslationMeta = {
   id: TranslationId;
   label: string;

@@ -1,9 +1,10 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import { useVerses, useBookName } from '@/hooks/use-bible';
 import { useReaderStore } from '@/stores/reader';
 import { usePlanReadingStore } from '@/stores/plan-reading';
+import { useReadingProgressStore } from '@/stores/reading-progress';
 import { useMarkPlanDayComplete } from '@/hooks/use-reading-plans';
 import { useTranslate } from '@/i18n';
 import { getMaxChapter } from '@/services/bible';
@@ -17,12 +18,21 @@ export default function useReaderScreen() {
   const session = usePlanReadingStore((s) => s.session);
   const clearSession = usePlanReadingStore((s) => s.clearSession);
   const markComplete = useMarkPlanDayComplete();
+  const markChapterRead = useReadingProgressStore((s) => s.markChapterRead);
 
   const [bookPickerVisible, setBookPickerVisible] = useState(false);
   const [translationPickerVisible, setTranslationPickerVisible] = useState(false);
 
   const { data: verses, isLoading } = useVerses(translationId, bookId, chapter);
   const { data: bookName } = useBookName(translationId, bookId);
+
+  // Local-first reading tracking: a chapter counts as read once its verses are on
+  // screen; this also stamps "read today" for the streak. Idempotent in the store.
+  useEffect(() => {
+    if (!isLoading && verses && verses.length > 0) {
+      markChapterRead(bookId, chapter);
+    }
+  }, [isLoading, verses, bookId, chapter, markChapterRead]);
 
   // Offer "finish today's reading" only when reading the active plan day's last
   // chapter — reachable by scrolling to the end of the passage (the CTA lives in

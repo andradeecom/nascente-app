@@ -1,4 +1,5 @@
-import { supabase } from '@/lib/supabase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AUTH_STORAGE_KEY, supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/auth';
 import { toAppUser, type AppUser, type RegisterRequest } from '@/types/auth';
 import { GoogleSignin, isSuccessResponse } from '@react-native-google-signin/google-signin';
@@ -127,8 +128,31 @@ export function useLogout() {
   const clearAuth = useAuthStore((state) => state.clearAuth);
 
   return async () => {
-    await supabase.auth.signOut();
+    // Clear local auth + all cached queries FIRST so the UI flips to guest and no
+    // previous-user data lingers (e.g. the Plans tab).
     clearAuth();
     queryClient.clear();
+
+    // Best-effort remote revoke (needs network; throws for a mock-login user with
+    // no session). The token removal below is what actually guarantees sign-out.
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // ignore — hard purge below is the guarantee
+    }
+
+    // Hard guarantee: delete the persisted session from storage so a failed or
+    // offline remote sign-out can't leave a token for hydrate() to restore on
+    // relaunch. Supabase keeps the session under AUTH_STORAGE_KEY (+ a
+    // `-code-verifier` sibling for PKCE), so purge anything with that prefix.
+    try {
+      const keys = await AsyncStorage.getAllKeys();
+      const authKeys = keys.filter((key) => key.startsWith(AUTH_STORAGE_KEY));
+      if (authKeys.length > 0) {
+        await AsyncStorage.multiRemove(authKeys);
+      }
+    } catch {
+      // ignore — store/cache already cleared; nothing more we can do here
+    }
   };
 }

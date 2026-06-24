@@ -4,9 +4,10 @@ import { useTranslate } from '@/i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useReaderStore } from '@/stores/reader';
 import { useLocaleStore } from '@/stores/locale';
+import { computeStreak, useReadingProgressStore } from '@/stores/reading-progress';
 import { useBookName } from '@/hooks/use-bible';
 import { useActivePlans } from '@/hooks/use-reading-plans';
-import { TRANSLATIONS } from '@/types/bible';
+import { TOTAL_BIBLE_CHAPTERS, TRANSLATIONS } from '@/types/bible';
 
 // ── Verse of the day ────────────────────────────────────────────────────────
 
@@ -133,14 +134,16 @@ export function useHomeScreen() {
   // Greeting
   const greetingKey = getGreetingKey();
 
-  // Stats — placeholder values until real tracking is implemented
+  // Stats — local-first reading tracking (works for guests and signed-in users).
+  // Highlights is deferred until a highlighting feature exists (see StatsRow usage).
+  const readChapters = useReadingProgressStore((s) => s.readChapters);
+  const readDays = useReadingProgressStore((s) => s.readDays);
   const stats = useMemo(
     () => ({
-      progressPercent: 0,
-      streak: 0,
-      highlightsCount: 0,
+      progressPercent: Math.round((Object.keys(readChapters).length / TOTAL_BIBLE_CHAPTERS) * 100),
+      streak: computeStreak(readDays),
     }),
-    []
+    [readChapters, readDays]
   );
 
   // ── Handlers ────────────────────────────────────────────────────────────────

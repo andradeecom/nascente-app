@@ -1,5 +1,7 @@
-import { Modal, Pressable, View } from 'react-native';
+import { useCallback, useEffect, useRef } from 'react';
+import { Pressable, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
+import BottomSheet, { BottomSheetBackdrop, BottomSheetView, type BottomSheetBackdropProps } from '@gorhom/bottom-sheet';
 import { Check, Trash2 } from 'lucide-react-native';
 import { Text, TextVariants } from '@/components/atoms';
 import { useTranslate } from '@/i18n';
@@ -19,71 +21,96 @@ type Props = {
 
 export function VerseActionSheet({ visible, reference, currentColor, onPick, onRemove, onClose }: Props) {
   const translate = useTranslate();
+  const sheetRef = useRef<BottomSheet>(null);
+
+  // Drive the imperative sheet from the declarative `visible` prop so the
+  // Reader keeps its existing show/hide contract.
+  useEffect(() => {
+    if (visible) {
+      sheetRef.current?.expand();
+    } else {
+      sheetRef.current?.close();
+    }
+  }, [visible]);
+
+  // Fire onClose when the sheet settles closed (covers swipe-down and backdrop tap).
+  const handleChange = useCallback(
+    (index: number) => {
+      if (index === -1 && visible) {
+        onClose();
+      }
+    },
+    [visible, onClose]
+  );
+
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} pressBehavior="close" />
+    ),
+    []
+  );
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <Pressable style={styles.backdrop} onPress={onClose}>
-        {/* Stop propagation so taps inside the sheet don't close it. */}
-        <Pressable style={styles.sheet} onPress={() => {}}>
-          <View style={styles.handle} />
+    <BottomSheet
+      ref={sheetRef}
+      index={-1}
+      enablePanDownToClose
+      enableDynamicSizing
+      onChange={handleChange}
+      backdropComponent={renderBackdrop}
+      backgroundStyle={styles.sheetBackground}
+      handleIndicatorStyle={styles.handleIndicator}
+    >
+      <BottomSheetView style={styles.content}>
+        <Text variant={TextVariants.Overline} color="textTertiary" style={styles.label}>
+          {translate('study.highlightVerse')}
+        </Text>
+        <Text variant={TextVariants.Title3} style={styles.reference}>
+          {reference}
+        </Text>
 
-          <Text variant={TextVariants.Overline} color="textTertiary" style={styles.label}>
-            {translate('study.highlightVerse')}
-          </Text>
-          <Text variant={TextVariants.Title3} style={styles.reference}>
-            {reference}
-          </Text>
-
-          <View style={styles.swatches}>
-            {HIGHLIGHT_COLORS.map((color) => (
-              <Pressable
-                key={color}
-                onPress={() => onPick(color)}
-                style={[styles.swatch, { backgroundColor: HIGHLIGHT_HEX[color] }]}
-                accessibilityRole="button"
-                accessibilityLabel={color}
-              >
-                {currentColor === color ? <Check size={18} color={styles.swatchCheck.color} strokeWidth={3} /> : null}
-              </Pressable>
-            ))}
-          </View>
-
-          {currentColor ? (
-            <Pressable onPress={onRemove} style={({ pressed }) => [styles.remove, pressed && styles.pressed]}>
-              <Trash2 size={18} color={styles.removeIcon.color} strokeWidth={2} />
-              <Text variant={TextVariants.Label} color="danger">
-                {translate('study.removeHighlight')}
-              </Text>
+        <View style={styles.swatches}>
+          {HIGHLIGHT_COLORS.map((color) => (
+            <Pressable
+              key={color}
+              onPress={() => onPick(color)}
+              style={[styles.swatch, { backgroundColor: HIGHLIGHT_HEX[color] }]}
+              accessibilityRole="button"
+              accessibilityLabel={color}
+            >
+              {currentColor === color ? <Check size={18} color={styles.swatchCheck.color} strokeWidth={3} /> : null}
             </Pressable>
-          ) : null}
-        </Pressable>
-      </Pressable>
-    </Modal>
+          ))}
+        </View>
+
+        {currentColor ? (
+          <Pressable onPress={onRemove} style={({ pressed }) => [styles.remove, pressed && styles.pressed]}>
+            <Trash2 size={18} color={styles.removeIcon.color} strokeWidth={2} />
+            <Text variant={TextVariants.Label} color="danger">
+              {translate('study.removeHighlight')}
+            </Text>
+          </Pressable>
+        ) : null}
+      </BottomSheetView>
+    </BottomSheet>
   );
 }
 
 const styles = StyleSheet.create((theme) => ({
-  backdrop: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.4)',
-  },
-  sheet: {
+  sheetBackground: {
     backgroundColor: theme.colors.semantic.bgPrimary,
     borderTopLeftRadius: theme.radius.xl,
     borderTopRightRadius: theme.radius.xl,
+  },
+  handleIndicator: {
+    backgroundColor: theme.colors.semantic.bgTertiary,
+    width: 36,
+  },
+  content: {
     paddingHorizontal: theme.spacing[5],
-    paddingTop: theme.spacing[3],
+    paddingTop: theme.spacing[1],
     paddingBottom: theme.spacing[8],
     gap: theme.spacing[2],
-  },
-  handle: {
-    alignSelf: 'center',
-    width: 36,
-    height: 4,
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.semantic.bgTertiary,
-    marginBottom: theme.spacing[3],
   },
   label: {
     textAlign: 'center',

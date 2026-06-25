@@ -1,10 +1,19 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { Alert } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useReaderStore } from '@/stores/reader';
 import { usePlanReadingStore } from '@/stores/plan-reading';
 import { useTranslate } from '@/i18n';
-import { useArchivePlan, useMarkPlanDayComplete, usePlanDetail, useStartPlan } from '@/hooks/use-reading-plans';
+import {
+  useActivePlans,
+  useArchivePlan,
+  useMarkPlanDayComplete,
+  usePlanDetail,
+  useStartPlan,
+} from '@/hooks/use-reading-plans';
+import { useTier } from '@/hooks/use-profile';
+import { ACTIVE_PLAN_LIMIT, isPlanLimitError } from '@/types/subscription';
 import type { PlanCadence, PlanDayGroup, ReadingPlan } from '@/types/reading-plans';
 
 // Mirror the cadence → typed key map used by the Plans list (literal-union safe).
@@ -22,9 +31,26 @@ export default function usePlanDetailScreen() {
   const { planId } = useLocalSearchParams<{ planId: string }>();
 
   const detail = usePlanDetail(planId);
+  const activePlans = useActivePlans();
   const startPlan = useStartPlan();
   const markComplete = useMarkPlanDayComplete();
   const archivePlan = useArchivePlan();
+  const tier = useTier();
+
+  // Free/Pro active-plan cap — same gate as the Plans list, applied to the
+  // preview-mode "Começar" CTA here, via the shared upsell modal.
+  const activeLimit = ACTIVE_PLAN_LIMIT[tier];
+  const atActiveLimit = (activePlans.data?.length ?? 0) >= activeLimit;
+
+  const [limitModalVisible, setLimitModalVisible] = useState(false);
+  const openLimitModal = useCallback(() => setLimitModalVisible(true), []);
+  const closeLimitModal = useCallback(() => setLimitModalVisible(false), []);
+
+  // Pro upsell CTA. No paywall screen yet (see notes.md RevenueCat) — dismiss
+  // for now; route to the paywall once it exists.
+  const handleUpsellCta = useCallback(() => {
+    setLimitModalVisible(false);
+  }, []);
 
   const plan = detail.data?.plan ?? null;
   const days = detail.data?.days ?? [];
@@ -45,8 +71,20 @@ export default function usePlanDetailScreen() {
 
   const handleStart = useCallback(() => {
     if (!plan || startPlan.isPending) return;
-    startPlan.mutate(plan);
-  }, [plan, startPlan]);
+    if (atActiveLimit) {
+      openLimitModal();
+      return;
+    }
+    startPlan.mutate(plan, {
+      onError: (error) => {
+        if (isPlanLimitError(error)) {
+          openLimitModal();
+        } else {
+          Toast.show({ type: 'error', text1: translate('plans.loadError') });
+        }
+      },
+    });
+  }, [plan, startPlan, atActiveLimit, openLimitModal, translate]);
 
   const handleOpenReading = useCallback(
     (day: PlanDayGroup) => {
@@ -118,5 +156,9 @@ export default function usePlanDetailScreen() {
     handleToggleComplete,
     handleRemove,
     handleBack,
+    activeLimit,
+    limitModalVisible,
+    closeLimitModal,
+    handleUpsellCta,
   };
 }

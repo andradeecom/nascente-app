@@ -12,6 +12,27 @@ export type Database = {
   };
   public: {
     Tables: {
+      profiles: {
+        Row: {
+          created_at: string;
+          id: string;
+          tier: Database['public']['Enums']['account_tier'];
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          id: string;
+          tier?: Database['public']['Enums']['account_tier'];
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          tier?: Database['public']['Enums']['account_tier'];
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       reading_plan_days: {
         Row: {
           book_id: number | null;
@@ -182,6 +203,7 @@ export type Database = {
       [_ in never]: never;
     };
     Enums: {
+      account_tier: 'free' | 'pro';
       plan_cadence: 'daily';
       user_plan_status: 'active' | 'completed' | 'archived';
     };
@@ -303,6 +325,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      account_tier: ['free', 'pro'],
       plan_cadence: ['daily'],
       user_plan_status: ['active', 'completed', 'archived'],
     },

@@ -2,7 +2,7 @@ import { ActivityIndicator, Pressable, ScrollView, View, type ViewStyle } from '
 import { StyleSheet } from 'react-native-unistyles';
 import { Check, ChevronRight } from 'lucide-react-native';
 import { Button, SafeAreaView, Text, TextVariants } from '@/components/atoms';
-import { ScreenHeader } from '@/components/organisms';
+import { ScreenHeader, UpsellModal } from '@/components/organisms';
 import usePlanDetailScreen from './use-plan-detail-screen';
 
 export default function PlanDetailScreen() {
@@ -22,6 +22,10 @@ export default function PlanDetailScreen() {
     handleToggleComplete,
     handleRemove,
     handleBack,
+    activeLimit,
+    limitModalVisible,
+    closeLimitModal,
+    handleUpsellCta,
   } = usePlanDetailScreen();
 
   return (
@@ -113,6 +117,15 @@ export default function PlanDetailScreen() {
           )}
         </ScrollView>
       )}
+
+      <UpsellModal
+        visible={limitModalVisible}
+        title={translate('plans.limitReached.title')}
+        description={translate('plans.limitReached.message', { count: activeLimit })}
+        ctaLabel={translate('plans.limitReached.cta')}
+        onCta={handleUpsellCta}
+        onClose={closeLimitModal}
+      />
     </SafeAreaView>
   );
 }

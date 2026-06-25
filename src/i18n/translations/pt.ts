@@ -4,6 +4,7 @@ const pt = {
     loading: 'Carregando...',
     signOut: 'Sair',
     cancel: 'Cancelar',
+    close: 'Fechar',
   },
   login: {
     title: 'Bem-vindo de volta',
@@ -176,6 +177,11 @@ const pt = {
       title: 'Remover plano?',
       message: 'Seu progresso neste plano será descartado.',
       confirm: 'Remover',
+    },
+    limitReached: {
+      title: 'Limite de planos ativos atingido',
+      message: 'O plano gratuito permite {{count}} planos ativos. Conclua ou remova um, ou assine o Pro para ter mais.',
+      cta: 'Conhecer o Pro',
     },
     reading: {
       finishButton: 'Concluí esta leitura',

@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native-unistyles';
 import { CalendarCheck } from 'lucide-react-native';
 import { SafeAreaView, Text, TextVariants } from '@/components/atoms';
 import { SectionHeader } from '@/components/molecules';
-import { ActivePlanCard, SignInPromptCard, SuggestedPlanCard } from '@/components/organisms';
+import { ActivePlanCard, SignInPromptCard, SuggestedPlanCard, UpsellModal } from '@/components/organisms';
 import usePlansScreen from './use-plans-screen';
 
 export default function PlansScreen() {
@@ -17,6 +17,10 @@ export default function PlansScreen() {
     handleSignIn,
     handleOpenPlan,
     startingPlanId,
+    activeLimit,
+    limitModalVisible,
+    closeLimitModal,
+    handleUpsellCta,
   } = usePlansScreen();
 
   const active = activePlans.data ?? [];
@@ -86,6 +90,15 @@ export default function PlansScreen() {
           </>
         )}
       </ScrollView>
+
+      <UpsellModal
+        visible={limitModalVisible}
+        title={translate('plans.limitReached.title')}
+        description={translate('plans.limitReached.message', { count: activeLimit })}
+        ctaLabel={translate('plans.limitReached.cta')}
+        onCta={handleUpsellCta}
+        onClose={closeLimitModal}
+      />
     </SafeAreaView>
   );
 }

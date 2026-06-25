@@ -1,6 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/auth';
+import { profileKeys } from '@/hooks/use-profile';
+import { ACTIVE_PLAN_LIMIT, PlanLimitError } from '@/types/subscription';
+import type { AccountTier } from '@/types/subscription';
 import type {
   ActiveReadingPlan,
   PlanDayGroup,
@@ -107,13 +110,30 @@ export function useStartPlan() {
     mutationFn: async (plan: ReadingPlan) => {
       if (!user) throw new Error('Not authenticated');
 
+      // Tier-aware active-plan cap (server-side trigger is the backstop). Read the
+      // tier from cache (defaults to free) and the authoritative active count.
+      const tier = queryClient.getQueryData<{ tier: AccountTier }>(profileKeys.me)?.tier ?? 'free';
+      const limit = ACTIVE_PLAN_LIMIT[tier];
+
+      const { count, error: countError } = await supabase
+        .from('user_reading_plans')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'active');
+      if (countError) throw countError;
+      if ((count ?? 0) >= limit) throw new PlanLimitError(limit);
+
       const { data, error } = await supabase
         .from('user_reading_plans')
         .insert({ user_id: user.id, plan_id: plan.id })
         .select()
         .single();
 
-      if (error) throw error;
+      // The DB trigger raises PLAN_LIMIT_REACHED if we slipped past the pre-check
+      // (race / stale count). Normalize it to the same typed error for the UI.
+      if (error) {
+        if (error.message?.includes('PLAN_LIMIT_REACHED')) throw new PlanLimitError(limit);
+        throw error;
+      }
       return data;
     },
     onSuccess: () => {

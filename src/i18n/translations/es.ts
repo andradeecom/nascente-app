@@ -4,6 +4,7 @@ const es = {
     loading: 'Cargando...',
     signOut: 'Cerrar sesión',
     cancel: 'Cancelar',
+    close: 'Cerrar',
   },
   login: {
     title: 'Bienvenido de nuevo',
@@ -176,6 +177,11 @@ const es = {
       title: '¿Quitar plan?',
       message: 'Se descartará tu progreso en este plan.',
       confirm: 'Quitar',
+    },
+    limitReached: {
+      title: 'Límite de planes activos alcanzado',
+      message: 'El plan gratis permite {{count}} planes activos. Termina o quita uno, o pásate a Pro para tener más.',
+      cta: 'Ver Pro',
     },
     reading: {
       finishButton: 'Terminé esta lectura',

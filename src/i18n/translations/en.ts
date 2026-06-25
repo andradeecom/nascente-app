@@ -4,6 +4,7 @@ const en = {
     loading: 'Loading...',
     signOut: 'Sign Out',
     cancel: 'Cancel',
+    close: 'Close',
   },
   login: {
     title: 'Welcome Back',
@@ -176,6 +177,11 @@ const en = {
       title: 'Remove plan?',
       message: 'Your progress in this plan will be discarded.',
       confirm: 'Remove',
+    },
+    limitReached: {
+      title: 'Active plan limit reached',
+      message: 'The free plan allows {{count}} active plans. Finish or remove one, or go Pro for more.',
+      cta: 'See Pro',
     },
     reading: {
       finishButton: 'I finished this reading',

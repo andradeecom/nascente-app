@@ -17,3 +17,4 @@ export { StatsRow } from './StatsRow';
 export { ActivePlansSection } from './ActivePlansSection';
 export { SignInPromptCard } from './SignInPromptCard';
 export { VerseActionSheet } from './VerseActionSheet';
+export { UpsellModal } from './UpsellModal';

@@ -1,38 +1,58 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useCurrentUserHighlights } from '@/hooks/use-highlights';
+import { useCurrentUserBookmarks } from '@/hooks/use-bookmarks';
+import { useCurrentUserNotes } from '@/hooks/use-notes';
 import { useAuthStore } from '@/stores/auth';
 import { useReaderStore } from '@/stores/reader';
 import { useTranslate } from '@/i18n';
 import { getBookName, getVerses } from '@/services/bible';
-import { highlightKey, type Highlight, type HighlightColor } from '@/types/study';
+import type { Bookmark, Highlight, HighlightColor, Note } from '@/types/study';
+import type { TranslationId } from '@/types/bible';
+
+export type StudyFilter = 'all' | 'highlights' | 'notes' | 'bookmarks';
 
 export const studyKeys = {
-  highlights: (ids: string[]) => ['study', 'highlights', ids] as const,
+  items: (ids: string[]) => ['study', 'items', ids] as const,
 };
 
-/** A highlight enriched with its book name + verse text, ready to render. */
-export type HighlightItem = {
+/** A study annotation (highlight / bookmark / note) enriched for the list. */
+export type StudyItem = {
   key: string;
+  type: 'highlight' | 'bookmark' | 'note';
   bookId: number;
   chapter: number;
   verse: number;
-  color: HighlightColor;
-  translationId: Highlight['translationId'];
+  translationId: TranslationId;
   reference: string;
   text: string;
+  /** Highlights only. */
+  color?: HighlightColor;
+  /** Notes only — the user's note body. */
+  body?: string;
 };
 
-// Enrich raw highlights with book names + verse text from the bundled Bible.
-// Verses are fetched once per unique (translation, book, chapter) to keep it cheap.
-async function enrichHighlights(highlights: Highlight[]): Promise<HighlightItem[]> {
-  const chapters = new Map<string, { translationId: Highlight['translationId']; bookId: number; chapter: number }>();
-  for (const h of highlights) {
-    chapters.set(`${h.translationId}:${h.bookId}:${h.chapter}`, {
-      translationId: h.translationId,
-      bookId: h.bookId,
-      chapter: h.chapter,
+// A minimal per-verse shape the enrichment can resolve (book name + verse text).
+type VerseRef = {
+  type: StudyItem['type'];
+  bookId: number;
+  chapter: number;
+  verse: number;
+  translationId: TranslationId;
+  color?: HighlightColor;
+  body?: string;
+};
+
+// Enrich raw per-verse items with book names + verse text from the bundled Bible.
+// Verses/book name are fetched once per unique (translation, book, chapter) to keep it cheap.
+async function enrichItems(refs: VerseRef[]): Promise<StudyItem[]> {
+  const chapters = new Map<string, { translationId: TranslationId; bookId: number; chapter: number }>();
+  for (const r of refs) {
+    chapters.set(`${r.translationId}:${r.bookId}:${r.chapter}`, {
+      translationId: r.translationId,
+      bookId: r.bookId,
+      chapter: r.chapter,
     });
   }
 
@@ -48,50 +68,100 @@ async function enrichHighlights(highlights: Highlight[]): Promise<HighlightItem[
     if (!bookNames.has(bookKey)) bookNames.set(bookKey, await getBookName(c.translationId, c.bookId));
   }
 
-  return highlights
-    .map((h) => {
-      const text = versesByChapter.get(`${h.translationId}:${h.bookId}:${h.chapter}`)?.[h.verse] ?? '';
-      const bookName = bookNames.get(`${h.translationId}:${h.bookId}`) ?? '';
+  return refs
+    .map((r) => {
+      const text = versesByChapter.get(`${r.translationId}:${r.bookId}:${r.chapter}`)?.[r.verse] ?? '';
+      const bookName = bookNames.get(`${r.translationId}:${r.bookId}`) ?? '';
       return {
-        key: highlightKey(h.userId, h.bookId, h.chapter, h.verse),
-        bookId: h.bookId,
-        chapter: h.chapter,
-        verse: h.verse,
-        color: h.color,
-        translationId: h.translationId,
-        reference: `${bookName} ${h.chapter}:${h.verse}`,
+        key: `${r.type}:${r.translationId}:${r.bookId}:${r.chapter}:${r.verse}`,
+        type: r.type,
+        bookId: r.bookId,
+        chapter: r.chapter,
+        verse: r.verse,
+        translationId: r.translationId,
+        reference: `${bookName} ${r.chapter}:${r.verse}`,
         text,
+        color: r.color,
+        body: r.body,
       };
     })
     .sort((a, b) => a.bookId - b.bookId || a.chapter - b.chapter || a.verse - b.verse);
 }
 
+function highlightToRef(h: Highlight): VerseRef {
+  return {
+    type: 'highlight',
+    bookId: h.bookId,
+    chapter: h.chapter,
+    verse: h.verse,
+    translationId: h.translationId,
+    color: h.color,
+  };
+}
+function bookmarkToRef(b: Bookmark): VerseRef {
+  return { type: 'bookmark', bookId: b.bookId, chapter: b.chapter, verse: b.verse, translationId: b.translationId };
+}
+function noteToRef(n: Note): VerseRef {
+  return {
+    type: 'note',
+    bookId: n.bookId,
+    chapter: n.chapter,
+    verse: n.verse,
+    translationId: n.translationId,
+    body: n.body,
+  };
+}
+
 /**
- * Screen-private logic for the Study tab. Loads the signed-in user's highlights
- * (local-first), enriches them with verse text, and wires "open in reader".
+ * Screen-private logic for the Study tab. Loads the signed-in user's
+ * annotations (highlights + bookmarks, local-first), enriches them with verse
+ * text, exposes a filter, and wires "open in reader".
  */
 export default function useStudyScreen() {
   const translate = useTranslate();
   const router = useRouter();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
-  const highlights = useCurrentUserHighlights();
-  // Key on the stable highlight identities so the enrichment refetches when the
-  // set changes (add/remove) but not on every render.
-  const ids = highlights.map((h) => `${h.translationId}:${h.bookId}:${h.chapter}:${h.verse}:${h.color}`).sort();
+  const [filter, setFilter] = useState<StudyFilter>('all');
 
-  const highlightsQuery = useQuery({
-    queryKey: studyKeys.highlights(ids),
-    queryFn: () => enrichHighlights(highlights),
+  const highlights = useCurrentUserHighlights();
+  const bookmarks = useCurrentUserBookmarks();
+  const notes = useCurrentUserNotes();
+
+  const refs = useMemo(
+    () => [...highlights.map(highlightToRef), ...bookmarks.map(bookmarkToRef), ...notes.map(noteToRef)],
+    [highlights, bookmarks, notes]
+  );
+
+  // Key on the stable item identities (including note body) so enrichment
+  // refetches when the set changes (add/remove/edit) but not on every render.
+  const ids = useMemo(
+    () =>
+      refs
+        .map((r) => `${r.type}:${r.translationId}:${r.bookId}:${r.chapter}:${r.verse}:${r.color ?? ''}:${r.body ?? ''}`)
+        .sort(),
+    [refs]
+  );
+
+  const itemsQuery = useQuery({
+    queryKey: studyKeys.items(ids),
+    queryFn: () => enrichItems(refs),
     enabled: isAuthenticated,
   });
+
+  const filteredItems = useMemo(() => {
+    const all = itemsQuery.data ?? [];
+    if (filter === 'all') return all;
+    const type = filter === 'highlights' ? 'highlight' : filter === 'bookmarks' ? 'bookmark' : 'note';
+    return all.filter((i) => i.type === type);
+  }, [itemsQuery.data, filter]);
 
   const handleSignIn = useCallback(() => {
     router.push('/register');
   }, [router]);
 
-  const handleOpenHighlight = useCallback(
-    (item: HighlightItem) => {
+  const handleOpenItem = useCallback(
+    (item: StudyItem) => {
       const store = useReaderStore.getState();
       if (store.translationId !== item.translationId) store.setTranslation(item.translationId);
       store.setPosition(item.bookId, item.chapter);
@@ -103,10 +173,12 @@ export default function useStudyScreen() {
   return {
     translate,
     isAuthenticated,
-    highlights: highlightsQuery.data ?? [],
-    isLoading: highlightsQuery.isLoading,
-    isError: highlightsQuery.isError,
+    filter,
+    setFilter,
+    items: filteredItems,
+    isLoading: itemsQuery.isLoading,
+    isError: itemsQuery.isError,
     handleSignIn,
-    handleOpenHighlight,
+    handleOpenItem,
   };
 }

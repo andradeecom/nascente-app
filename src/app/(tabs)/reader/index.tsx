@@ -4,7 +4,7 @@ import { StyleSheet } from 'react-native-unistyles';
 import { Check } from 'lucide-react-native';
 import { Button, Text, TextVariants, SafeAreaView } from '@/components/atoms';
 import { ReaderHeader, ChapterNavBar } from '@/components/molecules';
-import { BookChapterPicker, TranslationPicker, VerseActionSheet } from '@/components/organisms';
+import { BookChapterPicker, NoteEditorModal, TranslationPicker, VerseActionSheet } from '@/components/organisms';
 import { useReaderStore } from '@/stores/reader';
 import { useTranslate } from '@/i18n';
 import { highlights as HIGHLIGHT_HEX } from '@/theme/colors';
@@ -38,6 +38,17 @@ export default function ReaderScreen() {
     handlePickColor,
     handleRemoveHighlight,
     closeVerseSheet,
+    selectedVerseBookmarked,
+    handleToggleBookmark,
+    selectedVerseHasNote,
+    handleOpenNote,
+    noteEditorVisible,
+    noteEditorReference,
+    noteEditorBody,
+    noteEditorHasExisting,
+    handleSaveNote,
+    handleDeleteNote,
+    closeNoteEditor,
   } = useReaderScreen();
   const t = useTranslate();
 
@@ -135,6 +146,21 @@ export default function ReaderScreen() {
         onPick={handlePickColor}
         onRemove={handleRemoveHighlight}
         onClose={closeVerseSheet}
+        isBookmarked={selectedVerseBookmarked}
+        onToggleBookmark={handleToggleBookmark}
+        hasNote={selectedVerseHasNote}
+        onOpenNote={handleOpenNote}
+      />
+
+      <NoteEditorModal
+        key={noteEditorReference}
+        visible={noteEditorVisible}
+        reference={noteEditorReference}
+        initialBody={noteEditorBody}
+        hasExistingNote={noteEditorHasExisting}
+        onSave={handleSaveNote}
+        onDelete={handleDeleteNote}
+        onClose={closeNoteEditor}
       />
     </SafeAreaView>
   );

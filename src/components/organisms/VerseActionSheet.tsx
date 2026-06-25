@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { Pressable, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView, type BottomSheetBackdropProps } from '@gorhom/bottom-sheet';
-import { Check, Trash2 } from 'lucide-react-native';
+import { Bookmark, BookmarkCheck, Check, NotebookPen, Trash2 } from 'lucide-react-native';
 import { Text, TextVariants } from '@/components/atoms';
 import { useTranslate } from '@/i18n';
 import { highlights as HIGHLIGHT_HEX } from '@/theme/colors';
@@ -17,9 +17,26 @@ type Props = {
   onPick: (color: HighlightColor) => void;
   onRemove: () => void;
   onClose: () => void;
+  /** Whether this verse is bookmarked. */
+  isBookmarked: boolean;
+  onToggleBookmark: () => void;
+  /** Whether this verse already has a note (changes the action label). */
+  hasNote: boolean;
+  onOpenNote: () => void;
 };
 
-export function VerseActionSheet({ visible, reference, currentColor, onPick, onRemove, onClose }: Props) {
+export function VerseActionSheet({
+  visible,
+  reference,
+  currentColor,
+  onPick,
+  onRemove,
+  onClose,
+  isBookmarked,
+  onToggleBookmark,
+  hasNote,
+  onOpenNote,
+}: Props) {
   const translate = useTranslate();
   const sheetRef = useRef<BottomSheet>(null);
 
@@ -62,13 +79,13 @@ export function VerseActionSheet({ visible, reference, currentColor, onPick, onR
       handleIndicatorStyle={styles.handleIndicator}
     >
       <BottomSheetView style={styles.content}>
-        <Text variant={TextVariants.Overline} color="textTertiary" style={styles.label}>
-          {translate('study.highlightVerse')}
-        </Text>
         <Text variant={TextVariants.Title3} style={styles.reference}>
           {reference}
         </Text>
 
+        <Text variant={TextVariants.Overline} color="textTertiary" style={styles.label}>
+          {translate('study.highlightVerse')}
+        </Text>
         <View style={styles.swatches}>
           {HIGHLIGHT_COLORS.map((color) => (
             <Pressable
@@ -91,6 +108,40 @@ export function VerseActionSheet({ visible, reference, currentColor, onPick, onR
             </Text>
           </Pressable>
         ) : null}
+
+        <View style={styles.divider} />
+
+        <View style={styles.actions}>
+          <Pressable
+            onPress={onToggleBookmark}
+            style={({ pressed }) => [styles.action, pressed && styles.pressed]}
+            accessibilityRole="button"
+          >
+            {isBookmarked ? (
+              <BookmarkCheck size={20} color={styles.actionAccent.color} strokeWidth={2} />
+            ) : (
+              <Bookmark size={20} color={styles.actionIcon.color} strokeWidth={2} />
+            )}
+            <Text variant={TextVariants.Label} color={isBookmarked ? 'accent' : 'textPrimary'}>
+              {translate(isBookmarked ? 'study.removeBookmark' : 'study.addBookmark')}
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={onOpenNote}
+            style={({ pressed }) => [styles.action, pressed && styles.pressed]}
+            accessibilityRole="button"
+          >
+            <NotebookPen
+              size={20}
+              color={hasNote ? styles.actionAccent.color : styles.actionIcon.color}
+              strokeWidth={2}
+            />
+            <Text variant={TextVariants.Label} color={hasNote ? 'accent' : 'textPrimary'}>
+              {translate(hasNote ? 'study.editNote' : 'study.addNote')}
+            </Text>
+          </Pressable>
+        </View>
       </BottomSheetView>
     </BottomSheet>
   );
@@ -117,7 +168,7 @@ const styles = StyleSheet.create((theme) => ({
   },
   reference: {
     textAlign: 'center',
-    marginBottom: theme.spacing[4],
+    marginBottom: theme.spacing[2],
   },
   swatches: {
     flexDirection: 'row',
@@ -139,11 +190,36 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: 'center',
     justifyContent: 'center',
     gap: theme.spacing[2],
-    marginTop: theme.spacing[5],
+    marginTop: theme.spacing[2],
     paddingVertical: theme.spacing[2],
   },
   removeIcon: {
     color: theme.colors.semantic.danger,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: theme.colors.semantic.bgTertiary,
+    marginVertical: theme.spacing[2],
+  },
+  actions: {
+    flexDirection: 'row',
+    gap: theme.spacing[3],
+  },
+  action: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: theme.spacing[2],
+    paddingVertical: theme.spacing[3],
+    borderRadius: theme.radius.lg,
+    backgroundColor: theme.colors.semantic.bgSecondary,
+  },
+  actionIcon: {
+    color: theme.colors.semantic.textPrimary,
+  },
+  actionAccent: {
+    color: theme.colors.semantic.accent,
   },
   pressed: {
     opacity: 0.6,

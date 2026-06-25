@@ -8,6 +8,8 @@ import { useReadingProgressStore } from '@/stores/reading-progress';
 import { useAuthStore } from '@/stores/auth';
 import { useMarkPlanDayComplete } from '@/hooks/use-reading-plans';
 import { useChapterHighlights, useHighlightActions } from '@/hooks/use-highlights';
+import { useChapterBookmarks, useBookmarkActions } from '@/hooks/use-bookmarks';
+import { useChapterNotes, useNoteActions } from '@/hooks/use-notes';
 import { useTranslate } from '@/i18n';
 import { getMaxChapter } from '@/services/bible';
 import type { TranslationId } from '@/types/bible';
@@ -23,11 +25,19 @@ export default function useReaderScreen() {
   const markComplete = useMarkPlanDayComplete();
   const markChapterRead = useReadingProgressStore((s) => s.markChapterRead);
 
-  // Highlights (signed-in only). Verse → color map for rendering + the open sheet.
+  // Highlights + bookmarks (signed-in only). Per-chapter lookups feed both the
+  // verse rendering and the open action sheet.
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const chapterHighlights = useChapterHighlights(bookId, chapter);
   const { setHighlight, removeHighlight } = useHighlightActions(translationId);
+  const chapterBookmarks = useChapterBookmarks(bookId, chapter);
+  const { toggleBookmark } = useBookmarkActions(translationId);
+  const chapterNotes = useChapterNotes(bookId, chapter);
+  const { setNote, removeNote } = useNoteActions(translationId);
   const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
+  // The verse whose note is being edited (drives the NoteEditorModal). Separate
+  // from `selectedVerse` so opening the editor can close the action sheet.
+  const [noteVerse, setNoteVerse] = useState<number | null>(null);
 
   const [bookPickerVisible, setBookPickerVisible] = useState(false);
   const [translationPickerVisible, setTranslationPickerVisible] = useState(false);
@@ -95,7 +105,38 @@ export default function useReaderScreen() {
     setSelectedVerse(null);
   }, [selectedVerse, bookId, chapter, removeHighlight]);
 
+  // Bookmark toggles in place (sheet stays open so the state change is visible).
+  const handleToggleBookmark = useCallback(() => {
+    if (selectedVerse == null) return;
+    toggleBookmark(bookId, chapter, selectedVerse);
+  }, [selectedVerse, bookId, chapter, toggleBookmark]);
+
   const closeVerseSheet = useCallback(() => setSelectedVerse(null), []);
+
+  // Notes: the sheet's Note action closes the sheet and opens the editor for the
+  // same verse; save/delete write through the note store.
+  const handleOpenNote = useCallback(() => {
+    if (selectedVerse == null) return;
+    setNoteVerse(selectedVerse);
+    setSelectedVerse(null);
+  }, [selectedVerse]);
+
+  const closeNoteEditor = useCallback(() => setNoteVerse(null), []);
+
+  const handleSaveNote = useCallback(
+    (body: string) => {
+      if (noteVerse == null) return;
+      setNote(bookId, chapter, noteVerse, body);
+      setNoteVerse(null);
+    },
+    [noteVerse, bookId, chapter, setNote]
+  );
+
+  const handleDeleteNote = useCallback(() => {
+    if (noteVerse == null) return;
+    removeNote(bookId, chapter, noteVerse);
+    setNoteVerse(null);
+  }, [noteVerse, bookId, chapter, removeNote]);
 
   const handleBookChapterSelect = useCallback(
     (newBookId: number, newChapter: number) => {
@@ -159,5 +200,19 @@ export default function useReaderScreen() {
     handlePickColor,
     handleRemoveHighlight,
     closeVerseSheet,
+    // Bookmarks
+    chapterBookmarks,
+    selectedVerseBookmarked: selectedVerse != null ? chapterBookmarks.has(selectedVerse) : false,
+    handleToggleBookmark,
+    // Notes
+    selectedVerseHasNote: selectedVerse != null ? chapterNotes[selectedVerse] != null : false,
+    handleOpenNote,
+    noteEditorVisible: noteVerse != null,
+    noteEditorReference: noteVerse != null ? `${bookName ?? ''} ${chapter}:${noteVerse}` : '',
+    noteEditorBody: noteVerse != null ? (chapterNotes[noteVerse]?.body ?? '') : '',
+    noteEditorHasExisting: noteVerse != null ? chapterNotes[noteVerse] != null : false,
+    handleSaveNote,
+    handleDeleteNote,
+    closeNoteEditor,
   };
 }

@@ -125,7 +125,21 @@ const es = {
     home: 'Inicio',
     reader: 'Biblia',
     plans: 'Planes',
+    study: 'Estudio',
     settings: 'Ajustes',
+  },
+  study: {
+    title: 'Estudio',
+    highlightVerse: 'Resaltar versículo',
+    removeHighlight: 'Quitar resaltado',
+    highlightsSection: 'Resaltados',
+    empty: 'Aún no has resaltado ningún versículo. Toca un versículo en el lector para resaltarlo.',
+    loadError: 'No se pudieron cargar tus resaltados',
+    signIn: {
+      title: 'Guarda tus resaltados y notas',
+      description: 'Crea una cuenta para resaltar versículos y acceder a ellos en todos tus dispositivos.',
+      action: 'Crear cuenta',
+    },
   },
   reader: {
     title: 'Biblia',

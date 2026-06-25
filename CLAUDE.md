@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Expo + React Native + TypeScript app for **Nascente**, an offline-first Bible app (see `../CLAUDE.md` and `../.docs/` for product context). This package implements: a multi-step **onboarding** flow, **Supabase auth** (sign-in / sign-up / password reset), the **Reader** (offline bundled Bible), **reading plans** with progress tracking, **settings**, and the design system. AI study features (explain, word study, devotionals) are not built yet. Entry point is `src/index.ts` (which imports `expo-router/entry` then `./theme/config` to initialize Unistyles before anything renders). Routing is file-based via `expo-router` (`src/app/`). Uses pnpm as package manager.
+Expo + React Native + TypeScript app for **Nascente**, an offline-first Bible app (see `../CLAUDE.md` and `../.docs/` for product context). This package implements: a multi-step **onboarding** flow, **Supabase auth** (sign-in / sign-up / password reset), the **Reader** (offline bundled Bible) with **verse highlighting**, **reading plans** with progress tracking, a **Study** tab (highlights, account-gated), **settings**, and the design system. AI study features (explain, word study, devotionals) are not built yet. Entry point is `src/index.ts` (which imports `expo-router/entry` then `./theme/config` to initialize Unistyles before anything renders). Routing is file-based via `expo-router` (`src/app/`). Uses pnpm as package manager.
 
 **Guest-first:** the app no longer requires an account. After onboarding, guests land in `(tabs)` and can read, browse plans, and change settings; account-gated surfaces (reading-plan progress/sync, cross-device stats) show contextual sign-in prompts (`SignInPromptCard`) instead of blocking. See the Auth flow, Home screen, and Reading plans sections.
 
@@ -37,7 +37,7 @@ Husky + lint-staged run `prettier --write` and `expo lint --fix` on staged `*.{j
 
 - **atoms**: primitive UI (`Text`, `Button`, `Input`, `Divider`, `Avatar`, `SafeAreaView`) — own their style variants (e.g. `Button` has `variant`/`size` props mapped to `StyleSheet.create` lookups). `SafeAreaView` is a thin `withUnistyles(...)` wrapper over `react-native-safe-area-context`'s so themed backgrounds stay theme-reactive — see the Styling section.
 - **molecules**: small compositions of atoms (e.g. `InputField`, `SocialButton`, `SettingsRow`, `OnboardingStepHeader`, `BackButton`). `BackButton` is a floating top-left chevron that renders `null` when `router.canGoBack()` is false — used on the auth screens (which center their own content and don't use the titled `ScreenHeader`).
-- **organisms**: screen-level sections composed from atoms/molecules (e.g. `LoginCard`, `RegisterCard`, `ScreenHeader`, `ActivePlanCard`, `SuggestedPlanCard`, `SignInPromptCard`). `SignInPromptCard` is the reusable account-gate card (whole card is the CTA) used on the Plans tab and Home for guests.
+- **organisms**: screen-level sections composed from atoms/molecules (e.g. `LoginCard`, `RegisterCard`, `ScreenHeader`, `ActivePlanCard`, `SuggestedPlanCard`, `SignInPromptCard`, `VerseActionSheet`). `SignInPromptCard` is the reusable account-gate card (whole card is the CTA) used on the Plans tab, Home, and Study tab for guests. `VerseActionSheet` is the highlight color-picker bottom sheet opened from a verse tap in the Reader (see Reader + Study tools).
 
 Screens (`src/app/**`) compose organisms/atoms directly; they hold screen logic (handlers, mutations) and delegate presentation to organisms.
 
@@ -118,7 +118,7 @@ TanStack Query. `src/lib/query-client.ts` provides the single `queryClient` inst
 
 ### Backend — Supabase
 
-`src/lib/supabase.ts` is the single Supabase client. **Auth** and the **reading-plan tables** (`reading_plans`, `reading_plan_days`, `user_reading_plans`, `user_reading_plan_completions` — see `.docs/data-model.md`) are wired up; highlights / notes / bookmarks are still **DRAFT** (not applied, to build with the Reader's annotation features). Generated DB types live in `src/types/database.types.ts` (regenerate via the Supabase MCP `generate_typescript_types` after any DDL). Reading-plan queries/mutations live in `src/hooks/use-reading-plans.ts` and call `supabase.from(...)` directly (no `src/services/` layer) — same rationale as auth. Plan progress tracking is **online-only today**; `.docs/plans-progress-tracking.md` is the blueprint for the later offline-first (SQLite + sync) migration, which is why completions are treated as the authoritative append-only log and `current_day`/`status`/`progress` are derived.
+`src/lib/supabase.ts` is the single Supabase client. **Auth** and the **reading-plan tables** (`reading_plans`, `reading_plan_days`, `user_reading_plans`, `user_reading_plan_completions` — see `.docs/data-model.md`) are wired up. **Highlights are implemented local-first** (on-device only — see Study tools), so the backend `highlights` table stays **DRAFT** until the later sync; notes / bookmarks are still **DRAFT** too (not applied). Generated DB types live in `src/types/database.types.ts` (regenerate via the Supabase MCP `generate_typescript_types` after any DDL). Reading-plan queries/mutations live in `src/hooks/use-reading-plans.ts` and call `supabase.from(...)` directly (no `src/services/` layer) — same rationale as auth. Plan progress tracking is **online-only today**; `.docs/plans-progress-tracking.md` is the blueprint for the later offline-first (SQLite + sync) migration, which is why completions are treated as the authoritative append-only log and `current_day`/`status`/`progress` are derived.
 
 ### Type/schema layout
 
@@ -131,12 +131,10 @@ The Home tab (`src/app/(tabs)/index.tsx`) composes `WelcomeHeader`, `VerseOfTheD
 **Guest vs. signed-in (gated on `isAuthenticated`):**
 
 - **Active plans slot:** guests see a `SignInPromptCard` (icon `CalendarCheck`) in place of `ActivePlansSection` — plans need an account, so the empty state becomes a contextual CTA. Signed-in users see their real active plans (tapping a card → plan detail).
-- **Stats (`StatsRow`):** **local-first**, so values are real for everyone (guests included) — no sign-in gate. **Progress** = `readChapters / TOTAL_BIBLE_CHAPTERS` (1189) and **Streak** = consecutive reading days both come from `useReadingProgressStore` (`src/stores/reading-progress.ts`, persisted). **Highlights** is a muted `—` placeholder (deferred until a highlighting feature exists — `StatsRow` `Stat.muted` dims that tile).
+- **Stats (`StatsRow`):** **Progress** and **Streak** are **local-first**, real for everyone (guests included) — no sign-in gate; both come from `useReadingProgressStore` (`src/stores/reading-progress.ts`, persisted): Progress = `readChapters / TOTAL_BIBLE_CHAPTERS` (1189), Streak = consecutive reading days. **Highlights** is the real count for signed-in users (`useCurrentUserHighlights().length`); guests see a muted `—` (highlighting is account-gated — `StatsRow` `Stat.muted` dims that tile).
 - **Pro CTA:** hidden for guests (`{isAuthenticated && …}`) — don't stack a paid upsell on top of the create-account nudge. Still renders unconditionally for signed-in users.
 
 **TODO — Pro CTA gating:** for signed-in users the Pro card renders unconditionally; once subscription state exists, gate it to non-premium users. Per `.docs/user-flows/home.md`, show at most one Pro nudge, never interstitials.
-
-**TODO — Highlights stat:** show a real count once a highlighting feature (verse selection + storage) exists; currently a deferred `—` placeholder.
 
 ### Reading progress tracking (local-first)
 
@@ -155,6 +153,17 @@ Plans tab under `src/app/(tabs)/plans/` (nested `Stack`). Data layer is `src/hoo
 Reader tab under `src/app/(tabs)/reader/` (nested `Stack`). Renders verses for the current position from `useReaderStore` (`src/stores/reader.ts`: translation/book/chapter/fontSize, persisted). Bundled offline Bible via `src/hooks/use-bible.ts` / `src/services/bible.ts`.
 
 - **Plan reading session:** opening a not-yet-done plan day from plan detail sets an ephemeral, in-memory `usePlanReadingStore` session (`src/stores/plan-reading.ts`: `userPlanId`, `day`, `bookId`, `lastChapter`, …) and navigates to the Reader. When the reader is at that session's last chapter, a **"Concluí esta leitura" footer CTA** (list footer, reachable only by scrolling through the passage) marks the day complete via `useMarkPlanDayComplete`, fires a celebration toast (day vs. whole-plan message + prayer nudge), and returns to detail. The session clears on completion or when the user manually picks different content via the book picker.
+- **Verse highlighting (signed-in only):** each verse is wrapped in a `Pressable`; tapping opens the `VerseActionSheet` (6-color palette + remove). Tap is a **no-op for guests** (`handleVersePress` returns early when `!isAuthenticated`). The chapter's highlights are looked up via `useChapterHighlights(bookId, chapter)` (verse → color map) and rendered as a pastel background with fixed dark text (`#1A1A1A`) so they stay readable in every theme. See Study tools.
+
+### Study tools (highlights)
+
+Highlights are the first **study tool**, implemented **local-first and account-gated** (signed-in only). Architecture mirrors reading-progress (on-device now, sync later):
+
+- **Types:** `src/types/study.ts` — `HighlightColor` (palette keys match `theme.highlights` / the `highlights` export in `src/theme/colors.ts`), the `Highlight` shape (verse reference is canonical identity; `translationId` records origin), and `highlightKey(userId, bookId, chapter, verse)`.
+- **Store:** `src/stores/highlights.ts` (persisted Zustand, `byKey: Record<string, Highlight>`) keyed per **user+verse** so multiple accounts on one device never see each other's highlights. Persist name `nascente-highlights`.
+- **Hooks:** `src/hooks/use-highlights.ts` — `useCurrentUserHighlights()` (filters `byKey` by the current `user.id`; empty for guests), `useChapterHighlights(bookId, chapter)`, `useHighlightActions(translationId)` (`setHighlight`/`removeHighlight` are no-ops without a user id). Because selectors filter by current user, **logout instantly shows nothing** — no cross-user leak.
+- **Study tab** (`src/app/(tabs)/study/`, nested `Stack`): guests get a `SignInPromptCard` (icon `Highlighter`); signed-in users get the list of their highlights. `use-study-screen.ts` runs a React Query (`studyKeys.highlights`, `enabled: isAuthenticated`) that **enriches** each highlight with its book name + verse text from `@/services/bible` (fetched once per unique translation+book+chapter), sorted canonically. Tapping a highlight sets the reader position (translation + book/chapter) and navigates to the Reader. The query key is built from the highlight identities so it refetches on add/remove. Registered as the **4th bottom-nav tab** ("Estudo", between Planos and Ajustes) in `(tabs)/_layout.tsx`.
+- **Sync later:** mirrors the DRAFT `highlights` table in `.docs/data-model.md`; a future account syncs the local store, same pattern as reading-progress / plans.
 
 ## Conventions
 

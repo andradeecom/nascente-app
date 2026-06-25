@@ -5,10 +5,13 @@ import { useVerses, useBookName } from '@/hooks/use-bible';
 import { useReaderStore } from '@/stores/reader';
 import { usePlanReadingStore } from '@/stores/plan-reading';
 import { useReadingProgressStore } from '@/stores/reading-progress';
+import { useAuthStore } from '@/stores/auth';
 import { useMarkPlanDayComplete } from '@/hooks/use-reading-plans';
+import { useChapterHighlights, useHighlightActions } from '@/hooks/use-highlights';
 import { useTranslate } from '@/i18n';
 import { getMaxChapter } from '@/services/bible';
 import type { TranslationId } from '@/types/bible';
+import type { HighlightColor } from '@/types/study';
 
 export default function useReaderScreen() {
   const { translationId, bookId, chapter, setTranslation, setPosition, setChapter } = useReaderStore();
@@ -19,6 +22,12 @@ export default function useReaderScreen() {
   const clearSession = usePlanReadingStore((s) => s.clearSession);
   const markComplete = useMarkPlanDayComplete();
   const markChapterRead = useReadingProgressStore((s) => s.markChapterRead);
+
+  // Highlights (signed-in only). Verse → color map for rendering + the open sheet.
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const chapterHighlights = useChapterHighlights(bookId, chapter);
+  const { setHighlight, removeHighlight } = useHighlightActions(translationId);
+  const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
 
   const [bookPickerVisible, setBookPickerVisible] = useState(false);
   const [translationPickerVisible, setTranslationPickerVisible] = useState(false);
@@ -60,6 +69,33 @@ export default function useReaderScreen() {
       }
     );
   }, [session, markComplete, clearSession, translate, router]);
+
+  // Verse highlighting (gated to signed-in users). Tapping a verse opens the
+  // action sheet; picking a color sets it, and there's a remove option.
+  const handleVersePress = useCallback(
+    (verse: number) => {
+      if (!isAuthenticated) return;
+      setSelectedVerse(verse);
+    },
+    [isAuthenticated]
+  );
+
+  const handlePickColor = useCallback(
+    (color: HighlightColor) => {
+      if (selectedVerse == null) return;
+      setHighlight(bookId, chapter, selectedVerse, color);
+      setSelectedVerse(null);
+    },
+    [selectedVerse, bookId, chapter, setHighlight]
+  );
+
+  const handleRemoveHighlight = useCallback(() => {
+    if (selectedVerse == null) return;
+    removeHighlight(bookId, chapter, selectedVerse);
+    setSelectedVerse(null);
+  }, [selectedVerse, bookId, chapter, removeHighlight]);
+
+  const closeVerseSheet = useCallback(() => setSelectedVerse(null), []);
 
   const handleBookChapterSelect = useCallback(
     (newBookId: number, newChapter: number) => {
@@ -115,5 +151,13 @@ export default function useReaderScreen() {
     isPlanDayEnd,
     isFinishingPlanDay: markComplete.isPending,
     handleFinishPlanDay,
+    // Highlights
+    chapterHighlights,
+    selectedVerse,
+    selectedVerseColor: selectedVerse != null ? (chapterHighlights[selectedVerse] ?? null) : null,
+    handleVersePress,
+    handlePickColor,
+    handleRemoveHighlight,
+    closeVerseSheet,
   };
 }

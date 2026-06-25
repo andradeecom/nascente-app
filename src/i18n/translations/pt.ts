@@ -125,7 +125,21 @@ const pt = {
     home: 'Início',
     reader: 'Bíblia',
     plans: 'Planos',
+    study: 'Estudo',
     settings: 'Ajustes',
+  },
+  study: {
+    title: 'Estudo',
+    highlightVerse: 'Destacar versículo',
+    removeHighlight: 'Remover destaque',
+    highlightsSection: 'Destaques',
+    empty: 'Você ainda não destacou nenhum versículo. Toque em um versículo no leitor para destacá-lo.',
+    loadError: 'Não foi possível carregar seus destaques',
+    signIn: {
+      title: 'Salve seus destaques e notas',
+      description: 'Crie uma conta para destacar versículos e acessá-los em todos os seus aparelhos.',
+      action: 'Criar conta',
+    },
   },
   reader: {
     title: 'Bíblia',

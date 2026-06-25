@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { StyleSheet, UnistylesRuntime } from 'react-native-unistyles';
-import { House, BookOpen, Calendar, SlidersHorizontal } from 'lucide-react-native';
+import { House, BookOpen, Calendar, Highlighter, SlidersHorizontal } from 'lucide-react-native';
 import { useTranslate } from '@/i18n';
 import { useThemeStore } from '@/stores/theme';
 
@@ -49,6 +49,15 @@ export default function TabsLayout() {
           title: translate('tabs.plans'),
           tabBarIcon: ({ color, size, focused }) => (
             <Calendar size={size} color={color} strokeWidth={focused ? 2.5 : 2} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="study"
+        options={{
+          title: translate('tabs.study'),
+          tabBarIcon: ({ color, size, focused }) => (
+            <Highlighter size={size} color={color} strokeWidth={focused ? 2.5 : 2} />
           ),
         }}
       />

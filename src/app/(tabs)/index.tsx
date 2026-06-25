@@ -36,10 +36,12 @@ export default function HomeScreen() {
     () => [
       { value: `${stats.progressPercent}%`, label: translate('home.progress') },
       { value: stats.streak, label: translate('home.streak') },
-      // Highlights deferred until a highlighting feature exists — muted placeholder.
-      { value: '—', label: translate('home.highlights'), muted: true },
+      // Highlights are account-gated (Study tab); guests see a muted placeholder.
+      isAuthenticated
+        ? { value: stats.highlightCount, label: translate('home.highlights') }
+        : { value: '—', label: translate('home.highlights'), muted: true },
     ],
-    [stats, translate]
+    [stats, isAuthenticated, translate]
   );
 
   return (

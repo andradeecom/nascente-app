@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useReaderStore } from '@/stores/reader';
 import { useLocaleStore } from '@/stores/locale';
 import { computeStreak, useReadingProgressStore } from '@/stores/reading-progress';
+import { useCurrentUserHighlights } from '@/hooks/use-highlights';
 import { useBookName } from '@/hooks/use-bible';
 import { useActivePlans } from '@/hooks/use-reading-plans';
 import { TOTAL_BIBLE_CHAPTERS, TRANSLATIONS } from '@/types/bible';
@@ -135,15 +136,18 @@ export function useHomeScreen() {
   const greetingKey = getGreetingKey();
 
   // Stats — local-first reading tracking (works for guests and signed-in users).
-  // Highlights is deferred until a highlighting feature exists (see StatsRow usage).
+  // Highlights count is real for signed-in users; guests have none (highlighting
+  // is account-gated — see the Study tab).
   const readChapters = useReadingProgressStore((s) => s.readChapters);
   const readDays = useReadingProgressStore((s) => s.readDays);
+  const highlightCount = useCurrentUserHighlights().length;
   const stats = useMemo(
     () => ({
       progressPercent: Math.round((Object.keys(readChapters).length / TOTAL_BIBLE_CHAPTERS) * 100),
       streak: computeStreak(readDays),
+      highlightCount,
     }),
-    [readChapters, readDays]
+    [readChapters, readDays, highlightCount]
   );
 
   // ── Handlers ────────────────────────────────────────────────────────────────

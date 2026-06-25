@@ -125,7 +125,21 @@ const en = {
     home: 'Home',
     reader: 'Bible',
     plans: 'Plans',
+    study: 'Study',
     settings: 'Settings',
+  },
+  study: {
+    title: 'Study',
+    highlightVerse: 'Highlight verse',
+    removeHighlight: 'Remove highlight',
+    highlightsSection: 'Highlights',
+    empty: "You haven't highlighted any verses yet. Tap a verse in the reader to highlight it.",
+    loadError: 'Could not load your highlights',
+    signIn: {
+      title: 'Save your highlights and notes',
+      description: 'Create an account to highlight verses and access them across all your devices.',
+      action: 'Create account',
+    },
   },
   reader: {
     title: 'Bible',

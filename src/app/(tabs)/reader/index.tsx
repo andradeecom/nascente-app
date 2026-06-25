@@ -1,12 +1,13 @@
 import { useCallback } from 'react';
-import { ActivityIndicator, FlatList, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { Check } from 'lucide-react-native';
 import { Button, Text, TextVariants, SafeAreaView } from '@/components/atoms';
 import { ReaderHeader, ChapterNavBar } from '@/components/molecules';
-import { BookChapterPicker, TranslationPicker } from '@/components/organisms';
+import { BookChapterPicker, TranslationPicker, VerseActionSheet } from '@/components/organisms';
 import { useReaderStore } from '@/stores/reader';
 import { useTranslate } from '@/i18n';
+import { highlights as HIGHLIGHT_HEX } from '@/theme/colors';
 import { typography } from '@/theme/typography';
 import type { Verse } from '@/types/bible';
 import useReaderScreen from './use-reader-screen';
@@ -30,6 +31,13 @@ export default function ReaderScreen() {
     isPlanDayEnd,
     isFinishingPlanDay,
     handleFinishPlanDay,
+    chapterHighlights,
+    selectedVerse,
+    selectedVerseColor,
+    handleVersePress,
+    handlePickColor,
+    handleRemoveHighlight,
+    closeVerseSheet,
   } = useReaderScreen();
   const t = useTranslate();
 
@@ -38,15 +46,27 @@ export default function ReaderScreen() {
   const readerLineHeight = readerFontSize * typography.reader.lineHeightMultipliers[fontSize];
 
   const renderVerse = useCallback(
-    ({ item }: { item: Verse }) => (
-      <View style={styles.verseRow}>
-        <Text variant={TextVariants.Caption} color="textTertiary" style={styles.verseNumber}>
-          {item.verse}
-        </Text>
-        <Text style={[styles.verseText, { fontSize: readerFontSize, lineHeight: readerLineHeight }]}>{item.text}</Text>
-      </View>
-    ),
-    [readerFontSize, readerLineHeight]
+    ({ item }: { item: Verse }) => {
+      const color = chapterHighlights[item.verse];
+      return (
+        <Pressable onPress={() => handleVersePress(item.verse)} style={styles.verseRow}>
+          <Text variant={TextVariants.Caption} color="textTertiary" style={styles.verseNumber}>
+            {item.verse}
+          </Text>
+          <Text
+            style={[
+              styles.verseText,
+              { fontSize: readerFontSize, lineHeight: readerLineHeight },
+              // Fixed dark text on the pastel highlight keeps it readable in every theme.
+              color ? { backgroundColor: HIGHLIGHT_HEX[color], color: '#1A1A1A' } : null,
+            ]}
+          >
+            {item.text}
+          </Text>
+        </Pressable>
+      );
+    },
+    [readerFontSize, readerLineHeight, chapterHighlights, handleVersePress]
   );
 
   // When reading a plan day, a "finish today's reading" CTA sits at the end of
@@ -106,6 +126,15 @@ export default function ReaderScreen() {
         currentId={translationId}
         onSelect={handleTranslationSelect}
         onClose={() => setTranslationPickerVisible(false)}
+      />
+
+      <VerseActionSheet
+        visible={selectedVerse != null}
+        reference={`${bookName ?? ''} ${chapter}:${selectedVerse ?? ''}`}
+        currentColor={selectedVerseColor}
+        onPick={handlePickColor}
+        onRemove={handleRemoveHighlight}
+        onClose={closeVerseSheet}
       />
     </SafeAreaView>
   );

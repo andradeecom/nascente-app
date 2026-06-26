@@ -12,6 +12,120 @@ export type Database = {
   };
   public: {
     Tables: {
+      bookmarks: {
+        Row: {
+          book_id: number;
+          chapter: number;
+          created_at: string;
+          deleted_at: string | null;
+          id: string;
+          translation: string;
+          updated_at: string;
+          user_id: string;
+          verse: number;
+        };
+        Insert: {
+          book_id: number;
+          chapter: number;
+          created_at?: string;
+          deleted_at?: string | null;
+          id?: string;
+          translation?: string;
+          updated_at?: string;
+          user_id: string;
+          verse: number;
+        };
+        Update: {
+          book_id?: number;
+          chapter?: number;
+          created_at?: string;
+          deleted_at?: string | null;
+          id?: string;
+          translation?: string;
+          updated_at?: string;
+          user_id?: string;
+          verse?: number;
+        };
+        Relationships: [];
+      };
+      highlights: {
+        Row: {
+          book_id: number;
+          chapter: number;
+          color: string;
+          created_at: string;
+          deleted_at: string | null;
+          id: string;
+          translation: string;
+          updated_at: string;
+          user_id: string;
+          verse: number;
+        };
+        Insert: {
+          book_id: number;
+          chapter: number;
+          color: string;
+          created_at?: string;
+          deleted_at?: string | null;
+          id?: string;
+          translation?: string;
+          updated_at?: string;
+          user_id: string;
+          verse: number;
+        };
+        Update: {
+          book_id?: number;
+          chapter?: number;
+          color?: string;
+          created_at?: string;
+          deleted_at?: string | null;
+          id?: string;
+          translation?: string;
+          updated_at?: string;
+          user_id?: string;
+          verse?: number;
+        };
+        Relationships: [];
+      };
+      notes: {
+        Row: {
+          body: string;
+          book_id: number;
+          chapter: number;
+          created_at: string;
+          deleted_at: string | null;
+          id: string;
+          translation: string;
+          updated_at: string;
+          user_id: string;
+          verse: number;
+        };
+        Insert: {
+          body: string;
+          book_id: number;
+          chapter: number;
+          created_at?: string;
+          deleted_at?: string | null;
+          id?: string;
+          translation?: string;
+          updated_at?: string;
+          user_id: string;
+          verse: number;
+        };
+        Update: {
+          body?: string;
+          book_id?: number;
+          chapter?: number;
+          created_at?: string;
+          deleted_at?: string | null;
+          id?: string;
+          translation?: string;
+          updated_at?: string;
+          user_id?: string;
+          verse?: number;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           created_at: string;

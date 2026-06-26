@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useCurrentUserHighlights } from '@/hooks/use-highlights';
 import { useCurrentUserBookmarks } from '@/hooks/use-bookmarks';
 import { useCurrentUserNotes } from '@/hooks/use-notes';
+import { useSyncOnFocus } from '@/hooks/use-study-sync';
 import { useAuthStore } from '@/stores/auth';
 import { useReaderStore } from '@/stores/reader';
 import { useTranslate } from '@/i18n';
@@ -121,6 +122,11 @@ export default function useStudyScreen() {
   const translate = useTranslate();
   const router = useRouter();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
+  // Pull cross-device changes whenever the Study tab gains focus (tab switches
+  // don't fire the global foreground trigger). Pulled rows flow into the stores
+  // the list reads, so the list refreshes on its own.
+  useSyncOnFocus();
 
   const [filter, setFilter] = useState<StudyFilter>('all');
 

@@ -8,7 +8,10 @@ import type { TranslationId } from '@/types/bible';
 export function useCurrentUserBookmarks(): Bookmark[] {
   const userId = useAuthStore((s) => s.user?.id);
   const byKey = useBookmarksStore((s) => s.byKey);
-  return useMemo(() => (userId ? Object.values(byKey).filter((b) => b.userId === userId) : []), [byKey, userId]);
+  return useMemo(
+    () => (userId ? Object.values(byKey).filter((b) => b.userId === userId && !b.deletedAt) : []),
+    [byKey, userId]
+  );
 }
 
 /** Set of bookmarked verse numbers for one chapter, for fast lookup in the Reader. */
@@ -30,16 +33,21 @@ export function useBookmarkActions(translationId: TranslationId) {
   const remove = useBookmarksStore((s) => s.removeBookmark);
   const byKey = useBookmarksStore((s) => s.byKey);
 
+  // A tombstoned row (soft-deleted, pending sync) counts as "not bookmarked".
   const isBookmarked = useCallback(
-    (bookId: number, chapter: number, verse: number) =>
-      userId != null && byKey[`${userId}:${bookId}:${chapter}:${verse}`] != null,
+    (bookId: number, chapter: number, verse: number) => {
+      if (userId == null) return false;
+      const row = byKey[`${userId}:${bookId}:${chapter}:${verse}`];
+      return row != null && !row.deletedAt;
+    },
     [userId, byKey]
   );
 
   const toggleBookmark = useCallback(
     (bookId: number, chapter: number, verse: number) => {
       if (!userId) return;
-      if (byKey[`${userId}:${bookId}:${chapter}:${verse}`]) {
+      const row = byKey[`${userId}:${bookId}:${chapter}:${verse}`];
+      if (row && !row.deletedAt) {
         remove(userId, bookId, chapter, verse);
       } else {
         add({ userId, bookId, chapter, verse, translationId });

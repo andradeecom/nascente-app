@@ -8,11 +8,26 @@ export const HIGHLIGHT_COLORS = ['yellow', 'green', 'blue', 'pink', 'purple', 'o
 export type HighlightColor = (typeof HIGHLIGHT_COLORS)[number];
 
 /**
+ * Per-row sync metadata mirrored on every locally-stored study record so the
+ * on-device store can sync to Supabase (see `src/services/sync/`). `updatedAt`
+ * is the last-write-wins key (server-authoritative once a row has round-tripped);
+ * `deletedAt` is a soft-delete tombstone (set instead of dropping the row, so a
+ * delete on one device propagates everywhere); `dirty` marks a local change not
+ * yet pushed; `syncedAt` records the last successful push (debug/auditing).
+ */
+export type SyncMeta = {
+  updatedAt: string;
+  deletedAt?: string | null;
+  dirty?: boolean;
+  syncedAt?: string | null;
+};
+
+/**
  * A verse highlight. Stored locally per user (local-first; see
  * `src/stores/highlights.ts`). The verse reference (book/chapter/verse) is the
  * canonical identity — highlights render regardless of which translation is open.
- * `translationId` records where it was created. Mirrors the DRAFT `highlights`
- * table in `.docs/data-model.md` for the eventual sync.
+ * `translationId` records where it was created. Mirrors the live `highlights`
+ * table in `.docs/data-model.md`; synced via `src/services/sync/`.
  */
 export type Highlight = {
   userId: string;
@@ -22,8 +37,7 @@ export type Highlight = {
   color: HighlightColor;
   translationId: TranslationId;
   createdAt: string;
-  updatedAt: string;
-};
+} & SyncMeta;
 
 /** Stable per-user, per-verse key (one highlight per verse per user). */
 export function highlightKey(userId: string, bookId: number, chapter: number, verse: number): string {
@@ -34,8 +48,8 @@ export function highlightKey(userId: string, bookId: number, chapter: number, ve
  * A verse bookmark. Stored locally per user (local-first; see
  * `src/stores/bookmarks.ts`). Like `Highlight`, the verse reference is the
  * canonical identity and `translationId` records where it was created. Mirrors
- * the DRAFT `bookmarks` table in `.docs/data-model.md` (its `label` is unused in
- * V1 — bookmarks are a plain toggle).
+ * the live `bookmarks` table in `.docs/data-model.md` (a plain toggle, no body);
+ * synced via `src/services/sync/`.
  */
 export type Bookmark = {
   userId: string;
@@ -44,7 +58,7 @@ export type Bookmark = {
   verse: number;
   translationId: TranslationId;
   createdAt: string;
-};
+} & SyncMeta;
 
 /** Stable per-user, per-verse key (one bookmark per verse per user). */
 export function bookmarkKey(userId: string, bookId: number, chapter: number, verse: number): string {
@@ -53,8 +67,8 @@ export function bookmarkKey(userId: string, bookId: number, chapter: number, ver
 
 /**
  * A verse note. Stored locally per user (local-first; see `src/stores/notes.ts`).
- * One note per verse per user; `body` is the free text. Mirrors the DRAFT `notes`
- * table in `.docs/data-model.md` for the eventual sync.
+ * One note per verse per user; `body` is the free text. Mirrors the live `notes`
+ * table in `.docs/data-model.md`; synced via `src/services/sync/`.
  */
 export type Note = {
   userId: string;
@@ -64,8 +78,7 @@ export type Note = {
   body: string;
   translationId: TranslationId;
   createdAt: string;
-  updatedAt: string;
-};
+} & SyncMeta;
 
 /** Stable per-user, per-verse key (one note per verse per user). */
 export function noteKey(userId: string, bookId: number, chapter: number, verse: number): string {

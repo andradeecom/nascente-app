@@ -3,13 +3,15 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { noteKey, type Note } from '@/types/study';
 import type { TranslationId } from '@/types/bible';
+import { applyPulledRow, markRowSynced, migrateSyncMeta } from '@/services/sync/store-helpers';
 
 /**
  * Local-first note storage, persisted on-device and keyed per user+verse so
  * multiple accounts on one device never see each other's notes (filter by the
- * current user id in selectors). Account-gated in the UI; a future account would
- * sync this to Supabase (DRAFT `notes` table), not replace it. Mirrors
- * `src/stores/highlights.ts`.
+ * current user id in selectors). Account-gated in the UI. Changes sync to
+ * Supabase (`notes` table) via `src/services/sync/`: `remove` is a soft-delete
+ * tombstone, writes mark the row `dirty`, and the engine reconciles via the
+ * `applyPulled`/`markSynced` actions. Mirrors `src/stores/highlights.ts`.
  */
 type NoteInput = {
   userId: string;
@@ -26,6 +28,10 @@ type NotesState = {
   setNote: (input: NoteInput) => void;
   removeNote: (userId: string, bookId: number, chapter: number, verse: number) => void;
   setHasHydrated: (value: boolean) => void;
+  // Sync engine seams (src/services/sync). Never set `dirty`.
+  applyPulled: (key: string, incoming: Note) => void;
+  applyPulledMany: (rows: { key: string; incoming: Note }[]) => void;
+  markSynced: (key: string, pushedUpdatedAt: string, serverUpdatedAt: string) => void;
 };
 
 export const useNotesStore = create<NotesState>()(
@@ -47,25 +53,41 @@ export const useNotesStore = create<NotesState>()(
             translationId,
             createdAt: existing?.createdAt ?? now,
             updatedAt: now,
+            deletedAt: null, // writing un-tombstones
+            dirty: true,
+            syncedAt: existing?.syncedAt ?? null,
           };
           return { byKey: { ...state.byKey, [key]: next } };
         }),
       removeNote: (userId, bookId, chapter, verse) =>
         set((state) => {
           const key = noteKey(userId, bookId, chapter, verse);
-          if (!state.byKey[key]) return state;
-          const next = { ...state.byKey };
-          delete next[key];
-          return { byKey: next };
+          const existing = state.byKey[key];
+          if (!existing || existing.deletedAt) return state;
+          const now = new Date().toISOString();
+          // Soft delete: keep the row as a tombstone so the delete syncs across devices.
+          const next: Note = { ...existing, deletedAt: now, updatedAt: now, dirty: true };
+          return { byKey: { ...state.byKey, [key]: next } };
         }),
       setHasHydrated: (value) => set({ hasHydrated: value }),
+      applyPulled: (key, incoming) => set((state) => ({ byKey: applyPulledRow(state.byKey, key, incoming) })),
+      applyPulledMany: (rows) =>
+        set((state) => {
+          let byKey = state.byKey;
+          for (const { key, incoming } of rows) byKey = applyPulledRow(byKey, key, incoming);
+          return { byKey };
+        }),
+      markSynced: (key, pushedUpdatedAt, serverUpdatedAt) =>
+        set((state) => ({ byKey: markRowSynced(state.byKey, key, pushedUpdatedAt, serverUpdatedAt) })),
     }),
     {
       name: 'nascente-notes',
       storage: createJSONStorage(() => AsyncStorage),
       partialize: ({ byKey }) => ({ byKey }),
       onRehydrateStorage: () => (state, error) => {
-        if (!error) state?.setHasHydrated(true);
+        if (error || !state) return;
+        state.byKey = migrateSyncMeta(state.byKey);
+        state.setHasHydrated(true);
       },
     }
   )

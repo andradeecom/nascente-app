@@ -10,6 +10,7 @@ import { useMarkPlanDayComplete } from '@/hooks/use-reading-plans';
 import { useChapterHighlights, useHighlightActions } from '@/hooks/use-highlights';
 import { useChapterBookmarks, useBookmarkActions } from '@/hooks/use-bookmarks';
 import { useChapterNotes, useNoteActions } from '@/hooks/use-notes';
+import { useSyncOnFocus } from '@/hooks/use-study-sync';
 import { useTranslate } from '@/i18n';
 import { getMaxChapter } from '@/services/bible';
 import type { TranslationId } from '@/types/bible';
@@ -19,6 +20,10 @@ export default function useReaderScreen() {
   const { translationId, bookId, chapter, setTranslation, setPosition, setChapter } = useReaderStore();
   const router = useRouter();
   const translate = useTranslate();
+
+  // Pull cross-device study changes when the Reader gains focus, so highlights
+  // made on another device show up here without waiting for app foreground.
+  useSyncOnFocus();
 
   const session = usePlanReadingStore((s) => s.session);
   const clearSession = usePlanReadingStore((s) => s.clearSession);

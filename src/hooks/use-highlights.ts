@@ -8,7 +8,10 @@ import type { TranslationId } from '@/types/bible';
 export function useCurrentUserHighlights(): Highlight[] {
   const userId = useAuthStore((s) => s.user?.id);
   const byKey = useHighlightsStore((s) => s.byKey);
-  return useMemo(() => (userId ? Object.values(byKey).filter((h) => h.userId === userId) : []), [byKey, userId]);
+  return useMemo(
+    () => (userId ? Object.values(byKey).filter((h) => h.userId === userId && !h.deletedAt) : []),
+    [byKey, userId]
+  );
 }
 
 /** verse → color map for one chapter, for fast lookup while rendering the Reader. */

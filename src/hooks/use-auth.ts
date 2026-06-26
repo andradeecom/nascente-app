@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AUTH_STORAGE_KEY, supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/auth';
+import { useSyncMetaStore } from '@/services/sync/sync-meta';
 import { toAppUser, type AppUser, type RegisterRequest } from '@/types/auth';
 import { GoogleSignin, isSuccessResponse } from '@react-native-google-signin/google-signin';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -128,10 +129,17 @@ export function useLogout() {
   const clearAuth = useAuthStore((state) => state.clearAuth);
 
   return async () => {
+    // Capture the signed-out user before clearing, so we can reset their sync
+    // cursors (a re-login then does a clean full re-pull). The study stores stay
+    // untouched — they filter by user id, so logout already shows nothing, and
+    // any un-pushed dirty rows flush on the next sign-in of that account.
+    const previousUserId = useAuthStore.getState().user?.id;
+
     // Clear local auth + all cached queries FIRST so the UI flips to guest and no
     // previous-user data lingers (e.g. the Plans tab).
     clearAuth();
     queryClient.clear();
+    if (previousUserId) useSyncMetaStore.getState().clearForUser(previousUserId);
 
     // Best-effort remote revoke (needs network; throws for a mock-login user with
     // no session). The token removal below is what actually guarantees sign-out.

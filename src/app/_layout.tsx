@@ -10,6 +10,7 @@ import { queryClient } from '@/lib/query-client';
 import { useAuthStore } from '@/stores/auth';
 import { useThemeStore } from '@/stores/theme';
 import { useOnboardingStore } from '@/stores/onboarding';
+import { useStudyToolsSync } from '@/hooks/use-study-sync';
 import { getLocales } from 'expo-localization';
 import { i18n } from '@/i18n';
 
@@ -38,6 +39,9 @@ function useHydrate() {
 
 function RootNavigator() {
   const isHydrated = useHydrate();
+  // Mirror the local study tools (highlights/bookmarks/notes) to Supabase when
+  // signed in + online. Headless and self-gating — a no-op for guests.
+  useStudyToolsSync();
   const hasCompletedOnboarding = useOnboardingStore((s) => s.hasCompleted);
   const [splashDone, setSplashDone] = useState(false);
   const shouldShowOnboarding = FORCE_ONBOARDING || !hasCompletedOnboarding;

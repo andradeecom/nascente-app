@@ -8,7 +8,10 @@ import type { TranslationId } from '@/types/bible';
 export function useCurrentUserNotes(): Note[] {
   const userId = useAuthStore((s) => s.user?.id);
   const byKey = useNotesStore((s) => s.byKey);
-  return useMemo(() => (userId ? Object.values(byKey).filter((n) => n.userId === userId) : []), [byKey, userId]);
+  return useMemo(
+    () => (userId ? Object.values(byKey).filter((n) => n.userId === userId && !n.deletedAt) : []),
+    [byKey, userId]
+  );
 }
 
 /** verse → note map for one chapter, so the action sheet shows add vs. edit. */

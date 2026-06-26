@@ -18,6 +18,7 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
+        popToTopOnBlur: true,
         tabBarStyle: [
           styles.tabBar,
           { backgroundColor: colors.semantic.bgPrimary, borderTopColor: colors.semantic.bgTertiary },

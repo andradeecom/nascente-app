@@ -1,10 +1,19 @@
-import { ScrollView, View } from 'react-native';
+import { useMemo } from 'react';
+import { View } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { StyleSheet } from 'react-native-unistyles';
 import { CalendarCheck } from 'lucide-react-native';
 import { SafeAreaView, Text, TextVariants } from '@/components/atoms';
 import { SectionHeader } from '@/components/molecules';
 import { ActivePlanCard, SignInPromptCard, SuggestedPlanCard, UpsellModal } from '@/components/organisms';
+import type { ActiveReadingPlan, SuggestedReadingPlan } from '@/types/reading-plans';
 import usePlansScreen from './use-plans-screen';
+
+type ListItem =
+  | { type: 'header'; key: string; title: string }
+  | { type: 'empty'; key: string; message: string }
+  | { type: 'active'; key: string; plan: ActiveReadingPlan }
+  | { type: 'suggested'; key: string; plan: SuggestedReadingPlan };
 
 export default function PlansScreen() {
   const {
@@ -23,17 +32,40 @@ export default function PlansScreen() {
     handleUpsellCta,
   } = usePlansScreen();
 
-  const active = activePlans.data ?? [];
-  const suggested = suggestedPlans.data ?? [];
+  const items = useMemo<ListItem[]>(() => {
+    const active = activePlans.data ?? [];
+    const suggested = suggestedPlans.data ?? [];
+    const list: ListItem[] = [];
+    list.push({ type: 'header', key: 'active-header', title: translate('plans.activeSection') });
+    if (active.length > 0) {
+      active.forEach((plan) => list.push({ type: 'active', key: `active-${plan.userPlan.id}`, plan }));
+    } else {
+      list.push({
+        type: 'empty',
+        key: 'active-empty',
+        message: activePlans.isError ? translate('plans.loadError') : translate('plans.emptyActive'),
+      });
+    }
+    list.push({ type: 'header', key: 'suggested-header', title: translate('plans.suggestedSection') });
+    if (suggested.length > 0) {
+      suggested.forEach((plan) => list.push({ type: 'suggested', key: `suggested-${plan.id}`, plan }));
+    } else {
+      list.push({
+        type: 'empty',
+        key: 'suggested-empty',
+        message: suggestedPlans.isError ? translate('plans.loadError') : translate('plans.emptySuggested'),
+      });
+    }
+    return list;
+  }, [activePlans.data, activePlans.isError, suggestedPlans.data, suggestedPlans.isError, translate]);
 
-  return (
-    <SafeAreaView edges={['top']} style={styles.safe}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text variant={TextVariants.Title1} style={styles.heading}>
-          {translate('plans.title')}
-        </Text>
-
-        {!isAuthenticated ? (
+  if (!isAuthenticated) {
+    return (
+      <SafeAreaView edges={['top']} style={styles.safe}>
+        <View style={styles.content}>
+          <Text variant={TextVariants.Title1} style={styles.heading}>
+            {translate('plans.title')}
+          </Text>
           <SignInPromptCard
             icon={CalendarCheck}
             title={translate('plans.signIn.title')}
@@ -41,55 +73,59 @@ export default function PlansScreen() {
             actionLabel={translate('plans.signIn.action')}
             onPress={handleSignIn}
           />
-        ) : (
-          <>
-            {/* Active plans */}
-            <View style={styles.section}>
-              <SectionHeader title={translate('plans.activeSection')} />
-              {active.length > 0 ? (
-                <View style={styles.list}>
-                  {active.map((plan) => (
-                    <ActivePlanCard
-                      key={plan.userPlan.id}
-                      plan={plan}
-                      nextLabel={translate('plans.next')}
-                      onPress={() => handleOpenPlan(plan.plan.id)}
-                    />
-                  ))}
-                </View>
-              ) : (
-                <Text variant={TextVariants.Callout} color="textSecondary">
-                  {activePlans.isError ? translate('plans.loadError') : translate('plans.emptyActive')}
-                </Text>
-              )}
-            </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
-            {/* Suggested plans */}
-            <View style={styles.section}>
-              <SectionHeader title={translate('plans.suggestedSection')} />
-              {suggested.length > 0 ? (
-                <View style={styles.list}>
-                  {suggested.map((plan) => (
-                    <SuggestedPlanCard
-                      key={plan.id}
-                      plan={plan}
-                      meta={formatMeta(plan)}
-                      startLabel={translate('plans.start')}
-                      onStart={() => handleStart(plan)}
-                      onPress={() => handleOpenPlan(plan.id)}
-                      loading={startingPlanId === plan.id}
-                    />
-                  ))}
-                </View>
-              ) : (
+  const listHeader = (
+    <Text variant={TextVariants.Title1} style={styles.heading}>
+      {translate('plans.title')}
+    </Text>
+  );
+
+  return (
+    <SafeAreaView edges={['top']} style={styles.safe}>
+      <FlashList
+        data={items}
+        keyExtractor={(item) => item.key}
+        renderItem={({ item }) => {
+          switch (item.type) {
+            case 'header':
+              return <SectionHeader title={item.title} />;
+            case 'empty':
+              return (
                 <Text variant={TextVariants.Callout} color="textSecondary">
-                  {suggestedPlans.isError ? translate('plans.loadError') : translate('plans.emptySuggested')}
+                  {item.message}
                 </Text>
-              )}
-            </View>
-          </>
-        )}
-      </ScrollView>
+              );
+            case 'active':
+              return (
+                <ActivePlanCard
+                  plan={item.plan}
+                  nextLabel={translate('plans.next')}
+                  onPress={() => handleOpenPlan(item.plan.plan.id)}
+                />
+              );
+            case 'suggested':
+              return (
+                <SuggestedPlanCard
+                  plan={item.plan}
+                  meta={formatMeta(item.plan)}
+                  startLabel={translate('plans.start')}
+                  onStart={() => handleStart(item.plan)}
+                  onPress={() => handleOpenPlan(item.plan.id)}
+                  loading={startingPlanId === item.plan.id}
+                />
+              );
+          }
+        }}
+        getItemType={(item) => item.type}
+        ListHeaderComponent={listHeader}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+      />
 
       <UpsellModal
         visible={limitModalVisible}
@@ -117,10 +153,12 @@ const styles = StyleSheet.create((theme) => ({
   heading: {
     marginBottom: theme.spacing[2],
   },
-  section: {
-    gap: 0,
+  listContent: {
+    paddingHorizontal: theme.spacing[5],
+    paddingTop: theme.spacing[3],
+    paddingBottom: theme.spacing[8],
   },
-  list: {
-    gap: theme.spacing[3],
+  separator: {
+    height: theme.spacing[3],
   },
 }));

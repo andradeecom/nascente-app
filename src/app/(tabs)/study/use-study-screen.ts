@@ -9,6 +9,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useReaderStore } from '@/stores/reader';
 import { useTranslate } from '@/i18n';
 import { getBookName, getVerses } from '@/services/bible';
+import { syncAllStudyTools } from '@/services/sync';
 import type { Bookmark, Highlight, HighlightColor, Note } from '@/types/study';
 import type { TranslationId } from '@/types/bible';
 
@@ -122,6 +123,7 @@ export default function useStudyScreen() {
   const translate = useTranslate();
   const router = useRouter();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const userId = useAuthStore((s) => s.user?.id) ?? null;
 
   // Pull cross-device changes whenever the Study tab gains focus (tab switches
   // don't fire the global foreground trigger). Pulled rows flow into the stores
@@ -162,6 +164,13 @@ export default function useStudyScreen() {
     return all.filter((i) => i.type === type);
   }, [itemsQuery.data, filter]);
 
+  const refresh = useCallback(async () => {
+    if (userId != null) {
+      await syncAllStudyTools(userId);
+    }
+    await itemsQuery.refetch();
+  }, [userId, itemsQuery]);
+
   const handleSignIn = useCallback(() => {
     router.push('/register');
   }, [router]);
@@ -184,6 +193,8 @@ export default function useStudyScreen() {
     items: filteredItems,
     isLoading: itemsQuery.isLoading,
     isError: itemsQuery.isError,
+    isRefetching: itemsQuery.isRefetching,
+    refresh,
     handleSignIn,
     handleOpenItem,
   };

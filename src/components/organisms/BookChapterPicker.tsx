@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { FlatList, Modal, Pressable, View } from 'react-native';
+import { Modal, Pressable, View } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { StyleSheet } from 'react-native-unistyles';
 import { X } from 'lucide-react-native';
 import { Text, TextVariants, SafeAreaView } from '@/components/atoms';
@@ -67,7 +68,7 @@ export function BookChapterPicker({ visible, translationId, currentBookId, curre
             onSelect={handleChapterPress}
           />
         ) : (
-          <FlatList
+          <FlashList
             data={books}
             keyExtractor={(item) => String(item.id)}
             contentContainerStyle={styles.listContent}
@@ -106,12 +107,11 @@ function ChapterGrid({
   const { data: chapters = [] } = useChapters(translationId, bookId);
 
   return (
-    <FlatList
+    <FlashList
       data={chapters}
       keyExtractor={(item) => String(item.chapter)}
       numColumns={5}
       contentContainerStyle={styles.gridContent}
-      columnWrapperStyle={styles.gridRow}
       renderItem={({ item }) => (
         <Pressable
           onPress={() => onSelect(item.chapter)}
@@ -170,15 +170,11 @@ const styles = StyleSheet.create((theme) => ({
   },
   gridContent: {
     padding: theme.spacing[4],
-    gap: theme.spacing[2],
-  },
-  gridRow: {
-    gap: theme.spacing[2],
   },
   chapterCell: {
     flex: 1,
     aspectRatio: 1,
-    maxWidth: '18%',
+    margin: theme.spacing[1],
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: theme.radius.md,

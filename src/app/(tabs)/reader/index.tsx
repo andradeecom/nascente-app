@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
-import { ActivityIndicator, FlatList, Pressable, View } from 'react-native';
+import { ActivityIndicator, Pressable, View } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { StyleSheet } from 'react-native-unistyles';
 import { Check } from 'lucide-react-native';
 import { Button, Text, TextVariants, SafeAreaView } from '@/components/atoms';
@@ -111,8 +112,8 @@ export default function ReaderScreen() {
           <ActivityIndicator size="large" color={styles.accentColor.color} />
         </View>
       ) : (
-        <FlatList
-          data={verses}
+        <FlashList
+          data={verses ?? []}
           keyExtractor={(item) => String(item.id)}
           renderItem={renderVerse}
           contentContainerStyle={styles.listContent}

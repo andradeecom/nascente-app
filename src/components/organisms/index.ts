@@ -19,3 +19,4 @@ export { SignInPromptCard } from './SignInPromptCard';
 export { VerseActionSheet } from './VerseActionSheet';
 export { UpsellModal } from './UpsellModal';
 export { NoteEditorModal } from './NoteEditorModal';
+export { StudyCard } from './StudyCard';

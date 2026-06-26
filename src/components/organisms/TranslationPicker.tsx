@@ -1,4 +1,5 @@
 import { Modal, Pressable, View } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { StyleSheet } from 'react-native-unistyles';
 import { Check, X } from 'lucide-react-native';
 import { Text, TextVariants, SafeAreaView } from '@/components/atoms';
@@ -30,21 +31,25 @@ export function TranslationPicker({ visible, currentId, onSelect, onClose }: Pro
           </Pressable>
         </View>
 
-        {TRANSLATION_LIST.map((t) => (
-          <Pressable
-            key={t.id}
-            onPress={() => onSelect(t.id)}
-            style={({ pressed }) => [styles.row, pressed && styles.pressed]}
-          >
-            <View style={styles.rowContent}>
-              <Text variant={TextVariants.Body}>{t.label}</Text>
-              <Text variant={TextVariants.Caption} color="textSecondary">
-                {t.lang.toUpperCase()}
-              </Text>
-            </View>
-            {t.id === currentId && <Check size={20} color={styles.checkIcon.color} />}
-          </Pressable>
-        ))}
+        <FlashList
+          data={TRANSLATION_LIST}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <Pressable
+              onPress={() => onSelect(item.id)}
+              style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+            >
+              <View style={styles.rowContent}>
+                <Text variant={TextVariants.Body}>{item.label}</Text>
+                <Text variant={TextVariants.Caption} color="textSecondary">
+                  {item.lang.toUpperCase()}
+                </Text>
+              </View>
+              {item.id === currentId && <Check size={20} color={styles.checkIcon.color} />}
+            </Pressable>
+          )}
+          contentContainerStyle={styles.listContent}
+        />
       </SafeAreaView>
     </Modal>
   );
@@ -73,6 +78,9 @@ const styles = StyleSheet.create((theme) => ({
   },
   closeIcon: {
     color: theme.colors.semantic.textSecondary,
+  },
+  listContent: {
+    paddingVertical: theme.spacing[2],
   },
   row: {
     flexDirection: 'row',

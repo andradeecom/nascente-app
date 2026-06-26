@@ -4,12 +4,12 @@ import { useQuery } from '@tanstack/react-query';
 import { useCurrentUserHighlights } from '@/hooks/use-highlights';
 import { useCurrentUserBookmarks } from '@/hooks/use-bookmarks';
 import { useCurrentUserNotes } from '@/hooks/use-notes';
-import { useSyncOnFocus } from '@/hooks/use-study-sync';
+import { useSyncOnFocus } from '@/hooks/use-sync';
 import { useAuthStore } from '@/stores/auth';
 import { useReaderStore } from '@/stores/reader';
 import { useTranslate } from '@/i18n';
 import { getBookName, getVerses } from '@/services/bible';
-import { syncAllStudyTools } from '@/services/sync';
+import { syncAll } from '@/services/sync';
 import type { Bookmark, Highlight, HighlightColor, Note } from '@/types/study';
 import type { TranslationId } from '@/types/bible';
 
@@ -166,7 +166,7 @@ export default function useStudyScreen() {
 
   const refresh = useCallback(async () => {
     if (userId != null) {
-      await syncAllStudyTools(userId);
+      await syncAll(userId);
     }
     await itemsQuery.refetch();
   }, [userId, itemsQuery]);

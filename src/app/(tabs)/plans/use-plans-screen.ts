@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import { useActivePlans, useStartPlan, useSuggestedPlans } from '@/hooks/use-reading-plans';
+import { useRefetchOnFocus } from '@/hooks/use-refetch-on-focus';
 import { useTier } from '@/hooks/use-profile';
 import { useAuthStore } from '@/stores/auth';
 import { useTranslate } from '@/i18n';
@@ -27,6 +28,10 @@ export default function usePlansScreen() {
   const suggestedPlans = useSuggestedPlans();
   const startPlan = useStartPlan();
   const tier = useTier();
+
+  // React Query doesn't refetch on focus in RN (no browser window), so a tab
+  // switch back here would serve stale plan data — refetch the (stale) lists on focus.
+  useRefetchOnFocus(activePlans, suggestedPlans);
 
   // Free/Pro active-plan cap: block the "Começar" action once at the limit and
   // nudge toward Pro via the upsell modal (the server trigger is the backstop).

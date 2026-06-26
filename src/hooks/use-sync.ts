@@ -6,29 +6,32 @@ import { useAuthStore } from '@/stores/auth';
 import { useHighlightsStore } from '@/stores/highlights';
 import { useBookmarksStore } from '@/stores/bookmarks';
 import { useNotesStore } from '@/stores/notes';
+import { useReadingProgressStore } from '@/stores/reading-progress';
 import { useSyncMetaStore } from '@/services/sync/sync-meta';
-import { syncAllStudyTools } from '@/services/sync';
+import { syncAll } from '@/services/sync';
 
 const DEBOUNCE_MS = 3000;
 
 /**
- * Headless orchestrator for study-tools sync (highlights/bookmarks/notes). Mount
- * once at the app root. Self-gates: runs only when all study stores + auth are
- * hydrated AND a user is signed in, so guests pay zero cost. Triggers:
+ * Headless orchestrator for all local-first user-data sync — the three study
+ * tools (highlights/bookmarks/notes) plus reading-progress. Mount once at the app
+ * root. Self-gates: runs only when the relevant stores + auth are hydrated AND a
+ * user is signed in, so guests pay zero cost. Triggers:
  *   1. sign-in / user-id change (also covers launch with an existing session)
  *   2. app foreground (AppState → active)
  *   3. reconnect (NetInfo isConnected false → true)
- *   4. a local mutation (store subscription, debounced)
+ *   4. a local mutation (study stores' byKey or reading-progress, debounced)
  * The engine's own in-flight guard + this debounce coalesce overlapping triggers.
  */
-export function useStudyToolsSync(): void {
+export function useSync(): void {
   const userId = useAuthStore((s) => s.user?.id) ?? null;
   const hlHydrated = useHighlightsStore((s) => s.hasHydrated);
   const bmHydrated = useBookmarksStore((s) => s.hasHydrated);
   const noteHydrated = useNotesStore((s) => s.hasHydrated);
+  const progressHydrated = useReadingProgressStore((s) => s.hasHydrated);
   const metaHydrated = useSyncMetaStore((s) => s.hasHydrated);
 
-  const ready = userId != null && hlHydrated && bmHydrated && noteHydrated && metaHydrated;
+  const ready = userId != null && hlHydrated && bmHydrated && noteHydrated && progressHydrated && metaHydrated;
 
   useEffect(() => {
     if (!ready || userId == null) return;
@@ -37,7 +40,7 @@ export function useStudyToolsSync(): void {
     let wasConnected = true;
 
     const run = () => {
-      void syncAllStudyTools(userId);
+      void syncAll(userId);
     };
     const runDebounced = () => {
       if (debounce) clearTimeout(debounce);
@@ -59,16 +62,23 @@ export function useStudyToolsSync(): void {
       wasConnected = connected;
     });
 
-    // 4. Local mutations to any of the three stores. The stores don't use the
-    // subscribeWithSelector middleware, so compare `byKey` identity ourselves
-    // (it changes only on a mutation, not on the hydration flag flip).
+    // 4. Local mutations. The study stores don't use the subscribeWithSelector
+    // middleware, so compare the slice identity ourselves (changes only on a
+    // mutation, not on the hydration flag flip).
     const onByKeyChange = (next: { byKey: unknown }, prev: { byKey: unknown }) => {
       if (next.byKey !== prev.byKey) runDebounced();
+    };
+    const onProgressChange = (
+      next: { readChapters: unknown; readDays: unknown },
+      prev: { readChapters: unknown; readDays: unknown }
+    ) => {
+      if (next.readChapters !== prev.readChapters || next.readDays !== prev.readDays) runDebounced();
     };
     const storeSubs = [
       useHighlightsStore.subscribe(onByKeyChange),
       useBookmarksStore.subscribe(onByKeyChange),
       useNotesStore.subscribe(onByKeyChange),
+      useReadingProgressStore.subscribe(onProgressChange),
     ];
 
     return () => {
@@ -81,21 +91,20 @@ export function useStudyToolsSync(): void {
 }
 
 /**
- * Pull cross-device study changes when a screen gains focus. The global
- * `useStudyToolsSync` triggers (foreground / reconnect / local edit) don't fire
- * on an in-app tab switch, so a device that's only *viewing* wouldn't pick up
- * another device's edits until it backgrounded. Mount this on the surfaces that
- * render annotations (Study tab, Reader) so navigating to them re-pulls. The
- * pulled rows land in the Zustand stores, which the screens already read
- * reactively. No-op for guests; the engine's in-flight guard dedupes overlap
- * with the global triggers.
+ * Pull cross-device changes when a screen gains focus. The global `useSync`
+ * triggers (foreground / reconnect / local edit) don't fire on an in-app tab
+ * switch, so a device that's only *viewing* wouldn't pick up another device's
+ * edits until it backgrounded. Mount this on the surfaces that render synced
+ * data (Study tab, Reader, Home) so navigating to them re-pulls. Pulled rows
+ * land in the Zustand stores, which the screens already read reactively. No-op
+ * for guests; the engine's in-flight guard dedupes overlap with the global triggers.
  */
 export function useSyncOnFocus(): void {
   const userId = useAuthStore((s) => s.user?.id) ?? null;
 
   useFocusEffect(
     useCallback(() => {
-      if (userId != null) void syncAllStudyTools(userId);
+      if (userId != null) void syncAll(userId);
     }, [userId])
   );
 }

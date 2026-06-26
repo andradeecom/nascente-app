@@ -12,6 +12,7 @@ import {
   usePlanDetail,
   useStartPlan,
 } from '@/hooks/use-reading-plans';
+import { useRefetchOnFocus } from '@/hooks/use-refetch-on-focus';
 import { useTier } from '@/hooks/use-profile';
 import { ACTIVE_PLAN_LIMIT, isPlanLimitError } from '@/types/subscription';
 import type { PlanCadence, PlanDayGroup, ReadingPlan } from '@/types/reading-plans';
@@ -36,6 +37,11 @@ export default function usePlanDetailScreen() {
   const markComplete = useMarkPlanDayComplete();
   const archivePlan = useArchivePlan();
   const tier = useTier();
+
+  // React Query doesn't refetch on focus in RN, so returning to this screen
+  // (e.g. from the Reader after marking a day) would show stale progress —
+  // refetch the (stale) detail + active list on focus.
+  useRefetchOnFocus(detail, activePlans);
 
   // Free/Pro active-plan cap — same gate as the Plans list, applied to the
   // preview-mode "Começar" CTA here, via the shared upsell modal.

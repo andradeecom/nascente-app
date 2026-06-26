@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useReaderStore } from '@/stores/reader';
 import { useLocaleStore } from '@/stores/locale';
 import { computeStreak, useReadingProgressStore } from '@/stores/reading-progress';
+import { useSyncOnFocus } from '@/hooks/use-sync';
 import { useCurrentUserHighlights } from '@/hooks/use-highlights';
 import { useBookName } from '@/hooks/use-bible';
 import { useActivePlans } from '@/hooks/use-reading-plans';
@@ -116,6 +117,10 @@ export function useHomeScreen() {
   const router = useRouter();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const locale = useLocaleStore((s) => s.locale) ?? 'pt';
+
+  // Pull cross-device progress/highlight changes when Home gains focus, so the
+  // stats reflect reading done on another device without waiting for foreground.
+  useSyncOnFocus();
 
   // Reader store — "continue reading" card
   const translationId = useReaderStore((s) => s.translationId);

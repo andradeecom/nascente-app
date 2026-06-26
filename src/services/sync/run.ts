@@ -1,4 +1,5 @@
 import { syncCollection } from './collection';
+import { syncReadingProgress } from './reading-progress';
 import { highlightsSync, bookmarksSync, notesSync } from './descriptors';
 import type { SyncResult } from './types';
 
@@ -10,11 +11,13 @@ let queued = false;
 let queuedUserId: string | null = null;
 
 /**
- * Sync all three study collections for a user. Push+pull each sequentially to
- * keep mobile network load gentle. Returns the aggregate result. Re-entrant
- * calls coalesce: a call while a sync is running schedules exactly one re-run.
+ * Sync all local-first user data for a user: the three study collections
+ * (highlights/bookmarks/notes — LWW + tombstones) and reading-progress
+ * (append-only set-union). Each runs sequentially to keep mobile network load
+ * gentle. Returns the aggregate result. Re-entrant calls coalesce: a call while
+ * a sync is running schedules exactly one re-run.
  */
-export async function syncAllStudyTools(userId: string): Promise<SyncResult> {
+export async function syncAll(userId: string): Promise<SyncResult> {
   if (running) {
     queued = true;
     queuedUserId = userId;
@@ -25,12 +28,13 @@ export async function syncAllStudyTools(userId: string): Promise<SyncResult> {
   const aggregate: SyncResult = { pushed: 0, pulled: 0, errored: false };
   const safe = (): SyncResult => ({ pushed: 0, pulled: 0, errored: true });
   try {
-    // Called per-descriptor (not in a loop) so each keeps its concrete generic
-    // type — a heterogeneous loop would collapse to an incompatible union.
+    // Called per-source (not in a loop) so each study descriptor keeps its
+    // concrete generic type — a heterogeneous loop would collapse to a union.
     const results = [
       await syncCollection(highlightsSync, userId).catch(safe),
       await syncCollection(bookmarksSync, userId).catch(safe),
       await syncCollection(notesSync, userId).catch(safe),
+      await syncReadingProgress(userId).catch(safe),
     ];
     for (const result of results) {
       aggregate.pushed += result.pushed;
@@ -45,7 +49,7 @@ export async function syncAllStudyTools(userId: string): Promise<SyncResult> {
     queued = false;
     const next = queuedUserId ?? userId;
     queuedUserId = null;
-    void syncAllStudyTools(next);
+    void syncAll(next);
   }
 
   return aggregate;

@@ -10,7 +10,7 @@ import { useMarkPlanDayComplete } from '@/hooks/use-reading-plans';
 import { useChapterHighlights, useHighlightActions } from '@/hooks/use-highlights';
 import { useChapterBookmarks, useBookmarkActions } from '@/hooks/use-bookmarks';
 import { useChapterNotes, useNoteActions } from '@/hooks/use-notes';
-import { useSyncOnFocus } from '@/hooks/use-study-sync';
+import { useSyncOnFocus } from '@/hooks/use-sync';
 import { useTranslate } from '@/i18n';
 import { getMaxChapter } from '@/services/bible';
 import type { TranslationId } from '@/types/bible';

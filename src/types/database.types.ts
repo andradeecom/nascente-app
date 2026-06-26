@@ -309,12 +309,36 @@ export type Database = {
           },
         ];
       };
+      user_reading_progress: {
+        Row: {
+          created_at: string;
+          kind: string;
+          user_id: string;
+          value: string;
+        };
+        Insert: {
+          created_at?: string;
+          kind: string;
+          user_id: string;
+          value: string;
+        };
+        Update: {
+          created_at?: string;
+          kind?: string;
+          user_id?: string;
+          value?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      purge_study_tombstones: {
+        Args: { retention_days?: number };
+        Returns: undefined;
+      };
     };
     Enums: {
       account_tier: 'free' | 'pro';

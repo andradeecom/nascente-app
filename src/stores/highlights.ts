@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { highlightKey, type Highlight, type HighlightColor } from '@/types/study';
 import type { TranslationId } from '@/types/bible';
 
-import { applyPulledRow, markRowSynced, migrateSyncMeta } from '@/services/sync/store-helpers';
+import { applyPulledRow, markRowSynced, migrateSyncMeta, pruneTombstones } from '@/services/sync/store-helpers';
 
 /**
  * Local-first highlight storage, persisted on-device and keyed per user+verse so
@@ -88,8 +88,9 @@ export const useHighlightsStore = create<HighlightsState>()(
       onRehydrateStorage: () => (state, error) => {
         if (error || !state) return;
         // Backfill sync metadata on legacy rows so the existing local corpus
-        // uploads on first sync (see src/services/sync/store-helpers).
-        state.byKey = migrateSyncMeta(state.byKey);
+        // uploads on first sync, then drop long-propagated tombstones (mirrors
+        // the server purge cron). See src/services/sync/store-helpers.
+        state.byKey = pruneTombstones(migrateSyncMeta(state.byKey));
         state.setHasHydrated(true);
       },
     }

@@ -70,3 +70,30 @@ export function migrateSyncMeta<T extends SyncableRecord>(byKey: Record<string, 
   }
   return changed ? next : byKey;
 }
+
+/** Default tombstone retention — mirrors the server `purge_study_tombstones` cron (90 days). */
+export const TOMBSTONE_TTL_DAYS = 90;
+
+/**
+ * Drop local tombstones that have already propagated and are older than the
+ * retention window, so soft-deleted rows don't accumulate on-device forever
+ * (the server-side `purge_study_tombstones` cron does the same remotely). Only
+ * purges tombstones that are **not dirty** — an un-pushed local delete is kept
+ * so it still reaches the server. Run on rehydrate.
+ */
+export function pruneTombstones<T extends SyncableRecord>(
+  byKey: Record<string, T>,
+  ttlDays: number = TOMBSTONE_TTL_DAYS
+): Record<string, T> {
+  const cutoff = Date.now() - ttlDays * 24 * 60 * 60 * 1000;
+  let changed = false;
+  const next: Record<string, T> = {};
+  for (const [key, row] of Object.entries(byKey)) {
+    if (row.deletedAt && !row.dirty && new Date(row.deletedAt).getTime() < cutoff) {
+      changed = true; // drop it
+      continue;
+    }
+    next[key] = row;
+  }
+  return changed ? next : byKey;
+}

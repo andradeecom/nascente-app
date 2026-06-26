@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { noteKey, type Note } from '@/types/study';
 import type { TranslationId } from '@/types/bible';
-import { applyPulledRow, markRowSynced, migrateSyncMeta } from '@/services/sync/store-helpers';
+import { applyPulledRow, markRowSynced, migrateSyncMeta, pruneTombstones } from '@/services/sync/store-helpers';
 
 /**
  * Local-first note storage, persisted on-device and keyed per user+verse so
@@ -86,7 +86,7 @@ export const useNotesStore = create<NotesState>()(
       partialize: ({ byKey }) => ({ byKey }),
       onRehydrateStorage: () => (state, error) => {
         if (error || !state) return;
-        state.byKey = migrateSyncMeta(state.byKey);
+        state.byKey = pruneTombstones(migrateSyncMeta(state.byKey));
         state.setHasHydrated(true);
       },
     }

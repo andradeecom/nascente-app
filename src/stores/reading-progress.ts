@@ -5,8 +5,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 /**
  * Local-first reading activity, persisted on-device (no account needed). Powers
  * the Home stats: overall Bible progress (read chapters) and the daily streak
- * (days with any reading). A future account becomes "sync & never lose it"; this
- * store stays the source of truth on the device.
+ * (days with any reading). When signed in it syncs to Supabase
+ * (`user_reading_progress`) via `src/services/sync/reading-progress.ts` — pure
+ * append-only set-union (read = always read, day = always active), so there are
+ * no tombstones, no LWW, no per-row timestamps. The store is **device-global**
+ * (not per-user): a guest's accumulated progress unions up to the account on
+ * sign-in ("sync & never lose it"). The store stays the source of truth.
  *
  * Chapters are keyed translation-independently as `${bookId}:${chapter}` so
  * progress reflects the canon, not which translation was read.
@@ -31,6 +35,11 @@ type ReadingProgressState = {
   hasHydrated: boolean;
   markChapterRead: (bookId: number, chapter: number) => void;
   setHasHydrated: (value: boolean) => void;
+  /**
+   * Union pulled remote progress into the local sets (sync engine seam). Never
+   * removes — append-only. No-op (same reference) when nothing is new.
+   */
+  mergeRemote: (chapters: string[], days: string[]) => void;
 };
 
 export const useReadingProgressStore = create<ReadingProgressState>()(
@@ -51,6 +60,29 @@ export const useReadingProgressStore = create<ReadingProgressState>()(
         });
       },
       setHasHydrated: (value) => set({ hasHydrated: value }),
+      mergeRemote: (chapters, days) => {
+        const { readChapters, readDays } = get();
+        let nextChapters = readChapters;
+        let chaptersChanged = false;
+        for (const c of chapters) {
+          if (!nextChapters[c]) {
+            if (!chaptersChanged) nextChapters = { ...nextChapters };
+            nextChapters[c] = true;
+            chaptersChanged = true;
+          }
+        }
+        let nextDays = readDays;
+        let daysChanged = false;
+        for (const d of days) {
+          if (!nextDays[d]) {
+            if (!daysChanged) nextDays = { ...nextDays };
+            nextDays[d] = true;
+            daysChanged = true;
+          }
+        }
+        if (!chaptersChanged && !daysChanged) return; // nothing new → no re-render
+        set({ readChapters: nextChapters, readDays: nextDays });
+      },
     }),
     {
       name: 'nascente-reading-progress',

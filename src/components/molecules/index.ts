@@ -9,6 +9,7 @@ export { TranslationOption, type TranslationTier } from './TranslationOption';
 export { OnboardingStepHeader } from './OnboardingStepHeader';
 export { ThemePreviewCard } from './ThemePreviewCard';
 export { FontSizeSlider } from './FontSizeSlider';
+export { ShineButton } from './ShineButton';
 export { ReaderPreviewCard } from './ReaderPreviewCard';
 export { BackButton } from './BackButton';
 export { AppModal } from './AppModal';

@@ -11,6 +11,7 @@ export default function PaywallScreen() {
     selectedCycle,
     setSelectedCycle,
     ctaLabel,
+    isPurchasing,
     handleClose,
     handleSubscribe,
     handleRestore,
@@ -30,6 +31,7 @@ export default function PaywallScreen() {
         featuresTitle={translate('paywall.featuresTitle')}
         features={features}
         ctaLabel={ctaLabel}
+        subscribing={isPurchasing}
         finePrint={translate('paywall.finePrint')}
         restoreLabel={translate('paywall.restore')}
         termsLabel={translate('paywall.terms')}

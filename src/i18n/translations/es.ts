@@ -314,6 +314,10 @@ const es = {
     restore: 'Restaurar compra',
     terms: 'Términos',
     privacy: 'Privacidad',
+    purchaseSuccess: '¡Bienvenido a Nascente Pro! 🎉',
+    purchaseError: 'No se pudo completar la compra. Inténtalo de nuevo.',
+    restoreSuccess: 'Tu suscripción Pro fue restaurada.',
+    restoreNone: 'No hay compras para restaurar.',
   },
   errors: {
     loginFailed: 'Error al iniciar sesión',

@@ -26,6 +26,8 @@ type PaywallProps = {
   features: string[];
   /** Bottom CTA label (already includes the selected price). */
   ctaLabel: string;
+  /** Disable the CTA + restore while a purchase/restore is in flight. */
+  subscribing?: boolean;
   finePrint: string;
   restoreLabel: string;
   termsLabel: string;
@@ -43,7 +45,7 @@ type PaywallProps = {
  * Pro paywall screen UI (presentation only — no billing). A green hero header
  * (overline + title + subtitle + close), the billing-cycle picker, the full
  * feature list, and a pinned bottom CTA with fine print + restore/legal footer.
- * Wired by `src/app/paywall/` to the (not-yet-built) RevenueCat purchase flow.
+ * Wired by `src/app/paywall/` to the RevenueCat purchase flow.
  */
 export function Paywall({
   overline,
@@ -55,6 +57,7 @@ export function Paywall({
   featuresTitle,
   features,
   ctaLabel,
+  subscribing = false,
   finePrint,
   restoreLabel,
   termsLabel,
@@ -135,12 +138,12 @@ export function Paywall({
 
       {/* ── Pinned CTA footer ───────────────────────────────────────────── */}
       <View style={styles.footer}>
-        <Button variant="primary" label={ctaLabel} onPress={onSubscribe} fullWidth size="lg" />
+        <Button variant="primary" label={ctaLabel} onPress={onSubscribe} fullWidth size="lg" disabled={subscribing} />
         <Text variant={TextVariants.Caption} color="textTertiary" style={styles.finePrint}>
           {finePrint}
         </Text>
         <View style={styles.legalRow}>
-          <Pressable onPress={onRestore} hitSlop={8} accessibilityRole="button">
+          <Pressable onPress={onRestore} hitSlop={8} accessibilityRole="button" disabled={subscribing}>
             <Text variant={TextVariants.Caption} color="accent" style={styles.legalEmphasis}>
               {restoreLabel}
             </Text>

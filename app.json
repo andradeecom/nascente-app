@@ -1,18 +1,18 @@
 {
   "expo": {
-    "name": "Nascente App",
-    "slug": "nascente-app",
+    "name": "Nascente",
+    "slug": "nascente",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "nascenteapp",
+    "scheme": "nascente",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/images/icon.png",
       "infoPlist": {
         "CFBundleLocalizations": ["en", "es", "pt"]
       },
-      "bundleIdentifier": "com.andradee.nascenteapp"
+      "bundleIdentifier": "com.andradee.nascente"
     },
     "android": {
       "adaptiveIcon": {
@@ -22,7 +22,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.andradee.nascenteapp"
+      "package": "com.andradee.nascente"
     },
     "web": {
       "output": "static",

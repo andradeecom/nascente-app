@@ -13,9 +13,15 @@ import { useOnboardingStore } from '@/stores/onboarding';
 import { useSync } from '@/hooks/use-sync';
 import { getLocales } from 'expo-localization';
 import { i18n } from '@/i18n';
+import { configureRevenueCat } from '@/lib/revenuecat';
 
 i18n.locale = getLocales()[0]?.languageTag || 'en';
 i18n.enableFallback = true;
+
+// Configure RevenueCat once, before any offerings/purchase call. No-ops without a
+// platform API key (Expo Go / no key) so the app still boots. User identity is
+// bound separately from the auth lifecycle (see src/stores/auth.ts).
+configureRevenueCat();
 
 // Keep the native splash visible until JS loads and the app has hydrated.
 NativeSplash.preventAutoHideAsync();

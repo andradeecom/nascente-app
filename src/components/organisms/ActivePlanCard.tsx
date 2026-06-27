@@ -1,4 +1,5 @@
-import { Pressable, View, type ViewStyle } from 'react-native';
+import { View, type ViewStyle } from 'react-native';
+import { PressableScale } from 'pressto';
 import { StyleSheet } from 'react-native-unistyles';
 import { Text, TextVariants } from '@/components/atoms';
 import type { ActiveReadingPlan } from '@/types/reading-plans';
@@ -15,7 +16,7 @@ export function ActivePlanCard({ plan, nextLabel, onPress }: ActivePlanCardProps
   const subtitle = nextReadingLabel ? `${nextLabel}: ${nextReadingLabel}` : catalog.description;
 
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
+    <PressableScale onPress={onPress} style={styles.card}>
       <View style={styles.header}>
         <View style={styles.badge}>
           <Text variant={TextVariants.Caption} color="accent" style={styles.badgeText}>
@@ -37,7 +38,7 @@ export function ActivePlanCard({ plan, nextLabel, onPress }: ActivePlanCardProps
       <View style={styles.track}>
         <View style={[styles.fill, { width: `${progressPercent}%` } as ViewStyle]} />
       </View>
-    </Pressable>
+    </PressableScale>
   );
 }
 
@@ -48,9 +49,6 @@ const styles = StyleSheet.create((theme) => ({
     padding: theme.spacing[4],
     gap: theme.spacing[3],
     ...theme.shadows.lg,
-  },
-  pressed: {
-    opacity: 0.85,
   },
   header: {
     flexDirection: 'row',

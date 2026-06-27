@@ -1,4 +1,5 @@
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
+import { PressableScale } from 'pressto';
 import { StyleSheet } from 'react-native-unistyles';
 import { CalendarDays } from 'lucide-react-native';
 import { Button, Text, TextVariants } from '@/components/atoms';
@@ -18,7 +19,7 @@ type SuggestedPlanCardProps = {
 
 export function SuggestedPlanCard({ plan, meta, startLabel, onStart, onPress, loading }: SuggestedPlanCardProps) {
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
+    <PressableScale onPress={onPress} style={styles.card}>
       <View style={styles.icon}>
         <CalendarDays size={22} color={styles.icon.color} />
       </View>
@@ -31,7 +32,7 @@ export function SuggestedPlanCard({ plan, meta, startLabel, onStart, onPress, lo
         </Text>
       </View>
       <Button variant="secondary" size="sm" label={startLabel} onPress={onStart} disabled={loading} />
-    </Pressable>
+    </PressableScale>
   );
 }
 
@@ -44,9 +45,6 @@ const styles = StyleSheet.create((theme) => ({
     borderRadius: theme.radius.xl,
     padding: theme.spacing[4],
     ...theme.shadows.lg,
-  },
-  pressed: {
-    opacity: 0.85,
   },
   icon: {
     width: 44,

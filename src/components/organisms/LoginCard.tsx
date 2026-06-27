@@ -111,7 +111,7 @@ export function LoginCard({
           variant="primary"
           size="lg"
           fullWidth
-          onPress={handleSubmit(onSubmit)}
+          onPress={() => handleSubmit(onSubmit)()}
           disabled={isLoading}
         />
       </View>

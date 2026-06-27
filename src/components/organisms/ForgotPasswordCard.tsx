@@ -81,7 +81,7 @@ export function ForgotPasswordCard({ onSubmit, isLoading, isSubmitted, submitted
           variant="primary"
           size="lg"
           fullWidth
-          onPress={handleSubmit(handleFormSubmit)}
+          onPress={() => handleSubmit(handleFormSubmit)()}
           disabled={isLoading}
         />
       </View>

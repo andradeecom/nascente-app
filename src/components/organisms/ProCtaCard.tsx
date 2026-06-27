@@ -1,0 +1,52 @@
+import { View } from 'react-native';
+import { PressableScale } from 'pressto';
+import { StyleSheet } from 'react-native-unistyles';
+import { Text, TextVariants } from '@/components/atoms';
+
+type ProCtaCardProps = {
+  title: string;
+  description: string;
+  /** Badge text, e.g. "PRO". */
+  badgeLabel: string;
+  onPress: () => void;
+};
+
+/**
+ * Pro-upsell nudge card on the Home tab — shown only to signed-in non-Pro users
+ * (gated upstream via `showProCta`). The whole card is the CTA, opening the paywall.
+ */
+export function ProCtaCard({ title, description, badgeLabel, onPress }: ProCtaCardProps) {
+  return (
+    <PressableScale style={styles.proCard} onPress={onPress} accessibilityRole="button">
+      <View style={styles.proBadge}>
+        <Text variant={TextVariants.Caption} style={styles.proBadgeText}>
+          {badgeLabel}
+        </Text>
+      </View>
+      <Text variant={TextVariants.BodyEmphasis}>{title}</Text>
+      <Text variant={TextVariants.Callout} color="textSecondary">
+        {description}
+      </Text>
+    </PressableScale>
+  );
+}
+
+const styles = StyleSheet.create((theme) => ({
+  proCard: {
+    backgroundColor: theme.colors.semantic.accentSubtle,
+    borderRadius: theme.radius.xl,
+    padding: theme.spacing[5],
+    gap: theme.spacing[2],
+  },
+  proBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: theme.colors.semantic.accent,
+    borderRadius: theme.radius.sm,
+    paddingHorizontal: theme.spacing[2],
+    paddingVertical: theme.spacing[0.5],
+  },
+  proBadgeText: {
+    color: '#FFFFFF',
+    fontWeight: theme.font.weights.bold,
+  },
+}));

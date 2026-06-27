@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { CalendarCheck } from 'lucide-react-native';
-import { Text, SafeAreaView, TextVariants } from '@/components/atoms';
+import { SafeAreaView } from '@/components/atoms';
 import {
   WelcomeHeader,
   VerseOfTheDayCard,
@@ -10,6 +10,7 @@ import {
   StatsRow,
   ActivePlansSection,
   SignInPromptCard,
+  ProCtaCard,
 } from '@/components/organisms';
 import { useHomeScreen } from '@/hooks/use-home-screen';
 
@@ -93,24 +94,13 @@ export default function HomeScreen() {
         )}
 
         {/* ── Pro CTA ─────────────────────────────────────────────────────── */}
-        {/* Hidden for guests (no paid upsell on top of the create-account nudge)
-            and for Pro users (`showProCta` = signed-in && !isPro). Opens the paywall. */}
         {showProCta && (
-          <Pressable
-            style={({ pressed }) => [styles.proCard, pressed && styles.pressed]}
+          <ProCtaCard
+            badgeLabel="PRO"
+            title={translate('home.proTitle')}
+            description={translate('home.proDescription')}
             onPress={handleOpenPaywall}
-            accessibilityRole="button"
-          >
-            <View style={styles.proBadge}>
-              <Text variant={TextVariants.Caption} style={styles.proBadgeText}>
-                PRO
-              </Text>
-            </View>
-            <Text variant={TextVariants.BodyEmphasis}>{translate('home.proTitle')}</Text>
-            <Text variant={TextVariants.Callout} color="textSecondary">
-              {translate('home.proDescription')}
-            </Text>
-          </Pressable>
+          />
         )}
       </ScrollView>
     </SafeAreaView>
@@ -127,25 +117,5 @@ const styles = StyleSheet.create((theme) => ({
     paddingTop: theme.spacing[4],
     paddingBottom: theme.spacing[10],
     gap: theme.spacing[4],
-  },
-  pressed: {
-    opacity: 0.85,
-  },
-  proCard: {
-    backgroundColor: theme.colors.semantic.accentSubtle,
-    borderRadius: theme.radius.xl,
-    padding: theme.spacing[5],
-    gap: theme.spacing[2],
-  },
-  proBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: theme.colors.semantic.accent,
-    borderRadius: theme.radius.sm,
-    paddingHorizontal: theme.spacing[2],
-    paddingVertical: theme.spacing[0.5],
-  },
-  proBadgeText: {
-    color: '#FFFFFF',
-    fontWeight: theme.font.weights.bold,
   },
 }));

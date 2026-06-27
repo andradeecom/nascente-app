@@ -20,4 +20,6 @@ export { VerseActionSheet } from './VerseActionSheet';
 export { UpsellModal } from './UpsellModal';
 export { NoteEditorModal } from './NoteEditorModal';
 export { StudyCard } from './StudyCard';
+export { PlanDayRow } from './PlanDayRow';
+export { ProCtaCard } from './ProCtaCard';
 export { Paywall, type PaywallOffer } from './Paywall';

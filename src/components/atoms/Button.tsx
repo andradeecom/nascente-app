@@ -1,11 +1,12 @@
-import { Pressable, type PressableProps, type ViewStyle } from 'react-native';
+import { type ViewStyle } from 'react-native';
+import { PressableScale, type CustomPressableProps } from 'pressto';
 import { StyleSheet } from 'react-native-unistyles';
 import { Text, TextVariants } from './Text';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive' | 'pro';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
-type ButtonProps = PressableProps & {
+type ButtonProps = CustomPressableProps & {
   variant?: ButtonVariant;
   size?: ButtonSize;
   label: string;
@@ -26,13 +27,12 @@ export function Button({
   ...rest
 }: ButtonProps) {
   return (
-    <Pressable
-      style={({ pressed }) => [
+    <PressableScale
+      style={[
         styles.base,
         sizeStyles[size],
         variantStyles[variant],
         fullWidth && styles.fullWidth,
-        pressed && styles.pressed,
         disabled && styles.disabled,
         style as ViewStyle,
       ]}
@@ -44,7 +44,7 @@ export function Button({
         {label}
       </Text>
       {iconPosition === 'right' && icon}
-    </Pressable>
+    </PressableScale>
   );
 }
 
@@ -58,9 +58,6 @@ const styles = StyleSheet.create((theme) => ({
   },
   fullWidth: {
     width: '100%',
-  },
-  pressed: {
-    opacity: 0.85,
   },
   disabled: {
     opacity: 0.5,

@@ -1,9 +1,9 @@
-import { ActivityIndicator, Pressable, View, type ViewStyle } from 'react-native';
+import { ActivityIndicator, View, type ViewStyle } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { StyleSheet } from 'react-native-unistyles';
-import { Check, ChevronRight } from 'lucide-react-native';
 import { Button, SafeAreaView, Text, TextVariants } from '@/components/atoms';
-import { ScreenHeader, UpsellModal } from '@/components/organisms';
+import { PlanDayRow, ScreenHeader, UpsellModal } from '@/components/organisms';
+import type { PlanDayGroup } from '@/types/reading-plans';
 import usePlanDetailScreen from './use-plan-detail-screen';
 
 export default function PlanDetailScreen() {
@@ -56,6 +56,16 @@ export default function PlanDetailScreen() {
     </View>
   ) : null;
 
+  const listItem = (item: PlanDayGroup) => (
+    <PlanDayRow
+      item={item}
+      isEnrolled={isEnrolled}
+      markingDay={markingDay}
+      onToggleComplete={handleToggleComplete}
+      onOpenReading={handleOpenReading}
+    />
+  );
+
   const listFooter = plan ? (
     <View style={styles.footer}>
       {isEnrolled ? (
@@ -88,42 +98,10 @@ export default function PlanDetailScreen() {
           </Text>
         </View>
       ) : (
-        <FlashList
+        <FlashList<PlanDayGroup>
           data={days}
           keyExtractor={(item) => String(item.day)}
-          renderItem={({ item }) => (
-            <View style={styles.dayRow}>
-              {isEnrolled ? (
-                <Pressable
-                  onPress={() => handleToggleComplete(item)}
-                  disabled={item.completed || markingDay === item.day}
-                  hitSlop={8}
-                  accessibilityRole="checkbox"
-                  accessibilityState={{ checked: item.completed }}
-                  style={[styles.check, item.completed && styles.checkDone]}
-                >
-                  {item.completed ? <Check size={16} color={styles.checkDoneIcon.color} strokeWidth={3} /> : null}
-                </Pressable>
-              ) : (
-                <View style={styles.dayBadge}>
-                  <Text variant={TextVariants.Caption} color="accent" style={styles.dayBadgeText}>
-                    {item.day}
-                  </Text>
-                </View>
-              )}
-
-              <Pressable style={styles.dayBody} onPress={() => handleOpenReading(item)}>
-                <Text variant={TextVariants.Caption} color="textTertiary">
-                  {translate('plans.day', { count: item.day })}
-                </Text>
-                <Text variant={TextVariants.Body} numberOfLines={1}>
-                  {item.label}
-                </Text>
-              </Pressable>
-
-              <ChevronRight size={18} color={styles.chevron.color} />
-            </View>
-          )}
+          renderItem={({ item }) => listItem(item)}
           ItemSeparatorComponent={() => <View style={styles.daySeparator} />}
           ListHeaderComponent={listHeader}
           ListFooterComponent={listFooter}
@@ -191,49 +169,6 @@ const styles = StyleSheet.create((theme) => ({
   },
   daySeparator: {
     height: theme.spacing[2],
-  },
-  dayRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: theme.spacing[3],
-    backgroundColor: theme.colors.semantic.bgSecondary,
-    borderRadius: theme.radius.lg,
-    paddingHorizontal: theme.spacing[4],
-    paddingVertical: theme.spacing[3],
-  },
-  check: {
-    width: 28,
-    height: 28,
-    borderRadius: theme.radius.full,
-    borderWidth: 2,
-    borderColor: theme.colors.semantic.bgTertiary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkDone: {
-    backgroundColor: theme.colors.semantic.accent,
-    borderColor: theme.colors.semantic.accent,
-  },
-  checkDoneIcon: {
-    color: theme.colors.semantic.bgPrimary,
-  },
-  dayBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.semantic.accentSubtle,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dayBadgeText: {
-    fontWeight: theme.font.weights.semibold,
-  },
-  dayBody: {
-    flex: 1,
-    gap: theme.spacing[0.5],
-  },
-  chevron: {
-    color: theme.colors.semantic.textTertiary,
   },
   footer: {
     marginTop: theme.spacing[5],

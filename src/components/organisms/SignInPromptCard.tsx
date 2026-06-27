@@ -1,4 +1,5 @@
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
+import { PressableScale } from 'pressto';
 import { StyleSheet } from 'react-native-unistyles';
 import { ChevronRight, type LucideIcon } from 'lucide-react-native';
 import { Text, TextVariants } from '@/components/atoms';
@@ -18,11 +19,7 @@ type SignInPromptCardProps = {
  */
 export function SignInPromptCard({ icon: Icon, title, description, actionLabel, onPress }: SignInPromptCardProps) {
   return (
-    <Pressable
-      style={({ pressed }) => [styles.card, pressed && styles.pressed]}
-      onPress={onPress}
-      accessibilityRole="button"
-    >
+    <PressableScale style={styles.card} onPress={onPress} accessibilityRole="button">
       <View style={styles.iconBadge}>
         <Icon size={26} color={styles.iconColor.color} strokeWidth={2} />
       </View>
@@ -38,7 +35,7 @@ export function SignInPromptCard({ icon: Icon, title, description, actionLabel, 
         </Text>
         <ChevronRight size={18} color={styles.iconColor.color} strokeWidth={2.5} />
       </View>
-    </Pressable>
+    </PressableScale>
   );
 }
 
@@ -50,9 +47,6 @@ const styles = StyleSheet.create((theme) => ({
     padding: theme.spacing[6],
     gap: theme.spacing[2],
     ...theme.shadows.lg,
-  },
-  pressed: {
-    opacity: 0.85,
   },
   iconBadge: {
     width: 64,

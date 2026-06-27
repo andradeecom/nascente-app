@@ -6,14 +6,6 @@ import type { TranslationId } from '@/types/bible';
 
 import { applyPulledRow, markRowSynced, migrateSyncMeta, pruneTombstones } from '@/services/sync/store-helpers';
 
-/**
- * Local-first highlight storage, persisted on-device and keyed per user+verse so
- * multiple accounts on one device never see each other's highlights (filter by
- * the current user id in selectors). The feature itself is gated to signed-in
- * users in the UI. Changes sync to Supabase (`highlights` table) via
- * `src/services/sync/`: `remove` is a soft-delete tombstone, writes mark the row
- * `dirty`, and the engine reconciles via the `applyPulled`/`markSynced` actions.
- */
 type HighlightInput = {
   userId: string;
   bookId: number;

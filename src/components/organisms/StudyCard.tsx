@@ -1,4 +1,5 @@
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
+import { PressableScale } from 'pressto';
 import { StyleSheet } from 'react-native-unistyles';
 import { Bookmark, NotebookPen } from 'lucide-react-native';
 import { Text, TextVariants } from '@/components/atoms';
@@ -12,11 +13,7 @@ type StudyCardProps = {
 
 export function StudyCard({ item, onPress }: StudyCardProps) {
   return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [styles.card, pressed && styles.pressed]}
-      accessibilityRole="button"
-    >
+    <PressableScale onPress={onPress} style={styles.card} accessibilityRole="button">
       <View style={styles.leading}>
         {item.type === 'highlight' && item.color ? (
           <View style={[styles.colorDot, { backgroundColor: HIGHLIGHT_HEX[item.color] }]} />
@@ -45,7 +42,7 @@ export function StudyCard({ item, onPress }: StudyCardProps) {
           </Text>
         )}
       </View>
-    </Pressable>
+    </PressableScale>
   );
 }
 
@@ -57,9 +54,6 @@ const styles = StyleSheet.create((theme) => ({
     borderRadius: theme.radius.lg,
     padding: theme.spacing[4],
     ...theme.shadows.sm,
-  },
-  pressed: {
-    opacity: 0.85,
   },
   leading: {
     width: 16,

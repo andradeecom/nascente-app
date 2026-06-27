@@ -1,4 +1,5 @@
-import { Pressable, View, type ViewStyle } from 'react-native';
+import { View, type ViewStyle } from 'react-native';
+import { PressableScale } from 'pressto';
 import { StyleSheet } from 'react-native-unistyles';
 import { BookOpen } from 'lucide-react-native';
 import { Text, TextVariants } from '@/components/atoms';
@@ -21,7 +22,7 @@ export function ContinueReadingCard({
   onPress,
 }: ContinueReadingCardProps) {
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
+    <PressableScale onPress={onPress} style={styles.card}>
       <View style={styles.header}>
         <View style={styles.icon}>
           <BookOpen size={20} color={styles.accentColor.color} strokeWidth={2} />
@@ -38,7 +39,7 @@ export function ContinueReadingCard({
       <View style={styles.progressTrack}>
         <View style={[styles.progressFill, { width: `${progressPercent}%` } as ViewStyle]} />
       </View>
-    </Pressable>
+    </PressableScale>
   );
 }
 
@@ -48,9 +49,6 @@ const styles = StyleSheet.create((theme) => ({
     borderRadius: theme.radius.xl,
     padding: theme.spacing[5],
     gap: theme.spacing[3],
-  },
-  pressed: {
-    opacity: 0.85,
   },
   header: {
     flexDirection: 'row',

@@ -1,4 +1,5 @@
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
+import { PressableScale } from 'pressto';
 import { StyleSheet } from 'react-native-unistyles';
 import { ChevronRight } from 'lucide-react-native';
 import { Text, TextVariants } from '@/components/atoms';
@@ -13,7 +14,7 @@ type VerseOfTheDayCardProps = {
 
 export function VerseOfTheDayCard({ title, verseText, reference, actionLabel, onPress }: VerseOfTheDayCardProps) {
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
+    <PressableScale onPress={onPress} style={styles.card}>
       <Text variant={TextVariants.Overline} color="accent" style={styles.uppercase}>
         {title}
       </Text>
@@ -31,7 +32,7 @@ export function VerseOfTheDayCard({ title, verseText, reference, actionLabel, on
           <ChevronRight size={16} color={styles.accentColor.color} strokeWidth={2} />
         </View>
       </View>
-    </Pressable>
+    </PressableScale>
   );
 }
 
@@ -41,9 +42,6 @@ const styles = StyleSheet.create((theme) => ({
     borderRadius: theme.radius.xl,
     padding: theme.spacing[5],
     gap: theme.spacing[3],
-  },
-  pressed: {
-    opacity: 0.85,
   },
   uppercase: {
     textTransform: 'uppercase',

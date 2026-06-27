@@ -157,7 +157,7 @@ export function RegisterCard({ onRegister, onRegisterWithGoogle, onRegisterWithA
           variant="primary"
           size="lg"
           fullWidth
-          onPress={handleSubmit(onSubmit)}
+          onPress={() => handleSubmit(onSubmit)()}
           disabled={isLoading}
         />
       </View>

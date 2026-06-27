@@ -1,16 +1,28 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/auth';
 import { profileKeys } from '@/hooks/use-profile';
+import { syncAll } from '@/services/sync';
+import { usePlanCatalogStore, getCuratedPlans } from '@/stores/plan-catalog';
+import {
+  usePlanEnrollmentsStore,
+  deriveCurrentDay,
+  deriveProgressPercent,
+  deriveStatus,
+} from '@/stores/plan-enrollments';
+import { usePlanCompletionsStore, completedDaysFor } from '@/stores/plan-completions';
 import { ACTIVE_PLAN_LIMIT, PlanLimitError } from '@/types/subscription';
 import type { AccountTier } from '@/types/subscription';
+import { enrollmentKey } from '@/types/reading-plans';
 import type {
   ActiveReadingPlan,
+  LocalEnrollment,
   PlanDayGroup,
   PlanDetail,
   ReadingPlan,
   ReadingPlanDay,
   SuggestedReadingPlan,
+  UserPlanStatus,
+  UserReadingPlan,
 } from '@/types/reading-plans';
 
 export const planKeys = {
@@ -21,47 +33,88 @@ export const planKeys = {
 };
 
 /**
+ * Reading plans are **offline-first**: the local Zustand stores (catalog,
+ * enrollments, completions) are the source of truth, synced to Supabase by
+ * `src/services/sync/reading-plans.ts`. These hooks keep their React Query
+ * surface (so screens, `.isPending`/`.mutate`/`useRefetchOnFocus` are unchanged),
+ * but read/write the stores synchronously instead of the network — reads work
+ * offline, writes apply instantly + mark the row dirty + fire a background sync.
+ * `current_day`/`status`/`progress` are always **derived** from the completion
+ * set (see `.docs/plans-progress-tracking.md` §2).
+ */
+
+// ── Local read helpers ───────────────────────────────────────────────────────
+
+/** Map a local enrollment + derived fields into the `UserReadingPlan` shape the UI expects. */
+function toUserReadingPlan(
+  e: LocalEnrollment,
+  currentDay: number,
+  status: UserPlanStatus,
+  completedAt: string | null
+): UserReadingPlan {
+  return {
+    id: e.id,
+    user_id: e.userId,
+    plan_id: e.planId,
+    status,
+    current_day: currentDay,
+    started_at: e.startedAt,
+    completed_at: completedAt,
+    created_at: e.createdAt,
+    updated_at: e.updatedAt,
+  };
+}
+
+/** Lead reading (sort_order 0) label at a given day, looked up in the cached catalog. */
+function nextReadingLabel(days: ReadingPlanDay[] | undefined, day: number): string | null {
+  if (!days) return null;
+  const lead = days.find((d) => d.day === day && d.sort_order === 0);
+  return lead?.ref_label ?? null;
+}
+
+/** The user's single enrollment for a plan (one row per user+plan), or undefined. */
+function enrollmentFor(userId: string, planId: string): LocalEnrollment | undefined {
+  return usePlanEnrollmentsStore.getState().byKey[enrollmentKey(userId, planId)];
+}
+
+// ── Hooks ────────────────────────────────────────────────────────────────────
+
+/**
  * Plans the user has started and not archived, joined with their catalog plan,
  * with progress % and the next reading label derived for the "Planos ativos" list.
  */
 export function useActivePlans() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const userId = useAuthStore((state) => state.user?.id);
 
   return useQuery({
     queryKey: planKeys.active,
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && !!userId,
     queryFn: async (): Promise<ActiveReadingPlan[]> => {
-      const { data, error } = await supabase
-        .from('user_reading_plans')
-        .select(
-          `*,
-           plan:reading_plans!inner (*),
-           completions:user_reading_plan_completions (day)`
-        )
-        .eq('status', 'active')
-        .order('started_at', { ascending: false });
+      const uid = userId as string;
+      const { plans, daysByPlan } = usePlanCatalogStore.getState();
+      const completionsByKey = usePlanCompletionsStore.getState().byKey;
 
-      if (error) throw error;
+      return Object.values(usePlanEnrollmentsStore.getState().byKey)
+        .filter((e) => e.userId === uid)
+        .flatMap((e): ActiveReadingPlan[] => {
+          const plan = plans[e.planId];
+          if (!plan) return []; // catalog not cached yet (e.g. never online)
+          const done = completedDaysFor(completionsByKey, uid, e.id);
+          const status = deriveStatus(e, done.size, plan.total_days);
+          if (status !== 'active') return [];
 
-      const userPlans = data ?? [];
-
-      // Fetch the next reading label for each plan in one query, then index by plan.
-      const nextLabels = await fetchNextReadingLabels(
-        userPlans.map((up) => ({ planId: up.plan.id, day: up.current_day }))
-      );
-
-      return userPlans.map((up) => {
-        const { plan, completions, ...userPlan } = up;
-        const completedCount = completions?.length ?? 0;
-        const progressPercent = plan.total_days > 0 ? Math.round((completedCount / plan.total_days) * 100) : 0;
-
-        return {
-          userPlan,
-          plan,
-          progressPercent,
-          nextReadingLabel: nextLabels.get(`${plan.id}:${up.current_day}`) ?? null,
-        };
-      });
+          const currentDay = deriveCurrentDay(done, plan.total_days);
+          return [
+            {
+              userPlan: toUserReadingPlan(e, currentDay, 'active', null),
+              plan,
+              progressPercent: deriveProgressPercent(done.size, plan.total_days),
+              nextReadingLabel: nextReadingLabel(daysByPlan[e.planId], currentDay),
+            },
+          ];
+        })
+        .sort((a, b) => b.userPlan.started_at.localeCompare(a.userPlan.started_at));
     },
     staleTime: 1000 * 60, // 1 min; active plans change more often than suggested
   });
@@ -72,69 +125,56 @@ export function useActivePlans() {
  */
 export function useSuggestedPlans() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const userId = useAuthStore((state) => state.user?.id);
 
   return useQuery({
     queryKey: planKeys.suggested,
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && !!userId,
     queryFn: async (): Promise<SuggestedReadingPlan[]> => {
-      // Public catalog (RLS already limits to owner_id null + own); curated plans
-      // expose a slug, so filter on that to keep the suggested list to the catalog.
-      const { data: plans, error } = await supabase
-        .from('reading_plans')
-        .select('*')
-        .is('owner_id', null)
-        .order('created_at', { ascending: true });
+      const uid = userId as string;
+      const { plans } = usePlanCatalogStore.getState();
+      const enrollments = usePlanEnrollmentsStore.getState().byKey;
 
-      if (error) throw error;
-
-      const { data: started, error: startedError } = await supabase.from('user_reading_plans').select('plan_id');
-
-      if (startedError) throw startedError;
-
-      const startedIds = new Set((started ?? []).map((s) => s.plan_id));
-      return (plans ?? []).filter((p) => !startedIds.has(p.id));
+      // Exclude plans with a non-archived enrollment (archived returns to Sugeridos).
+      return getCuratedPlans(plans).filter((p) => {
+        const e = enrollments[enrollmentKey(uid, p.id)];
+        return !e || e.status === 'archived';
+      });
     },
     staleTime: 1000 * 60 * 5, // 5 min; suggested plans don't change often
   });
 }
 
 /**
- * Enroll the current user in a plan ("Começar"). Refreshes both lists so the
- * plan moves from Sugeridos to Ativos.
+ * Enroll the current user in a plan ("Começar") — local-first/offline. Applies
+ * instantly to the store and triggers a background sync; the DB active-plan-cap
+ * trigger stays the server backstop.
  */
 export function useStartPlan() {
   const queryClient = useQueryClient();
   const user = useAuthStore((state) => state.user);
 
   return useMutation({
-    mutationFn: async (plan: ReadingPlan) => {
+    mutationFn: async (plan: ReadingPlan): Promise<UserReadingPlan> => {
       if (!user) throw new Error('Not authenticated');
 
-      // Tier-aware active-plan cap (server-side trigger is the backstop). Read the
-      // tier from cache (defaults to free) and the authoritative active count.
+      // Tier-aware active-plan cap, checked against the LOCAL active count (no
+      // network). Tier from cache (defaults to free); the DB trigger backstops.
       const tier = queryClient.getQueryData<{ tier: AccountTier }>(profileKeys.me)?.tier ?? 'free';
       const limit = ACTIVE_PLAN_LIMIT[tier];
 
-      const { count, error: countError } = await supabase
-        .from('user_reading_plans')
-        .select('id', { count: 'exact', head: true })
-        .eq('status', 'active');
-      if (countError) throw countError;
-      if ((count ?? 0) >= limit) throw new PlanLimitError(limit);
+      const { plans } = usePlanCatalogStore.getState();
+      const completionsByKey = usePlanCompletionsStore.getState().byKey;
+      const activeCount = Object.values(usePlanEnrollmentsStore.getState().byKey).filter((e) => {
+        if (e.userId !== user.id || e.planId === plan.id) return false; // exclude the one being (re)started
+        const total = plans[e.planId]?.total_days ?? 0;
+        return deriveStatus(e, completedDaysFor(completionsByKey, user.id, e.id).size, total) === 'active';
+      }).length;
+      if (activeCount >= limit) throw new PlanLimitError(limit);
 
-      const { data, error } = await supabase
-        .from('user_reading_plans')
-        .insert({ user_id: user.id, plan_id: plan.id })
-        .select()
-        .single();
-
-      // The DB trigger raises PLAN_LIMIT_REACHED if we slipped past the pre-check
-      // (race / stale count). Normalize it to the same typed error for the UI.
-      if (error) {
-        if (error.message?.includes('PLAN_LIMIT_REACHED')) throw new PlanLimitError(limit);
-        throw error;
-      }
-      return data;
+      const row = usePlanEnrollmentsStore.getState().start(user.id, plan.id);
+      void syncAll(user.id);
+      return toUserReadingPlan(row, 1, 'active', null);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: planKeys.active });
@@ -149,47 +189,38 @@ export function useStartPlan() {
  */
 export function usePlanDetail(planId: string | undefined) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const userId = useAuthStore((state) => state.user?.id);
 
   return useQuery({
     queryKey: planKeys.detail(planId ?? ''),
-    enabled: isAuthenticated && !!planId,
+    enabled: isAuthenticated && !!planId && !!userId,
     queryFn: async (): Promise<PlanDetail> => {
       const id = planId as string;
+      const uid = userId as string;
+      const { plans, daysByPlan } = usePlanCatalogStore.getState();
+      const plan = plans[id];
+      if (!plan) throw new Error('Plan not found in catalog');
 
-      const [planRes, daysRes, enrollRes] = await Promise.all([
-        supabase.from('reading_plans').select('*').eq('id', id).single(),
-        supabase.from('reading_plan_days').select('*').eq('plan_id', id).order('day').order('sort_order'),
-        // Most recent non-archived enrollment for this plan, if any.
-        supabase
-          .from('user_reading_plans')
-          .select('*')
-          .eq('plan_id', id)
-          .neq('status', 'archived')
-          .order('started_at', { ascending: false })
-          .limit(1)
-          .maybeSingle(),
-      ]);
+      const local = enrollmentFor(uid, id);
+      const enrollment = local && local.status !== 'archived' ? local : undefined;
 
-      if (planRes.error) throw planRes.error;
-      if (daysRes.error) throw daysRes.error;
-      if (enrollRes.error) throw enrollRes.error;
+      const done = enrollment
+        ? completedDaysFor(usePlanCompletionsStore.getState().byKey, uid, enrollment.id)
+        : new Set<number>();
 
-      const enrollment = enrollRes.data ?? null;
-
-      let completedDays = new Set<number>();
-      if (enrollment) {
-        const { data: comps, error } = await supabase
-          .from('user_reading_plan_completions')
-          .select('day')
-          .eq('user_plan_id', enrollment.id);
-        if (error) throw error;
-        completedDays = new Set((comps ?? []).map((c) => c.day));
-      }
+      const enrollmentVm = enrollment
+        ? toUserReadingPlan(
+            enrollment,
+            deriveCurrentDay(done, plan.total_days),
+            deriveStatus(enrollment, done.size, plan.total_days),
+            null
+          )
+        : null;
 
       return {
-        plan: planRes.data,
-        days: groupPlanDays(daysRes.data ?? [], completedDays),
-        enrollment,
+        plan,
+        days: groupPlanDays(daysByPlan[id] ?? [], done),
+        enrollment: enrollmentVm,
       };
     },
     staleTime: 1000 * 60,
@@ -197,10 +228,10 @@ export function usePlanDetail(planId: string | undefined) {
 }
 
 /**
- * Mark a plan day complete (online, idempotent). Upserts the completion, then
- * recomputes the enrollment's `current_day` (lowest uncompleted day) and flips
- * status → completed once every day is logged. Completions are the source of
- * truth; current_day/status are derived (see `.docs/plans-progress-tracking.md`).
+ * Mark a plan day complete — local-first/offline, idempotent. Records the
+ * completion (the source of truth), flips the enrollment to `completed` once
+ * every day is logged, and triggers a background sync. `current_day`/`status`
+ * stay derived (see `.docs/plans-progress-tracking.md` §2).
  */
 export function useMarkPlanDayComplete() {
   const queryClient = useQueryClient();
@@ -215,41 +246,13 @@ export function useMarkPlanDayComplete() {
     }): Promise<{ finished: boolean }> => {
       if (!user) throw new Error('Not authenticated');
 
-      const { error: upsertError } = await supabase
-        .from('user_reading_plan_completions')
-        .upsert(
-          { user_id: user.id, user_plan_id: vars.userPlanId, day: vars.day },
-          { onConflict: 'user_plan_id,day', ignoreDuplicates: true }
-        );
-      if (upsertError) throw upsertError;
+      usePlanCompletionsStore.getState().add(user.id, vars.userPlanId, vars.day);
 
-      // Recompute current_day + status from the full completion set.
-      const { data: comps, error: compError } = await supabase
-        .from('user_reading_plan_completions')
-        .select('day')
-        .eq('user_plan_id', vars.userPlanId);
-      if (compError) throw compError;
-
-      const done = new Set((comps ?? []).map((c) => c.day));
+      const done = completedDaysFor(usePlanCompletionsStore.getState().byKey, user.id, vars.userPlanId);
       const finished = done.size >= vars.totalDays;
-      let nextDay = vars.totalDays;
-      for (let d = 1; d <= vars.totalDays; d += 1) {
-        if (!done.has(d)) {
-          nextDay = d;
-          break;
-        }
-      }
+      if (finished) usePlanEnrollmentsStore.getState().markComplete(user.id, vars.planId);
 
-      const { error: updateError } = await supabase
-        .from('user_reading_plans')
-        .update({
-          current_day: nextDay,
-          status: finished ? 'completed' : 'active',
-          completed_at: finished ? new Date().toISOString() : null,
-        })
-        .eq('id', vars.userPlanId);
-      if (updateError) throw updateError;
-
+      void syncAll(user.id);
       return { finished };
     },
     onSuccess: (_data, vars) => {
@@ -260,19 +263,19 @@ export function useMarkPlanDayComplete() {
 }
 
 /**
- * Soft-remove an active plan ("Remover plano") by archiving it, so it drops out
- * of the active list and frees a slot in Sugeridos.
+ * Remove an active plan ("Remover plano") by archiving it (local-first), so it
+ * drops out of the active list and frees a slot in Sugeridos. The archive syncs
+ * as a sticky status (§6.2), propagating the removal to other devices.
  */
 export function useArchivePlan() {
   const queryClient = useQueryClient();
+  const user = useAuthStore((state) => state.user);
 
   return useMutation({
     mutationFn: async (vars: { userPlanId: string; planId: string }) => {
-      const { error } = await supabase
-        .from('user_reading_plans')
-        .update({ status: 'archived' })
-        .eq('id', vars.userPlanId);
-      if (error) throw error;
+      if (!user) throw new Error('Not authenticated');
+      usePlanEnrollmentsStore.getState().archive(user.id, vars.planId);
+      void syncAll(user.id);
     },
     onSuccess: (_data, vars) => {
       queryClient.invalidateQueries({ queryKey: planKeys.active });
@@ -305,27 +308,4 @@ function groupPlanDays(rows: ReadingPlanDay[], completed: Set<number>): PlanDayG
         completed: completed.has(day),
       };
     });
-}
-
-/**
- * Look up the display label for "today's" reading (the plan's current_day) for a
- * set of (plan, day) pairs in a single query. sort_order 0 is the lead reading.
- */
-async function fetchNextReadingLabels(pairs: { planId: string; day: number }[]): Promise<Map<string, string>> {
-  const labels = new Map<string, string>();
-  if (pairs.length === 0) return labels;
-
-  const planIds = [...new Set(pairs.map((p) => p.planId))];
-  const { data, error } = await supabase
-    .from('reading_plan_days')
-    .select('plan_id, day, ref_label')
-    .in('plan_id', planIds)
-    .eq('sort_order', 0);
-
-  if (error) throw error;
-
-  for (const row of data ?? []) {
-    labels.set(`${row.plan_id}:${row.day}`, row.ref_label);
-  }
-  return labels;
 }

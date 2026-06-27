@@ -1,5 +1,6 @@
 import { syncCollection } from './collection';
 import { syncReadingProgress } from './reading-progress';
+import { syncPlanCatalog, syncEnrollments, syncPlanCompletions } from './reading-plans';
 import { highlightsSync, bookmarksSync, notesSync } from './descriptors';
 import type { SyncResult } from './types';
 
@@ -12,10 +13,11 @@ let queuedUserId: string | null = null;
 
 /**
  * Sync all local-first user data for a user: the three study collections
- * (highlights/bookmarks/notes — LWW + tombstones) and reading-progress
- * (append-only set-union). Each runs sequentially to keep mobile network load
- * gentle. Returns the aggregate result. Re-entrant calls coalesce: a call while
- * a sync is running schedules exactly one re-run.
+ * (highlights/bookmarks/notes — LWW + tombstones), reading-progress (append-only
+ * set-union), and reading plans (catalog pull + enrollments status-merge +
+ * completions union). Each runs sequentially to keep mobile network load gentle.
+ * Returns the aggregate result. Re-entrant calls coalesce: a call while a sync is
+ * running schedules exactly one re-run.
  */
 export async function syncAll(userId: string): Promise<SyncResult> {
   if (running) {
@@ -35,6 +37,11 @@ export async function syncAll(userId: string): Promise<SyncResult> {
       await syncCollection(bookmarksSync, userId).catch(safe),
       await syncCollection(notesSync, userId).catch(safe),
       await syncReadingProgress(userId).catch(safe),
+      // Reading plans, in dependency order: catalog (pull-only) → enrollments →
+      // completions (FK-references the enrollment, so it must land server-side first).
+      await syncPlanCatalog().catch(safe),
+      await syncEnrollments(userId).catch(safe),
+      await syncPlanCompletions(userId).catch(safe),
     ];
     for (const result of results) {
       aggregate.pushed += result.pushed;

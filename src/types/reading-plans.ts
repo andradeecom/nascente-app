@@ -61,3 +61,53 @@ export type PlanDetail = {
   days: PlanDayGroup[];
   enrollment: UserReadingPlan | null;
 };
+
+// ── Local-first records (offline sync via src/services/sync/reading-plans.ts) ─
+
+/**
+ * A user's plan enrollment as stored on-device (the local source of truth; see
+ * `src/stores/plan-enrollments.ts`). Superset of the `user_reading_plans` row's
+ * user-authored fields plus sync metadata. **`current_day`/`completed_at` are NOT
+ * stored** — they're derived from the completion set on read (see the derive
+ * helpers in the store). `status` is stored, but archived is treated as the only
+ * authoritative status bit on merge; active-vs-completed is also derived.
+ * Synced with status-merge (archived sticky-wins, startedAt earliest-wins, else
+ * LWW on `updatedAt`).
+ */
+export type LocalEnrollment = {
+  /** Client-generated uuid (so a plan can be started offline); becomes the server PK. */
+  id: string;
+  userId: string;
+  planId: string;
+  startedAt: string;
+  createdAt: string;
+  status: UserPlanStatus;
+  /** LWW key (server-authoritative once round-tripped). */
+  updatedAt: string;
+  /** Local change not yet pushed. */
+  dirty?: boolean;
+  syncedAt?: string | null;
+};
+
+/**
+ * A single completed plan day as stored on-device (append-only log; see
+ * `src/stores/plan-completions.ts`). Mirrors `user_reading_plan_completions`;
+ * synced by set-union (idempotent on `(user_plan_id, day)`), like reading-progress.
+ */
+export type LocalPlanCompletion = {
+  userId: string;
+  /** The enrollment id (`user_reading_plans.id` / `LocalEnrollment.id`). */
+  userPlanId: string;
+  day: number;
+  completedAt: string;
+};
+
+/** Stable per-user, per-plan key (one enrollment per (user, plan) — matches the DB UNIQUE). */
+export function enrollmentKey(userId: string, planId: string): string {
+  return `${userId}:${planId}`;
+}
+
+/** Stable per-user, per-enrollment, per-day key (append-only completion log). */
+export function planCompletionKey(userId: string, userPlanId: string, day: number): string {
+  return `${userId}:${userPlanId}:${day}`;
+}

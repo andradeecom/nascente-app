@@ -17,6 +17,7 @@ export default function HomeScreen() {
   const {
     translate,
     isAuthenticated,
+    showProCta,
     greetingKey,
     verseOfTheDay,
     verseText,
@@ -30,6 +31,7 @@ export default function HomeScreen() {
     handleExplorePlans,
     handleSignIn,
     handleOpenPlan,
+    handleOpenPaywall,
   } = useHomeScreen();
 
   const statItems = useMemo(
@@ -91,10 +93,14 @@ export default function HomeScreen() {
         )}
 
         {/* ── Pro CTA ─────────────────────────────────────────────────────── */}
-        {/* Hidden for guests — don't stack a paid upsell on top of the create-account
-            nudge. TODO: also gate on subscription state once available (non-premium only). */}
-        {isAuthenticated && (
-          <Pressable style={({ pressed }) => [styles.proCard, pressed && styles.pressed]}>
+        {/* Hidden for guests (no paid upsell on top of the create-account nudge)
+            and for Pro users (`showProCta` = signed-in && !isPro). Opens the paywall. */}
+        {showProCta && (
+          <Pressable
+            style={({ pressed }) => [styles.proCard, pressed && styles.pressed]}
+            onPress={handleOpenPaywall}
+            accessibilityRole="button"
+          >
             <View style={styles.proBadge}>
               <Text variant={TextVariants.Caption} style={styles.proBadgeText}>
                 PRO

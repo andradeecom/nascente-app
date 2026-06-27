@@ -45,11 +45,11 @@ export default function usePlansScreen() {
   const openLimitModal = useCallback(() => setLimitModalVisible(true), []);
   const closeLimitModal = useCallback(() => setLimitModalVisible(false), []);
 
-  // Pro upsell CTA. No Pro/paywall screen exists yet (see notes.md RevenueCat),
-  // so for now this just dismisses; route to the paywall once it's built.
+  // Pro upsell CTA — dismiss the cap modal and open the paywall.
   const handleUpsellCta = useCallback(() => {
     setLimitModalVisible(false);
-  }, []);
+    router.push('/paywall');
+  }, [router]);
 
   // Build the "30 dias · diário" meta line from a plan's duration + cadence.
   const formatMeta = useCallback(

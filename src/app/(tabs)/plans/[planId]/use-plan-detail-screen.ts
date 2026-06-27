@@ -54,11 +54,11 @@ export default function usePlanDetailScreen() {
   const openLimitModal = useCallback(() => setLimitModalVisible(true), []);
   const closeLimitModal = useCallback(() => setLimitModalVisible(false), []);
 
-  // Pro upsell CTA. No paywall screen yet (see notes.md RevenueCat) — dismiss
-  // for now; route to the paywall once it exists.
+  // Pro upsell CTA — dismiss the cap modal and open the paywall.
   const handleUpsellCta = useCallback(() => {
     setLimitModalVisible(false);
-  }, []);
+    router.push('/paywall');
+  }, [router]);
 
   const plan = detail.data?.plan ?? null;
   const days = detail.data?.days ?? [];

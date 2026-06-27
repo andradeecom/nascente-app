@@ -70,6 +70,8 @@ function RootNavigator() {
         <Stack.Screen name="login" />
         <Stack.Screen name="register" />
         <Stack.Screen name="forgot-password" />
+        {/* Pro paywall — pushed from any tier-gated CTA, presented as a modal. */}
+        <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
       </Stack.Protected>
     </Stack>
   );

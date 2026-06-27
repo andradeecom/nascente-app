@@ -7,6 +7,7 @@ import { useLocaleStore } from '@/stores/locale';
 import { computeStreak, useReadingProgressStore } from '@/stores/reading-progress';
 import { useSyncOnFocus } from '@/hooks/use-sync';
 import { useCurrentUserHighlights } from '@/hooks/use-highlights';
+import { useIsPro } from '@/hooks/use-profile';
 import { useBookName } from '@/hooks/use-bible';
 import { useActivePlans } from '@/hooks/use-reading-plans';
 import { TOTAL_BIBLE_CHAPTERS, TRANSLATIONS } from '@/types/bible';
@@ -132,6 +133,10 @@ export function useHomeScreen() {
   // Active plans
   const activePlans = useActivePlans();
 
+  // Pro CTA gating — only nudge non-Pro users (no-op grant until RevenueCat lands,
+  // so every account reads `free` for now). Guests are gated separately in the UI.
+  const isPro = useIsPro();
+
   // Verse of the day
   const verseOfTheDay = useMemo(() => getVerseOfTheDay(), []);
   const verseText =
@@ -178,9 +183,14 @@ export function useHomeScreen() {
     router.push(`/(tabs)/plans/${planId}`);
   };
 
+  const handleOpenPaywall = () => {
+    router.push('/paywall');
+  };
+
   return {
     translate,
     isAuthenticated,
+    showProCta: isAuthenticated && !isPro,
     greetingKey,
     verseOfTheDay,
     verseText,
@@ -194,5 +204,6 @@ export function useHomeScreen() {
     handleExplorePlans,
     handleSignIn,
     handleOpenPlan,
+    handleOpenPaywall,
   };
 }

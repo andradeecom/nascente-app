@@ -12,3 +12,4 @@ export { FontSizeSlider } from './FontSizeSlider';
 export { BackButton } from './BackButton';
 export { AppModal } from './AppModal';
 export { SegmentedControl, type Segment } from './SegmentedControl';
+export { PlanOption } from './PlanOption';

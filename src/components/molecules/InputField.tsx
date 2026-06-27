@@ -1,6 +1,6 @@
 import { View, type TextInputProps } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text, TextVariants, Input } from '@/components/atoms';
+import { Text, TEXT_VARIANTS, Input } from '@/components/atoms';
 
 type InputFieldProps = TextInputProps & {
   label: string;
@@ -23,16 +23,16 @@ export function InputField({
   return (
     <View style={styles.container}>
       <View style={styles.labelRow}>
-        <Text variant={TextVariants.Label}>{label}</Text>
+        <Text variant={TEXT_VARIANTS.Label}>{label}</Text>
         {rightLabel && (
-          <Text variant={TextVariants.Label} color="textSecondary" onPress={onRightLabelPress}>
+          <Text variant={TEXT_VARIANTS.Label} color="textSecondary" onPress={onRightLabelPress}>
             {rightLabel}
           </Text>
         )}
       </View>
       <Input leftIcon={leftIcon} rightIcon={rightIcon} error={!!error} {...inputProps} />
       {error && (
-        <Text variant={TextVariants.Caption} color="danger">
+        <Text variant={TEXT_VARIANTS.Caption} color="danger">
           {error}
         </Text>
       )}

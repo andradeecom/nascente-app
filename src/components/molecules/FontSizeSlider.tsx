@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { PanResponder, View, type GestureResponderHandlers, type LayoutChangeEvent } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text, TextVariants } from '@/components/atoms';
+import { Text, TEXT_VARIANTS } from '@/components/atoms';
 
 type FontSizeSliderProps = {
   steps: number;
@@ -58,7 +58,7 @@ export function FontSizeSlider({ steps, value, onChange }: FontSizeSliderProps) 
 
   return (
     <View style={styles.row}>
-      <Text variant={TextVariants.Callout} color="textTertiary">
+      <Text variant={TEXT_VARIANTS.Callout} color="textTertiary">
         A
       </Text>
 
@@ -68,7 +68,7 @@ export function FontSizeSlider({ steps, value, onChange }: FontSizeSliderProps) 
         <View style={[styles.thumb, { left: thumbLeft }]} />
       </View>
 
-      <Text variant={TextVariants.Title2} color="textTertiary">
+      <Text variant={TEXT_VARIANTS.Title2} color="textTertiary">
         A
       </Text>
     </View>

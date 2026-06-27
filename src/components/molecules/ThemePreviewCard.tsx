@@ -1,6 +1,6 @@
 import { Pressable, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text, TextVariants } from '@/components/atoms';
+import { Text, TEXT_VARIANTS } from '@/components/atoms';
 import { colors } from '@/theme/colors';
 import type { ThemeName } from '@/stores/theme';
 
@@ -26,7 +26,7 @@ export function ThemePreviewCard({ name, label, selected, onSelect }: ThemePrevi
         <View style={[styles.line, styles.lineLong, { backgroundColor: palette.textPrimary }]} />
         <View style={[styles.line, styles.lineShort, { backgroundColor: palette.textTertiary }]} />
       </View>
-      <Text variant={TextVariants.Caption} style={styles.label}>
+      <Text variant={TEXT_VARIANTS.Caption} style={styles.label}>
         {label}
       </Text>
     </Pressable>

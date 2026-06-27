@@ -2,7 +2,7 @@ import { View } from 'react-native';
 import { PressableScale } from 'pressto';
 import { StyleSheet } from 'react-native-unistyles';
 import { ChevronRight } from 'lucide-react-native';
-import { Text, TextVariants } from '@/components/atoms';
+import { Text, TEXT_VARIANTS } from '@/components/atoms';
 
 type VerseOfTheDayCardProps = {
   title: string;
@@ -15,18 +15,18 @@ type VerseOfTheDayCardProps = {
 export function VerseOfTheDayCard({ title, verseText, reference, actionLabel, onPress }: VerseOfTheDayCardProps) {
   return (
     <PressableScale onPress={onPress} style={styles.card}>
-      <Text variant={TextVariants.Overline} color="accent" style={styles.uppercase}>
+      <Text variant={TEXT_VARIANTS.Overline} color="accent" style={styles.uppercase}>
         {title}
       </Text>
-      <Text variant={TextVariants.BodyEmphasis} style={styles.verseText}>
+      <Text variant={TEXT_VARIANTS.BodyEmphasis} style={styles.verseText}>
         {verseText}
       </Text>
       <View style={styles.footer}>
-        <Text variant={TextVariants.Callout} color="textSecondary">
+        <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
           {reference}
         </Text>
         <View style={styles.action}>
-          <Text variant={TextVariants.Label} color="accent">
+          <Text variant={TEXT_VARIANTS.Label} color="accent">
             {actionLabel}
           </Text>
           <ChevronRight size={16} color={styles.accentColor.color} strokeWidth={2} />

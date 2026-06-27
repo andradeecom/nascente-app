@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text, TextVariants } from '@/components/atoms';
+import { Text, TEXT_VARIANTS } from '@/components/atoms';
 
 type Stat = {
   value: string | number;
@@ -18,10 +18,10 @@ export function StatsRow({ stats }: StatsRowProps) {
     <View style={styles.row}>
       {stats.map((stat) => (
         <View key={stat.label} style={[styles.card, stat.muted && styles.cardMuted]}>
-          <Text variant={TextVariants.Title1} color={stat.muted ? 'textTertiary' : 'textPrimary'}>
+          <Text variant={TEXT_VARIANTS.Title1} color={stat.muted ? 'textTertiary' : 'textPrimary'}>
             {stat.value}
           </Text>
-          <Text variant={TextVariants.Caption} color="textSecondary">
+          <Text variant={TEXT_VARIANTS.Caption} color="textSecondary">
             {stat.label}
           </Text>
         </View>

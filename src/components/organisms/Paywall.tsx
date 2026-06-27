@@ -1,9 +1,10 @@
 import { Pressable, ScrollView, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { Check, Target, X } from 'lucide-react-native';
-import { Button, Text, TextVariants } from '@/components/atoms';
+import { Button, Text, TEXT_VARIANTS } from '@/components/atoms';
 import { PlanOption } from '@/components/molecules';
 import type { ProBillingCycle } from '@/types/subscription';
+import { BUTTON_SIZES, BUTTON_VARIANTS } from '../atoms/Button';
 
 /** A billing offer rendered as a selectable row. */
 export type PaywallOffer = {
@@ -77,7 +78,7 @@ export function Paywall({
           <View style={styles.heroTopRow}>
             <View style={styles.brandRow}>
               <Target size={22} color={styles.heroText.color} strokeWidth={2} />
-              <Text variant={TextVariants.Overline} style={styles.heroOverline}>
+              <Text variant={TEXT_VARIANTS.Overline} style={styles.heroOverline}>
                 {overline}
               </Text>
             </View>
@@ -92,10 +93,10 @@ export function Paywall({
             </Pressable>
           </View>
 
-          <Text variant={TextVariants.Display} style={styles.heroTitle}>
+          <Text variant={TEXT_VARIANTS.Display} style={styles.heroTitle}>
             {title}
           </Text>
-          <Text variant={TextVariants.Body} style={styles.heroSubtitle}>
+          <Text variant={TEXT_VARIANTS.Body} style={styles.heroSubtitle}>
             {subtitle}
           </Text>
         </View>
@@ -118,7 +119,7 @@ export function Paywall({
           </View>
 
           {/* ── Feature list ────────────────────────────────────────────── */}
-          <Text variant={TextVariants.Overline} color="textTertiary" style={styles.featuresTitle}>
+          <Text variant={TEXT_VARIANTS.Overline} color="textTertiary" style={styles.featuresTitle}>
             {featuresTitle}
           </Text>
           <View style={styles.features}>
@@ -127,7 +128,7 @@ export function Paywall({
                 <View style={styles.featureCheck}>
                   <Check size={14} color={styles.featureCheckIcon.color} strokeWidth={3} />
                 </View>
-                <Text variant={TextVariants.Callout} style={styles.featureText}>
+                <Text variant={TEXT_VARIANTS.Callout} style={styles.featureText}>
                   {feature}
                 </Text>
               </View>
@@ -138,29 +139,36 @@ export function Paywall({
 
       {/* ── Pinned CTA footer ───────────────────────────────────────────── */}
       <View style={styles.footer}>
-        <Button variant="primary" label={ctaLabel} onPress={onSubscribe} fullWidth size="lg" disabled={subscribing} />
-        <Text variant={TextVariants.Caption} color="textTertiary" style={styles.finePrint}>
+        <Button
+          variant={BUTTON_VARIANTS.Primary}
+          label={ctaLabel}
+          onPress={onSubscribe}
+          fullWidth
+          size={BUTTON_SIZES.Large}
+          disabled={subscribing}
+        />
+        <Text variant={TEXT_VARIANTS.Caption} color="textTertiary" style={styles.finePrint}>
           {finePrint}
         </Text>
         <View style={styles.legalRow}>
           <Pressable onPress={onRestore} hitSlop={8} accessibilityRole="button" disabled={subscribing}>
-            <Text variant={TextVariants.Caption} color="accent" style={styles.legalEmphasis}>
+            <Text variant={TEXT_VARIANTS.Caption} color="accent" style={styles.legalEmphasis}>
               {restoreLabel}
             </Text>
           </Pressable>
-          <Text variant={TextVariants.Caption} color="textTertiary">
+          <Text variant={TEXT_VARIANTS.Caption} color="textTertiary">
             {'  ·  '}
           </Text>
           <Pressable onPress={onTerms} hitSlop={8} accessibilityRole="button">
-            <Text variant={TextVariants.Caption} color="textTertiary">
+            <Text variant={TEXT_VARIANTS.Caption} color="textTertiary">
               {termsLabel}
             </Text>
           </Pressable>
-          <Text variant={TextVariants.Caption} color="textTertiary">
+          <Text variant={TEXT_VARIANTS.Caption} color="textTertiary">
             {'  ·  '}
           </Text>
           <Pressable onPress={onPrivacy} hitSlop={8} accessibilityRole="button">
-            <Text variant={TextVariants.Caption} color="textTertiary">
+            <Text variant={TEXT_VARIANTS.Caption} color="textTertiary">
               {privacyLabel}
             </Text>
           </Pressable>

@@ -1,9 +1,10 @@
 import { ScrollView, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Button, Text, TextVariants, SafeAreaView } from '@/components/atoms';
+import { Button, Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
 import { TranslationOption, OnboardingStepHeader } from '@/components/molecules';
 import { useTranslate } from '@/i18n';
 import useOnboardingTranslationScreen from './use-onboarding-translation-screen';
+import { BUTTON_SIZES } from '@/components/atoms/Button';
 
 export default function OnboardingTranslationScreen() {
   const { sections, selectedKey, selectedName, handleSelect, handleContinue, handleBack } =
@@ -16,18 +17,18 @@ export default function OnboardingTranslationScreen() {
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Text variant={TextVariants.Title2}>{t('onboarding.translation.title')}</Text>
-          <Text variant={TextVariants.Callout} color="textSecondary" style={styles.subtitle}>
+          <Text variant={TEXT_VARIANTS.Title2}>{t('onboarding.translation.title')}</Text>
+          <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" style={styles.subtitle}>
             {t('onboarding.translation.subtitle')}
           </Text>
         </View>
 
         {sections.map((section) => (
           <View key={section.sectionKey} style={styles.section}>
-            <Text variant={TextVariants.Overline} color="textTertiary">
+            <Text variant={TEXT_VARIANTS.Overline} color="textTertiary">
               {t(`onboarding.translation.sections.${section.sectionKey}.label`)}
             </Text>
-            <Text variant={TextVariants.Caption} color="textSecondary" style={styles.sectionCaption}>
+            <Text variant={TEXT_VARIANTS.Caption} color="textSecondary" style={styles.sectionCaption}>
               {t(`onboarding.translation.sections.${section.sectionKey}.caption`)}
             </Text>
 
@@ -51,10 +52,15 @@ export default function OnboardingTranslationScreen() {
       </ScrollView>
 
       <View style={styles.footer}>
-        <Text variant={TextVariants.Caption} color="textTertiary" style={styles.footerNote}>
+        <Text variant={TEXT_VARIANTS.Caption} color="textTertiary" style={styles.footerNote}>
           {t('onboarding.translation.footer', { name: selectedName })}
         </Text>
-        <Button label={t('onboarding.translation.continueButton')} size="lg" fullWidth onPress={handleContinue} />
+        <Button
+          label={t('onboarding.translation.continueButton')}
+          size={BUTTON_SIZES.Large}
+          fullWidth
+          onPress={handleContinue}
+        />
       </View>
     </SafeAreaView>
   );

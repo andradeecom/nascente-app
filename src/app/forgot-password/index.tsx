@@ -3,7 +3,7 @@ import { translate } from '@/i18n';
 import { Link } from 'expo-router';
 import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text, TextVariants, SafeAreaView } from '@/components/atoms';
+import { Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
 import { BackButton } from '@/components/molecules';
 import useForgotPasswordScreen from './use-forgot-password-screen';
 
@@ -22,7 +22,7 @@ export default function ForgotPasswordScreen() {
             submittedEmail={submittedEmail ?? undefined}
           />
           <Link href="/login" style={styles.footerLink}>
-            <Text variant={TextVariants.Callout} color="textSecondary">
+            <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
               {translate('forgotPassword.backToLogin')}
             </Text>
           </Link>

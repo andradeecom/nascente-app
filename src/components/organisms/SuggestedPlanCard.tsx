@@ -2,8 +2,9 @@ import { View } from 'react-native';
 import { PressableScale } from 'pressto';
 import { StyleSheet } from 'react-native-unistyles';
 import { CalendarDays } from 'lucide-react-native';
-import { Button, Text, TextVariants } from '@/components/atoms';
+import { Button, Text, TEXT_VARIANTS } from '@/components/atoms';
 import type { SuggestedReadingPlan } from '@/types/reading-plans';
+import { BUTTON_SIZES, BUTTON_VARIANTS } from '../atoms/Button';
 
 type SuggestedPlanCardProps = {
   plan: SuggestedReadingPlan;
@@ -24,14 +25,20 @@ export function SuggestedPlanCard({ plan, meta, startLabel, onStart, onPress, lo
         <CalendarDays size={22} color={styles.icon.color} />
       </View>
       <View style={styles.body}>
-        <Text variant={TextVariants.BodyEmphasis} numberOfLines={2}>
+        <Text variant={TEXT_VARIANTS.BodyEmphasis} numberOfLines={2}>
           {plan.title}
         </Text>
-        <Text variant={TextVariants.Callout} color="textSecondary" numberOfLines={1}>
+        <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" numberOfLines={1}>
           {meta}
         </Text>
       </View>
-      <Button variant="secondary" size="sm" label={startLabel} onPress={onStart} disabled={loading} />
+      <Button
+        variant={BUTTON_VARIANTS.Secondary}
+        size={BUTTON_SIZES.Small}
+        label={startLabel}
+        onPress={onStart}
+        disabled={loading}
+      />
     </PressableScale>
   );
 }

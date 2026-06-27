@@ -1,11 +1,12 @@
 import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { CloudCheck, Check } from 'lucide-react-native';
-import { Button, Text, TextVariants, SafeAreaView } from '@/components/atoms';
+import { Button, Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
 import { OnboardingStepHeader } from '@/components/molecules';
 import { useTranslate } from '@/i18n';
 import { typography } from '@/theme/typography';
 import useOnboardingAccountScreen from './use-onboarding-account-screen';
+import { BUTTON_SIZES, BUTTON_VARIANTS } from '@/components/atoms/Button';
 
 const BENEFITS = ['highlights', 'plans', 'backup'] as const;
 
@@ -22,10 +23,10 @@ export default function OnboardingAccountScreen() {
           <View style={styles.iconBadge}>
             <CloudCheck size={40} color={styles.heroIcon.color} strokeWidth={2} />
           </View>
-          <Text variant={TextVariants.Title1} style={styles.title}>
+          <Text variant={TEXT_VARIANTS.Title1} style={styles.title}>
             {t('onboarding.account.title')}
           </Text>
-          <Text variant={TextVariants.Callout} color="textSecondary" style={styles.subtitle}>
+          <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" style={styles.subtitle}>
             {t('onboarding.account.subtitle')}
           </Text>
         </View>
@@ -36,7 +37,7 @@ export default function OnboardingAccountScreen() {
               <View style={styles.benefitIcon}>
                 <Check size={16} color={styles.benefitIconColor.color} strokeWidth={3} />
               </View>
-              <Text variant={TextVariants.Body} style={styles.benefitText}>
+              <Text variant={TEXT_VARIANTS.Body} style={styles.benefitText}>
                 {t(`onboarding.account.benefits.${key}`)}
               </Text>
             </View>
@@ -45,9 +46,20 @@ export default function OnboardingAccountScreen() {
       </View>
 
       <View style={styles.footer}>
-        <Button label={t('onboarding.account.createButton')} size="lg" fullWidth onPress={handleCreateAccount} />
-        <Button label={t('onboarding.account.skipButton')} variant="ghost" size="lg" fullWidth onPress={handleSkip} />
-        <Text variant={TextVariants.Caption} color="textTertiary" style={styles.footerNote}>
+        <Button
+          label={t('onboarding.account.createButton')}
+          size={BUTTON_SIZES.Large}
+          fullWidth
+          onPress={handleCreateAccount}
+        />
+        <Button
+          label={t('onboarding.account.skipButton')}
+          variant={BUTTON_VARIANTS.Ghost}
+          size={BUTTON_SIZES.Large}
+          fullWidth
+          onPress={handleSkip}
+        />
+        <Text variant={TEXT_VARIANTS.Caption} color="textTertiary" style={styles.footerNote}>
           {t('onboarding.account.footer')}
         </Text>
       </View>

@@ -1,7 +1,7 @@
 import { Pressable, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { User, ChevronRight } from 'lucide-react-native';
-import { Text, TextVariants, Avatar } from '@/components/atoms';
+import { Text, TEXT_VARIANTS, Avatar } from '@/components/atoms';
 
 type SettingsProfileCardProps = {
   isAuthenticated: boolean;
@@ -32,8 +32,8 @@ export function SettingsProfileCard({
         </View>
       )}
       <View style={styles.info}>
-        <Text variant={TextVariants.BodyEmphasis}>{isAuthenticated ? name : title}</Text>
-        <Text variant={TextVariants.Callout} color="textSecondary">
+        <Text variant={TEXT_VARIANTS.BodyEmphasis}>{isAuthenticated ? name : title}</Text>
+        <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
           {isAuthenticated ? email : subtitle}
         </Text>
       </View>

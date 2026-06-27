@@ -1,7 +1,7 @@
 import { Pressable, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { Check, Cloud, Download, Lock } from 'lucide-react-native';
-import { Text, TextVariants } from '@/components/atoms';
+import { Text, TEXT_VARIANTS } from '@/components/atoms';
 
 export type TranslationTier = 'available' | 'download' | 'pro';
 
@@ -41,11 +41,11 @@ export function TranslationOption({
       </View>
 
       <View style={styles.text}>
-        <Text variant={TextVariants.BodyEmphasis}>{title}</Text>
-        <Text variant={TextVariants.Caption} color="textSecondary" style={styles.description}>
+        <Text variant={TEXT_VARIANTS.BodyEmphasis}>{title}</Text>
+        <Text variant={TEXT_VARIANTS.Caption} color="textSecondary" style={styles.description}>
           {description}
         </Text>
-        <Text variant={TextVariants.Caption} color="textTertiary" style={styles.size}>
+        <Text variant={TEXT_VARIANTS.Caption} color="textTertiary" style={styles.size}>
           {size}
         </Text>
       </View>
@@ -54,7 +54,7 @@ export function TranslationOption({
         {tier === 'available' && (
           <View style={styles.offlineBadge}>
             <Cloud size={14} color={styles.offlineBadge.color} />
-            <Text variant={TextVariants.Caption} color="accent">
+            <Text variant={TEXT_VARIANTS.Caption} color="accent">
               {offlineLabel}
             </Text>
           </View>
@@ -63,7 +63,7 @@ export function TranslationOption({
         {tier === 'pro' && (
           <View style={styles.proBadge}>
             <Lock size={12} color={styles.proBadge.color} />
-            <Text variant={TextVariants.Caption} color="accent">
+            <Text variant={TEXT_VARIANTS.Caption} color="accent">
               {proLabel}
             </Text>
           </View>

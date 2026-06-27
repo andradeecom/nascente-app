@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { BookOpen } from 'lucide-react-native';
-import { Text, TextVariants } from '@/components/atoms';
+import { Text, TEXT_VARIANTS } from '@/components/atoms';
 
 type WelcomeHeaderProps = {
   greeting: string;
@@ -15,8 +15,8 @@ export function WelcomeHeader({ greeting, subtitle }: WelcomeHeaderProps) {
         <BookOpen size={24} color={styles.iconColor.color} strokeWidth={2} />
       </View>
       <View>
-        <Text variant={TextVariants.Title1}>{greeting}</Text>
-        <Text variant={TextVariants.Callout} color="textSecondary">
+        <Text variant={TEXT_VARIANTS.Title1}>{greeting}</Text>
+        <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
           {subtitle}
         </Text>
       </View>

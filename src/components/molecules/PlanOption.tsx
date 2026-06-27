@@ -1,6 +1,6 @@
 import { Pressable, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text, TextVariants } from '@/components/atoms';
+import { Text, TEXT_VARIANTS } from '@/components/atoms';
 
 type PlanOptionProps = {
   label: string;
@@ -30,23 +30,23 @@ export function PlanOption({ label, price, period, caption, badge, selected, onS
 
       <View style={styles.text}>
         <View style={styles.labelRow}>
-          <Text variant={TextVariants.BodyEmphasis}>{label}</Text>
+          <Text variant={TEXT_VARIANTS.BodyEmphasis}>{label}</Text>
           {badge ? (
             <View style={styles.badge}>
-              <Text variant={TextVariants.Caption} style={styles.badgeText}>
+              <Text variant={TEXT_VARIANTS.Caption} style={styles.badgeText}>
                 {badge}
               </Text>
             </View>
           ) : null}
         </View>
-        <Text variant={TextVariants.Caption} color="textSecondary">
+        <Text variant={TEXT_VARIANTS.Caption} color="textSecondary">
           {caption}
         </Text>
       </View>
 
       <View style={styles.priceCol}>
-        <Text variant={TextVariants.Title3}>{price}</Text>
-        <Text variant={TextVariants.Caption} color="textSecondary">
+        <Text variant={TEXT_VARIANTS.Title3}>{price}</Text>
+        <Text variant={TEXT_VARIANTS.Caption} color="textSecondary">
           {period}
         </Text>
       </View>

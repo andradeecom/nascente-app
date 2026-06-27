@@ -3,7 +3,7 @@ import { ActivityIndicator, Pressable, View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { StyleSheet } from 'react-native-unistyles';
 import { Check } from 'lucide-react-native';
-import { Button, Text, TextVariants, SafeAreaView } from '@/components/atoms';
+import { Button, Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
 import { ReaderHeader, ChapterNavBar } from '@/components/molecules';
 import { BookChapterPicker, NoteEditorModal, TranslationPicker, VerseActionSheet } from '@/components/organisms';
 import { useReaderStore } from '@/stores/reader';
@@ -12,6 +12,7 @@ import { highlights as HIGHLIGHT_HEX } from '@/theme/colors';
 import { typography } from '@/theme/typography';
 import type { Verse } from '@/types/bible';
 import useReaderScreen from './use-reader-screen';
+import { BUTTON_SIZES } from '@/components/atoms/Button';
 
 export default function ReaderScreen() {
   const {
@@ -62,7 +63,7 @@ export default function ReaderScreen() {
       const color = chapterHighlights[item.verse];
       return (
         <Pressable onPress={() => handleVersePress(item.verse)} style={styles.verseRow}>
-          <Text variant={TextVariants.Caption} color="textTertiary" style={styles.verseNumber}>
+          <Text variant={TEXT_VARIANTS.Caption} color="textTertiary" style={styles.verseNumber}>
             {item.verse}
           </Text>
           <Text
@@ -86,7 +87,7 @@ export default function ReaderScreen() {
   const listFooter = isPlanDayEnd ? (
     <View style={styles.planFooter}>
       <Button
-        size="lg"
+        size={BUTTON_SIZES.Large}
         fullWidth
         label={t('plans.reading.finishButton')}
         onPress={handleFinishPlanDay}

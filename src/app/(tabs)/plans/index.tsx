@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { StyleSheet } from 'react-native-unistyles';
 import { CalendarCheck } from 'lucide-react-native';
-import { SafeAreaView, Text, TextVariants } from '@/components/atoms';
+import { SafeAreaView, Text, TEXT_VARIANTS } from '@/components/atoms';
 import { SectionHeader } from '@/components/molecules';
 import { ActivePlanCard, SignInPromptCard, SuggestedPlanCard, UpsellModal } from '@/components/organisms';
 import type { ActiveReadingPlan, SuggestedReadingPlan } from '@/types/reading-plans';
@@ -63,7 +63,7 @@ export default function PlansScreen() {
     return (
       <SafeAreaView edges={['top']} style={styles.safe}>
         <View style={styles.content}>
-          <Text variant={TextVariants.Title1} style={styles.heading}>
+          <Text variant={TEXT_VARIANTS.Title1} style={styles.heading}>
             {translate('plans.title')}
           </Text>
           <SignInPromptCard
@@ -79,7 +79,7 @@ export default function PlansScreen() {
   }
 
   const listHeader = (
-    <Text variant={TextVariants.Title1} style={styles.heading}>
+    <Text variant={TEXT_VARIANTS.Title1} style={styles.heading}>
       {translate('plans.title')}
     </Text>
   );
@@ -95,7 +95,7 @@ export default function PlansScreen() {
               return <SectionHeader title={item.title} />;
             case 'empty':
               return (
-                <Text variant={TextVariants.Callout} color="textSecondary">
+                <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
                   {item.message}
                 </Text>
               );

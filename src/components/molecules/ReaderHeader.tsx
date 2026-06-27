@@ -1,7 +1,7 @@
 import { Pressable, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { ChevronDown } from 'lucide-react-native';
-import { Text, TextVariants } from '@/components/atoms';
+import { Text, TEXT_VARIANTS } from '@/components/atoms';
 import { TRANSLATIONS, type TranslationId } from '@/types/bible';
 
 type ReaderHeaderProps = {
@@ -16,14 +16,14 @@ export function ReaderHeader({ bookName, chapter, translationId, onBookPress, on
   return (
     <View style={styles.header}>
       <Pressable onPress={onBookPress} style={styles.bookButton}>
-        <Text variant={TextVariants.Title3} numberOfLines={1} style={styles.bookButtonText}>
+        <Text variant={TEXT_VARIANTS.Title3} numberOfLines={1} style={styles.bookButtonText}>
           {bookName ?? '...'} {chapter}
         </Text>
         <ChevronDown size={18} color={styles.chevron.color} />
       </Pressable>
 
       <Pressable onPress={onTranslationPress} style={styles.translationButton}>
-        <Text variant={TextVariants.Label} color="accent">
+        <Text variant={TEXT_VARIANTS.Label} color="accent">
           {TRANSLATIONS[translationId].label}
         </Text>
       </Pressable>

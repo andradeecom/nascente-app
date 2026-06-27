@@ -3,10 +3,11 @@ import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { useForm, Controller } from 'react-hook-form';
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema';
-import { Text, TextVariants, Button } from '@/components/atoms';
+import { Text, TEXT_VARIANTS, Button } from '@/components/atoms';
 import { InputField } from '@/components/molecules';
 import { createForgotPasswordSchema, type ForgotPasswordFormData } from '@/schemas/forgot-password';
 import { translate } from '@/i18n';
+import { BUTTON_SIZES, BUTTON_VARIANTS } from '../atoms/Button';
 
 type ForgotPasswordCardProps = {
   onSubmit: (email: string) => void;
@@ -35,10 +36,10 @@ export function ForgotPasswordCard({ onSubmit, isLoading, isSubmitted, submitted
     return (
       <View style={styles.card}>
         <View style={styles.header}>
-          <Text variant={TextVariants.Title1} style={styles.title}>
+          <Text variant={TEXT_VARIANTS.Title1} style={styles.title}>
             {translate('forgotPassword.successTitle')}
           </Text>
-          <Text variant={TextVariants.Callout} color="textSecondary" style={styles.title}>
+          <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" style={styles.title}>
             {translate('forgotPassword.successMessage', { email: submittedEmail ?? '' })}
           </Text>
         </View>
@@ -49,10 +50,10 @@ export function ForgotPasswordCard({ onSubmit, isLoading, isSubmitted, submitted
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Text variant={TextVariants.Title1} style={styles.title}>
+        <Text variant={TEXT_VARIANTS.Title1} style={styles.title}>
           {translate('forgotPassword.title')}
         </Text>
-        <Text variant={TextVariants.Callout} color="textSecondary" style={styles.title}>
+        <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" style={styles.title}>
           {translate('forgotPassword.subtitle')}
         </Text>
       </View>
@@ -78,8 +79,8 @@ export function ForgotPasswordCard({ onSubmit, isLoading, isSubmitted, submitted
 
         <Button
           label={isLoading ? translate('forgotPassword.sending') : translate('forgotPassword.submitButton')}
-          variant="primary"
-          size="lg"
+          variant={BUTTON_VARIANTS.Primary}
+          size={BUTTON_SIZES.Large}
           fullWidth
           onPress={() => handleSubmit(handleFormSubmit)()}
           disabled={isLoading}

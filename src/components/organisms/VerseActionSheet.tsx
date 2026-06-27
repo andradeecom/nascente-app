@@ -3,7 +3,7 @@ import { Pressable, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView, type BottomSheetBackdropProps } from '@gorhom/bottom-sheet';
 import { Bookmark, BookmarkCheck, Check, NotebookPen, Trash2 } from 'lucide-react-native';
-import { Text, TextVariants } from '@/components/atoms';
+import { Text, TEXT_VARIANTS } from '@/components/atoms';
 import { useTranslate } from '@/i18n';
 import { highlights as HIGHLIGHT_HEX } from '@/theme/colors';
 import { HIGHLIGHT_COLORS, type HighlightColor } from '@/types/study';
@@ -79,11 +79,11 @@ export function VerseActionSheet({
       handleIndicatorStyle={styles.handleIndicator}
     >
       <BottomSheetView style={styles.content}>
-        <Text variant={TextVariants.Title3} style={styles.reference}>
+        <Text variant={TEXT_VARIANTS.Title3} style={styles.reference}>
           {reference}
         </Text>
 
-        <Text variant={TextVariants.Overline} color="textTertiary" style={styles.label}>
+        <Text variant={TEXT_VARIANTS.Overline} color="textTertiary" style={styles.label}>
           {translate('study.highlightVerse')}
         </Text>
         <View style={styles.swatches}>
@@ -103,7 +103,7 @@ export function VerseActionSheet({
         {currentColor ? (
           <Pressable onPress={onRemove} style={({ pressed }) => [styles.remove, pressed && styles.pressed]}>
             <Trash2 size={18} color={styles.removeIcon.color} strokeWidth={2} />
-            <Text variant={TextVariants.Label} color="danger">
+            <Text variant={TEXT_VARIANTS.Label} color="danger">
               {translate('study.removeHighlight')}
             </Text>
           </Pressable>
@@ -122,7 +122,7 @@ export function VerseActionSheet({
             ) : (
               <Bookmark size={20} color={styles.actionIcon.color} strokeWidth={2} />
             )}
-            <Text variant={TextVariants.Label} color={isBookmarked ? 'accent' : 'textPrimary'}>
+            <Text variant={TEXT_VARIANTS.Label} color={isBookmarked ? 'accent' : 'textPrimary'}>
               {translate(isBookmarked ? 'study.removeBookmark' : 'study.addBookmark')}
             </Text>
           </Pressable>
@@ -137,7 +137,7 @@ export function VerseActionSheet({
               color={hasNote ? styles.actionAccent.color : styles.actionIcon.color}
               strokeWidth={2}
             />
-            <Text variant={TextVariants.Label} color={hasNote ? 'accent' : 'textPrimary'}>
+            <Text variant={TEXT_VARIANTS.Label} color={hasNote ? 'accent' : 'textPrimary'}>
               {translate(hasNote ? 'study.editNote' : 'study.addNote')}
             </Text>
           </Pressable>

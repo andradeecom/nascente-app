@@ -1,10 +1,11 @@
 import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text, TextVariants, Avatar, Button, SafeAreaView } from '@/components/atoms';
+import { Text, TEXT_VARIANTS, Avatar, Button, SafeAreaView } from '@/components/atoms';
 import { ScreenHeader } from '@/components/organisms';
 import { useAuthStore } from '@/stores/auth';
 import { useLogout } from '@/hooks/use-auth';
 import { useTranslate } from '@/i18n';
+import { BUTTON_VARIANTS } from '@/components/atoms/Button';
 
 export default function ProfileScreen() {
   const user = useAuthStore((s) => s.user);
@@ -18,14 +19,14 @@ export default function ProfileScreen() {
       <ScreenHeader title={translate('settings.profileTitle')} />
       <View style={styles.container}>
         <Avatar uri={user?.profileImageUrl ?? undefined} fallback={fullName} size="xl" />
-        <Text variant={TextVariants.Title3}>{fullName}</Text>
-        <Text variant={TextVariants.Callout} color="textSecondary">
+        <Text variant={TEXT_VARIANTS.Title3}>{fullName}</Text>
+        <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
           {user?.email ?? ''}
         </Text>
         {user && (
           <Button
             label={translate('common.signOut')}
-            variant="secondary"
+            variant={BUTTON_VARIANTS.Secondary}
             fullWidth
             onPress={logout}
             style={styles.signOut}

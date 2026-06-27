@@ -1,8 +1,9 @@
 import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { Sparkles, type LucideIcon } from 'lucide-react-native';
-import { Button, Text, TextVariants } from '@/components/atoms';
+import { Button, Text, TEXT_VARIANTS } from '@/components/atoms';
 import { AppModal } from '@/components/molecules';
+import { BUTTON_VARIANTS } from '../atoms/Button';
 
 type UpsellModalProps = {
   visible: boolean;
@@ -36,13 +37,13 @@ export function UpsellModal({
         <View style={styles.iconBadge}>
           <Icon size={26} color={styles.iconColor.color} strokeWidth={2} />
         </View>
-        <Text variant={TextVariants.Title3} style={styles.title}>
+        <Text variant={TEXT_VARIANTS.Title3} style={styles.title}>
           {title}
         </Text>
-        <Text variant={TextVariants.Callout} color="textSecondary" style={styles.description}>
+        <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" style={styles.description}>
           {description}
         </Text>
-        <Button variant="pro" label={ctaLabel} onPress={onCta} fullWidth style={styles.cta} />
+        <Button variant={BUTTON_VARIANTS.Pro} label={ctaLabel} onPress={onCta} fullWidth style={styles.cta} />
       </View>
     </AppModal>
   );

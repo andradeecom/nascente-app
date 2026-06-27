@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { PressableScale } from 'pressto';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text, TextVariants } from '@/components/atoms';
+import { Text, TEXT_VARIANTS } from '@/components/atoms';
 
 type ProCtaCardProps = {
   title: string;
@@ -19,12 +19,12 @@ export function ProCtaCard({ title, description, badgeLabel, onPress }: ProCtaCa
   return (
     <PressableScale style={styles.proCard} onPress={onPress} accessibilityRole="button">
       <View style={styles.proBadge}>
-        <Text variant={TextVariants.Caption} style={styles.proBadgeText}>
+        <Text variant={TEXT_VARIANTS.Caption} style={styles.proBadgeText}>
           {badgeLabel}
         </Text>
       </View>
-      <Text variant={TextVariants.BodyEmphasis}>{title}</Text>
-      <Text variant={TextVariants.Callout} color="textSecondary">
+      <Text variant={TEXT_VARIANTS.BodyEmphasis}>{title}</Text>
+      <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
         {description}
       </Text>
     </PressableScale>

@@ -1,7 +1,7 @@
 import { View, type ViewStyle } from 'react-native';
 import { PressableScale } from 'pressto';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text, TextVariants } from '@/components/atoms';
+import { Text, TEXT_VARIANTS } from '@/components/atoms';
 import type { ActiveReadingPlan } from '@/types/reading-plans';
 
 type ActivePlanCardProps = {
@@ -19,16 +19,16 @@ export function ActivePlanCard({ plan, nextLabel, onPress }: ActivePlanCardProps
     <PressableScale onPress={onPress} style={styles.card}>
       <View style={styles.header}>
         <View style={styles.badge}>
-          <Text variant={TextVariants.Caption} color="accent" style={styles.badgeText}>
+          <Text variant={TEXT_VARIANTS.Caption} color="accent" style={styles.badgeText}>
             {progressPercent}%
           </Text>
         </View>
         <View style={styles.body}>
-          <Text variant={TextVariants.BodyEmphasis} numberOfLines={1}>
+          <Text variant={TEXT_VARIANTS.BodyEmphasis} numberOfLines={1}>
             {catalog.title}
           </Text>
           {subtitle ? (
-            <Text variant={TextVariants.Callout} color="textSecondary" numberOfLines={1}>
+            <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" numberOfLines={1}>
               {subtitle}
             </Text>
           ) : null}

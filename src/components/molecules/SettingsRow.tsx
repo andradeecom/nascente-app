@@ -1,7 +1,7 @@
 import { Pressable, View, type PressableProps, type ViewStyle } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { ChevronRight } from 'lucide-react-native';
-import { Text, TextVariants } from '@/components/atoms';
+import { Text, TEXT_VARIANTS } from '@/components/atoms';
 
 type SettingsRowProps = Omit<PressableProps, 'children'> & {
   icon?: React.ReactNode;
@@ -23,11 +23,11 @@ export function SettingsRow({
   return (
     <Pressable style={({ pressed }) => [styles.row, pressed && styles.pressed, style as ViewStyle]} {...rest}>
       {icon && <View style={styles.icon}>{icon}</View>}
-      <Text variant={TextVariants.Body} color={destructive ? 'danger' : 'textPrimary'} style={styles.label}>
+      <Text variant={TEXT_VARIANTS.Body} color={destructive ? 'danger' : 'textPrimary'} style={styles.label}>
         {label}
       </Text>
       {value && (
-        <Text variant={TextVariants.Callout} color="textSecondary">
+        <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
           {value}
         </Text>
       )}

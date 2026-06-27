@@ -2,7 +2,7 @@ import { View, type ViewStyle } from 'react-native';
 import { PressableScale } from 'pressto';
 import { StyleSheet } from 'react-native-unistyles';
 import { BookOpen } from 'lucide-react-native';
-import { Text, TextVariants } from '@/components/atoms';
+import { Text, TEXT_VARIANTS } from '@/components/atoms';
 
 type ContinueReadingCardProps = {
   title: string;
@@ -28,10 +28,10 @@ export function ContinueReadingCard({
           <BookOpen size={20} color={styles.accentColor.color} strokeWidth={2} />
         </View>
         <View style={styles.body}>
-          <Text variant={TextVariants.Overline} color="textSecondary" style={styles.uppercase}>
+          <Text variant={TEXT_VARIANTS.Overline} color="textSecondary" style={styles.uppercase}>
             {title}
           </Text>
-          <Text variant={TextVariants.BodyEmphasis}>
+          <Text variant={TEXT_VARIANTS.BodyEmphasis}>
             {bookName} {chapter} · {translationLabel}
           </Text>
         </View>

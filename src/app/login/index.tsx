@@ -1,4 +1,4 @@
-import { Button, Text, TextVariants, SafeAreaView } from '@/components/atoms';
+import { Button, Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
 import { BackButton } from '@/components/molecules';
 import { LoginCard, LoginFooter } from '@/components/organisms';
 import { translate } from '@/i18n';
@@ -6,6 +6,7 @@ import { Link } from 'expo-router';
 import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import useLoginScreen from './use-login-screen';
+import { BUTTON_SIZES, BUTTON_VARIANTS } from '@/components/atoms/Button';
 
 export default function LoginScreen() {
   const { handleLogin, handleGoogleLogin, handleAppleLogin, handleForgotPassword, mockLogin, isLoading } =
@@ -24,7 +25,7 @@ export default function LoginScreen() {
             isLoading={isLoading}
           />
           <Link href="/register" style={styles.footerLink}>
-            <Text variant={TextVariants.Callout} color="textSecondary">
+            <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
               {translate('login.noAccount')} {translate('login.signUp')}
             </Text>
           </Link>
@@ -32,8 +33,8 @@ export default function LoginScreen() {
           {__DEV__ && (
             <Button
               label="[DEV] Skip login with mock user"
-              variant="ghost"
-              size="sm"
+              variant={BUTTON_VARIANTS.Ghost}
+              size={BUTTON_SIZES.Small}
               fullWidth
               onPress={mockLogin}
               style={styles.devButton}

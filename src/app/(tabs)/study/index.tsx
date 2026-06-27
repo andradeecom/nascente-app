@@ -3,7 +3,7 @@ import { ActivityIndicator, View } from 'react-native';
 import { FlashList, type FlashListRef } from '@shopify/flash-list';
 import { StyleSheet } from 'react-native-unistyles';
 import { Highlighter } from 'lucide-react-native';
-import { SafeAreaView, Text, TextVariants } from '@/components/atoms';
+import { SafeAreaView, Text, TEXT_VARIANTS } from '@/components/atoms';
 import { SegmentedControl, type Segment } from '@/components/molecules';
 import { SignInPromptCard, StudyCard } from '@/components/organisms';
 import useStudyScreen, { type StudyFilter, type StudyItem } from './use-study-screen';
@@ -40,7 +40,7 @@ export default function StudyScreen() {
     return (
       <SafeAreaView edges={['top']} style={styles.safe}>
         <View style={styles.content}>
-          <Text variant={TextVariants.Title1} style={styles.heading}>
+          <Text variant={TEXT_VARIANTS.Title1} style={styles.heading}>
             {translate('study.title')}
           </Text>
           <SignInPromptCard
@@ -60,11 +60,11 @@ export default function StudyScreen() {
       <ActivityIndicator size="large" color={styles.accent.color} />
     </View>
   ) : isError ? (
-    <Text variant={TextVariants.Callout} color="textSecondary">
+    <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
       {translate('study.loadError')}
     </Text>
   ) : (
-    <Text variant={TextVariants.Callout} color="textSecondary" style={styles.empty}>
+    <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" style={styles.empty}>
       {translate(`study.empty.${filter}`)}
     </Text>
   );
@@ -72,7 +72,7 @@ export default function StudyScreen() {
   return (
     <SafeAreaView edges={['top']} style={styles.safe}>
       <View style={styles.header}>
-        <Text variant={TextVariants.Title1} style={styles.heading}>
+        <Text variant={TEXT_VARIANTS.Title1} style={styles.heading}>
           {translate('study.title')}
         </Text>
         <SegmentedControl segments={segments} value={filter} onChange={setFilter} />

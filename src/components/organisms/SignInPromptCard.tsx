@@ -2,7 +2,7 @@ import { View } from 'react-native';
 import { PressableScale } from 'pressto';
 import { StyleSheet } from 'react-native-unistyles';
 import { ChevronRight, type LucideIcon } from 'lucide-react-native';
-import { Text, TextVariants } from '@/components/atoms';
+import { Text, TEXT_VARIANTS } from '@/components/atoms';
 
 type SignInPromptCardProps = {
   icon: LucideIcon;
@@ -23,14 +23,14 @@ export function SignInPromptCard({ icon: Icon, title, description, actionLabel, 
       <View style={styles.iconBadge}>
         <Icon size={26} color={styles.iconColor.color} strokeWidth={2} />
       </View>
-      <Text variant={TextVariants.Title3} style={styles.title}>
+      <Text variant={TEXT_VARIANTS.Title3} style={styles.title}>
         {title}
       </Text>
-      <Text variant={TextVariants.Callout} color="textSecondary" style={styles.description}>
+      <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" style={styles.description}>
         {description}
       </Text>
       <View style={styles.action}>
-        <Text variant={TextVariants.Label} color="accent">
+        <Text variant={TEXT_VARIANTS.Label} color="accent">
           {actionLabel}
         </Text>
         <ChevronRight size={18} color={styles.iconColor.color} strokeWidth={2.5} />

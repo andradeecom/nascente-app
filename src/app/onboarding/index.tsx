@@ -1,9 +1,10 @@
-import { Button, Text, TextVariants, SafeAreaView } from '@/components/atoms';
+import { Button, Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
 import { LanguageOption, OnboardingStepHeader } from '@/components/molecules';
 import { useTranslate } from '@/i18n';
 import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import useOnboardingScreen from './use-onboarding-screen';
+import { BUTTON_SIZES } from '@/components/atoms/Button';
 
 export default function OnboardingLanguageScreen() {
   const { selected, languages, handleSelect, handleStart } = useOnboardingScreen();
@@ -14,11 +15,11 @@ export default function OnboardingLanguageScreen() {
       <OnboardingStepHeader step={1} total={4} />
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text variant={TextVariants.Title2}>{t('onboarding.language.title')}</Text>
-          <Text variant={TextVariants.Callout} color="textSecondary" style={styles.subtitle}>
+          <Text variant={TEXT_VARIANTS.Title2}>{t('onboarding.language.title')}</Text>
+          <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" style={styles.subtitle}>
             {t('onboarding.language.subtitle')}
           </Text>
-          <Text variant={TextVariants.Callout} color="textSecondary" style={styles.description}>
+          <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" style={styles.description}>
             {t('onboarding.language.description')}
           </Text>
         </View>
@@ -38,7 +39,12 @@ export default function OnboardingLanguageScreen() {
       </View>
 
       <View style={styles.footer}>
-        <Button label={t('onboarding.language.startButton')} size="lg" fullWidth onPress={handleStart} />
+        <Button
+          label={t('onboarding.language.startButton')}
+          size={BUTTON_SIZES.Large}
+          fullWidth
+          onPress={handleStart}
+        />
       </View>
     </SafeAreaView>
   );

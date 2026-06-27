@@ -1,10 +1,23 @@
 import { type ViewStyle } from 'react-native';
 import { PressableScale, type CustomPressableProps } from 'pressto';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text, TextVariants } from './Text';
+import { Text, TEXT_VARIANTS } from './Text';
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive' | 'pro';
-type ButtonSize = 'sm' | 'md' | 'lg';
+export enum BUTTON_VARIANTS {
+  Primary = 'primary',
+  Secondary = 'secondary',
+  Ghost = 'ghost',
+  Destructive = 'destructive',
+  Pro = 'pro',
+}
+export type ButtonVariant = (typeof BUTTON_VARIANTS)[keyof typeof BUTTON_VARIANTS];
+
+export enum BUTTON_SIZES {
+  Small = 'sm',
+  Medium = 'md',
+  Large = 'lg',
+}
+export type ButtonSize = (typeof BUTTON_SIZES)[keyof typeof BUTTON_SIZES];
 
 type ButtonProps = CustomPressableProps & {
   variant?: ButtonVariant;
@@ -16,8 +29,8 @@ type ButtonProps = CustomPressableProps & {
 };
 
 export function Button({
-  variant = 'primary',
-  size = 'md',
+  variant = BUTTON_VARIANTS.Primary,
+  size = BUTTON_SIZES.Medium,
   label,
   icon,
   iconPosition = 'left',
@@ -40,7 +53,10 @@ export function Button({
       {...rest}
     >
       {iconPosition === 'left' && icon}
-      <Text variant={size === 'sm' ? TextVariants.Caption : TextVariants.Label} style={[textVariantStyles[variant]]}>
+      <Text
+        variant={size === BUTTON_SIZES.Small ? TEXT_VARIANTS.Caption : TEXT_VARIANTS.Label}
+        style={[textVariantStyles[variant]]}
+      >
         {label}
       </Text>
       {iconPosition === 'right' && icon}

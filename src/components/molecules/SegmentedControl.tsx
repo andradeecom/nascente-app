@@ -1,6 +1,6 @@
 import { Pressable, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text, TextVariants } from '@/components/atoms';
+import { Text, TEXT_VARIANTS } from '@/components/atoms';
 
 export type Segment<T extends string> = {
   key: T;
@@ -30,7 +30,7 @@ export function SegmentedControl<T extends string>({ segments, value, onChange }
             accessibilityRole="button"
             accessibilityState={{ selected: active }}
           >
-            <Text variant={TextVariants.Label} color={active ? 'accent' : 'textSecondary'} numberOfLines={1}>
+            <Text variant={TEXT_VARIANTS.Label} color={active ? 'accent' : 'textSecondary'} numberOfLines={1}>
               {segment.label}
             </Text>
           </Pressable>

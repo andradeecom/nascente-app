@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { TextInput, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { Trash2 } from 'lucide-react-native';
-import { Button, Text, TextVariants } from '@/components/atoms';
+import { Button, Text, TEXT_VARIANTS } from '@/components/atoms';
 import { AppModal } from '@/components/molecules';
 import { useTranslate } from '@/i18n';
+import { BUTTON_VARIANTS } from '../atoms/Button';
 
 type NoteEditorModalProps = {
   visible: boolean;
@@ -43,10 +44,10 @@ export function NoteEditorModal({
   return (
     <AppModal visible={visible} onClose={onClose}>
       <View style={styles.content}>
-        <Text variant={TextVariants.Overline} color="textTertiary" style={styles.label}>
+        <Text variant={TEXT_VARIANTS.Overline} color="textTertiary" style={styles.label}>
           {translate('study.note.title')}
         </Text>
-        <Text variant={TextVariants.Title3} style={styles.reference}>
+        <Text variant={TEXT_VARIANTS.Title3} style={styles.reference}>
           {reference}
         </Text>
 
@@ -70,7 +71,7 @@ export function NoteEditorModal({
 
         {hasExistingNote ? (
           <Button
-            variant="ghost"
+            variant={BUTTON_VARIANTS.Ghost}
             label={translate('study.note.delete')}
             icon={<Trash2 size={18} color={styles.deleteIcon.color} strokeWidth={2} />}
             onPress={onDelete}

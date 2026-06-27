@@ -1,10 +1,11 @@
 import { ActivityIndicator, View, type ViewStyle } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { StyleSheet } from 'react-native-unistyles';
-import { Button, SafeAreaView, Text, TextVariants } from '@/components/atoms';
+import { Button, SafeAreaView, Text, TEXT_VARIANTS } from '@/components/atoms';
 import { PlanDayRow, ScreenHeader, UpsellModal } from '@/components/organisms';
 import type { PlanDayGroup } from '@/types/reading-plans';
 import usePlanDetailScreen from './use-plan-detail-screen';
+import { BUTTON_SIZES, BUTTON_VARIANTS } from '@/components/atoms/Button';
 
 export default function PlanDetailScreen() {
   const {
@@ -32,12 +33,12 @@ export default function PlanDetailScreen() {
   const listHeader = plan ? (
     <View style={styles.header}>
       <View style={styles.head}>
-        <Text variant={TextVariants.Title2}>{plan.title}</Text>
-        <Text variant={TextVariants.Caption} color="textTertiary">
+        <Text variant={TEXT_VARIANTS.Title2}>{plan.title}</Text>
+        <Text variant={TEXT_VARIANTS.Caption} color="textTertiary">
           {formatMeta(plan)}
         </Text>
         {plan.description ? (
-          <Text variant={TextVariants.Callout} color="textSecondary" style={styles.description}>
+          <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" style={styles.description}>
             {plan.description}
           </Text>
         ) : null}
@@ -48,7 +49,7 @@ export default function PlanDetailScreen() {
           <View style={styles.track}>
             <View style={[styles.fill, { width: `${progressPercent}%` } as ViewStyle]} />
           </View>
-          <Text variant={TextVariants.Caption} color="textSecondary">
+          <Text variant={TEXT_VARIANTS.Caption} color="textSecondary">
             {progressPercent}%
           </Text>
         </View>
@@ -70,15 +71,21 @@ export default function PlanDetailScreen() {
     <View style={styles.footer}>
       {isEnrolled ? (
         <Button
-          variant="ghost"
-          size="lg"
+          variant={BUTTON_VARIANTS.Ghost}
+          size={BUTTON_SIZES.Large}
           fullWidth
           label={translate('plans.remove.action')}
           onPress={handleRemove}
           style={styles.remove}
         />
       ) : (
-        <Button size="lg" fullWidth label={translate('plans.start')} onPress={handleStart} disabled={isStarting} />
+        <Button
+          size={BUTTON_SIZES.Large}
+          fullWidth
+          label={translate('plans.start')}
+          onPress={handleStart}
+          disabled={isStarting}
+        />
       )}
     </View>
   ) : null;
@@ -93,7 +100,7 @@ export default function PlanDetailScreen() {
         </View>
       ) : isError || !plan ? (
         <View style={styles.center}>
-          <Text variant={TextVariants.Callout} color="textSecondary">
+          <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
             {translate('plans.loadError')}
           </Text>
         </View>

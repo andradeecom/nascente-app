@@ -2,7 +2,7 @@ import { View } from 'react-native';
 import { PressableScale } from 'pressto';
 import { StyleSheet } from 'react-native-unistyles';
 import { Check, ChevronRight } from 'lucide-react-native';
-import { Text, TextVariants } from '@/components/atoms';
+import { Text, TEXT_VARIANTS } from '@/components/atoms';
 import { useTranslate } from '@/i18n';
 import type { PlanDayGroup } from '@/types/reading-plans';
 
@@ -38,17 +38,17 @@ export function PlanDayRow({ item, isEnrolled, markingDay, onToggleComplete, onO
         </PressableScale>
       ) : (
         <View style={styles.dayBadge}>
-          <Text variant={TextVariants.Caption} color="accent" style={styles.dayBadgeText}>
+          <Text variant={TEXT_VARIANTS.Caption} color="accent" style={styles.dayBadgeText}>
             {item.day}
           </Text>
         </View>
       )}
 
       <View style={styles.dayBody}>
-        <Text variant={TextVariants.Caption} color="textTertiary">
+        <Text variant={TEXT_VARIANTS.Caption} color="textTertiary">
           {translate('plans.day', { count: item.day })}
         </Text>
-        <Text variant={TextVariants.Body} numberOfLines={1}>
+        <Text variant={TEXT_VARIANTS.Body} numberOfLines={1}>
           {item.label}
         </Text>
       </View>

@@ -12,11 +12,12 @@ import Animated, {
 import Svg, { Circle, Defs, Line, LinearGradient, Stop } from 'react-native-svg';
 import { StyleSheet, UnistylesRuntime } from 'react-native-unistyles';
 import { ChevronRight } from 'lucide-react-native';
-import { Button, Text, TextVariants, SafeAreaView } from '@/components/atoms';
+import { Button, Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
 import { useTranslate } from '@/i18n';
 import { useThemeStore } from '@/stores/theme';
 import { typography } from '@/theme/typography';
 import useOnboardingWelcomeScreen from './use-onboarding-welcome-screen';
+import { BUTTON_SIZES, BUTTON_VARIANTS } from '@/components/atoms/Button';
 
 const SUN_BOX = 260;
 const SUN_SIZE = 220;
@@ -185,10 +186,10 @@ export default function OnboardingWelcomeScreen() {
         <AnimatedSun />
 
         <View style={styles.copy}>
-          <Text variant={TextVariants.Overline} color="accent" style={styles.overline}>
+          <Text variant={TEXT_VARIANTS.Overline} color="accent" style={styles.overline}>
             {t('onboarding.welcome.overline')}
           </Text>
-          <Text variant={TextVariants.Display} style={styles.title}>
+          <Text variant={TEXT_VARIANTS.Display} style={styles.title}>
             {t('onboarding.welcome.title')}
           </Text>
           <Text style={styles.verse}>{t('onboarding.welcome.verse')}</Text>
@@ -197,12 +198,17 @@ export default function OnboardingWelcomeScreen() {
 
       <View style={styles.footer}>
         <Animated.View style={[styles.glow, glowStyle]}>
-          <Button label={t('onboarding.welcome.startButton')} size="lg" fullWidth onPress={handleStartReading} />
+          <Button
+            label={t('onboarding.welcome.startButton')}
+            size={BUTTON_SIZES.Large}
+            fullWidth
+            onPress={handleStartReading}
+          />
         </Animated.View>
         <Button
           label={t('onboarding.welcome.plansButton')}
-          variant="ghost"
-          size="lg"
+          variant={BUTTON_VARIANTS.Ghost}
+          size={BUTTON_SIZES.Large}
           fullWidth
           icon={<ChevronRight size={18} color={styles.chevron.color} strokeWidth={2.5} />}
           iconPosition="right"

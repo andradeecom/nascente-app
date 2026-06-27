@@ -2,7 +2,7 @@ import { Pressable, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { StyleSheet } from 'react-native-unistyles';
 import { ChevronLeft } from 'lucide-react-native';
-import { Text, TextVariants, SafeAreaView } from '@/components/atoms';
+import { Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
 
 type ScreenHeaderProps = {
   title: string;
@@ -25,7 +25,7 @@ export function ScreenHeader({ title, showBack = true, onBack }: ScreenHeaderPro
         ) : (
           <View style={styles.back} />
         )}
-        <Text variant={TextVariants.Title3} style={styles.title} numberOfLines={1}>
+        <Text variant={TEXT_VARIANTS.Title3} style={styles.title} numberOfLines={1}>
           {title}
         </Text>
         {/* Spacer mirrors the back button so the title stays centered. */}

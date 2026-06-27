@@ -1,10 +1,11 @@
 import { ScrollView, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Button, Text, TextVariants, SafeAreaView } from '@/components/atoms';
+import { Button, Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
 import { OnboardingStepHeader, ThemePreviewCard, FontSizeSlider } from '@/components/molecules';
 import { useTranslate } from '@/i18n';
 import { typography } from '@/theme/typography';
 import useOnboardingPreferencesScreen from './use-onboarding-preferences-screen';
+import { BUTTON_SIZES } from '@/components/atoms/Button';
 
 export default function OnboardingPreferencesScreen() {
   const {
@@ -27,18 +28,18 @@ export default function OnboardingPreferencesScreen() {
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Text variant={TextVariants.Title2}>{t('onboarding.preferences.title')}</Text>
-          <Text variant={TextVariants.Callout} color="textSecondary" style={styles.subtitle}>
+          <Text variant={TEXT_VARIANTS.Title2}>{t('onboarding.preferences.title')}</Text>
+          <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" style={styles.subtitle}>
             {t('onboarding.preferences.subtitle')}
           </Text>
         </View>
 
         <View style={styles.section}>
           <View style={styles.sectionHeading}>
-            <Text variant={TextVariants.Overline} color="textTertiary">
+            <Text variant={TEXT_VARIANTS.Overline} color="textTertiary">
               {t('onboarding.preferences.themeLabel')}
             </Text>
-            <Text variant={TextVariants.Caption} color="textTertiary">
+            <Text variant={TEXT_VARIANTS.Caption} color="textTertiary">
               {t('onboarding.preferences.themeHint')}
             </Text>
           </View>
@@ -58,14 +59,14 @@ export default function OnboardingPreferencesScreen() {
 
         <View style={styles.section}>
           <View style={styles.sectionHeadingRow}>
-            <Text variant={TextVariants.Overline} color="textTertiary">
+            <Text variant={TEXT_VARIANTS.Overline} color="textTertiary">
               {t('onboarding.preferences.textSizeLabel')}
             </Text>
-            <Text variant={TextVariants.Caption} color="textSecondary">
+            <Text variant={TEXT_VARIANTS.Caption} color="textSecondary">
               {fontSizePt} pt
             </Text>
           </View>
-          <Text variant={TextVariants.Caption} color="textTertiary" style={styles.sectionHint}>
+          <Text variant={TEXT_VARIANTS.Caption} color="textTertiary" style={styles.sectionHint}>
             {t('onboarding.preferences.textSizeHint')}
           </Text>
 
@@ -73,7 +74,7 @@ export default function OnboardingPreferencesScreen() {
         </View>
 
         <View style={styles.previewCard}>
-          <Text variant={TextVariants.Overline} color="textTertiary">
+          <Text variant={TEXT_VARIANTS.Overline} color="textTertiary">
             {t('onboarding.preferences.previewReference')}
           </Text>
           <Text
@@ -89,7 +90,12 @@ export default function OnboardingPreferencesScreen() {
       </ScrollView>
 
       <View style={styles.footer}>
-        <Button label={t('onboarding.preferences.finishButton')} size="lg" fullWidth onPress={handleFinish} />
+        <Button
+          label={t('onboarding.preferences.finishButton')}
+          size={BUTTON_SIZES.Large}
+          fullWidth
+          onPress={handleFinish}
+        />
       </View>
     </SafeAreaView>
   );

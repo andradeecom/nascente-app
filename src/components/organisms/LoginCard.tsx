@@ -4,10 +4,11 @@ import { StyleSheet } from 'react-native-unistyles';
 import { useForm, Controller } from 'react-hook-form';
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text, TextVariants, Button, Divider } from '@/components/atoms';
+import { Text, TEXT_VARIANTS, Button, Divider } from '@/components/atoms';
 import { InputField, SocialButton } from '@/components/molecules';
 import { createLoginSchema, type LoginFormData } from '@/schemas/login';
 import { translate } from '@/i18n';
+import { BUTTON_SIZES, BUTTON_VARIANTS } from '../atoms/Button';
 
 type LoginCardProps = {
   onLogin: (email: string, password: string) => void;
@@ -60,10 +61,10 @@ export function LoginCard({
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Text variant={TextVariants.Title1} style={styles.title}>
+        <Text variant={TEXT_VARIANTS.Title1} style={styles.title}>
           {translate('login.title')}
         </Text>
-        <Text variant={TextVariants.Callout} color="textSecondary">
+        <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
           {translate('login.subtitle')}
         </Text>
       </View>
@@ -108,8 +109,8 @@ export function LoginCard({
 
         <Button
           label={isLoading ? translate('login.signingIn') : translate('login.loginButton')}
-          variant="primary"
-          size="lg"
+          variant={BUTTON_VARIANTS.Primary}
+          size={BUTTON_SIZES.Large}
           fullWidth
           onPress={() => handleSubmit(onSubmit)()}
           disabled={isLoading}

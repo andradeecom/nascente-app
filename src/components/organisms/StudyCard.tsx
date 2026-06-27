@@ -2,7 +2,7 @@ import { View } from 'react-native';
 import { PressableScale } from 'pressto';
 import { StyleSheet } from 'react-native-unistyles';
 import { Bookmark, NotebookPen } from 'lucide-react-native';
-import { Text, TextVariants } from '@/components/atoms';
+import { Text, TEXT_VARIANTS } from '@/components/atoms';
 import { highlights as HIGHLIGHT_HEX } from '@/theme/colors';
 import type { StudyItem } from '@/app/(tabs)/study/use-study-screen';
 
@@ -24,20 +24,20 @@ export function StudyCard({ item, onPress }: StudyCardProps) {
         )}
       </View>
       <View style={styles.cardBody}>
-        <Text variant={TextVariants.Label} color="accent">
+        <Text variant={TEXT_VARIANTS.Label} color="accent">
           {item.reference}
         </Text>
         {item.type === 'note' ? (
           <>
-            <Text variant={TextVariants.Callout} numberOfLines={3}>
+            <Text variant={TEXT_VARIANTS.Callout} numberOfLines={3}>
               {item.body}
             </Text>
-            <Text variant={TextVariants.Caption} color="textTertiary" numberOfLines={1}>
+            <Text variant={TEXT_VARIANTS.Caption} color="textTertiary" numberOfLines={1}>
               {item.text}
             </Text>
           </>
         ) : (
-          <Text variant={TextVariants.Callout} color="textSecondary" numberOfLines={3}>
+          <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" numberOfLines={3}>
             {item.text}
           </Text>
         )}

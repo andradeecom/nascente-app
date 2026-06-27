@@ -1,7 +1,7 @@
 import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Link, useRouter } from 'expo-router';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text, TextVariants, SafeAreaView } from '@/components/atoms';
+import { Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
 import { OnboardingStepHeader } from '@/components/molecules';
 import { ForgotPasswordCard } from '@/components/organisms';
 import { translate } from '@/i18n';
@@ -23,7 +23,7 @@ export default function OnboardingForgotPasswordScreen() {
             submittedEmail={submittedEmail ?? undefined}
           />
           <Link href="/onboarding/account/login" style={styles.footerLink}>
-            <Text variant={TextVariants.Callout} color="textSecondary">
+            <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
               {translate('forgotPassword.backToLogin')}
             </Text>
           </Link>

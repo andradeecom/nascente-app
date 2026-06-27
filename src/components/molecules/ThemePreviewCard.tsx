@@ -1,8 +1,11 @@
-import { Pressable, View } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
+import { View } from 'react-native';
+import { StyleSheet, withUnistyles } from 'react-native-unistyles';
+import { PressableScale } from 'pressto';
 import { Text, TEXT_VARIANTS } from '@/components/atoms';
 import { colors } from '@/theme/colors';
 import type { ThemeName } from '@/stores/theme';
+
+const ThemedPressableScale = withUnistyles(PressableScale);
 
 type ThemePreviewCardProps = {
   name: ThemeName;
@@ -16,8 +19,8 @@ export function ThemePreviewCard({ name, label, selected, onSelect }: ThemePrevi
   const palette = colors[name].semantic;
 
   return (
-    <Pressable
-      style={({ pressed }) => [styles.card, selected && styles.cardSelected, pressed && styles.pressed]}
+    <ThemedPressableScale
+      style={[styles.card, selected && styles.cardSelected]}
       onPress={onSelect}
       accessibilityRole="radio"
       accessibilityState={{ selected }}
@@ -29,7 +32,7 @@ export function ThemePreviewCard({ name, label, selected, onSelect }: ThemePrevi
       <Text variant={TEXT_VARIANTS.Caption} style={styles.label}>
         {label}
       </Text>
-    </Pressable>
+    </ThemedPressableScale>
   );
 }
 
@@ -46,9 +49,6 @@ const styles = StyleSheet.create((theme) => ({
   cardSelected: {
     borderColor: theme.colors.semantic.accent,
     backgroundColor: theme.colors.semantic.accentSubtle,
-  },
-  pressed: {
-    opacity: 0.9,
   },
   swatch: {
     height: 64,

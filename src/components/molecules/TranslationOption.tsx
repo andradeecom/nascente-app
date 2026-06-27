@@ -1,9 +1,16 @@
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { Check, Cloud, Download, Lock } from 'lucide-react-native';
+import { PressableScale } from 'pressto';
 import { Text, TEXT_VARIANTS } from '@/components/atoms';
 
-export type TranslationTier = 'available' | 'download' | 'pro';
+export enum TRANSLATION_TIER {
+  Available = 'available',
+  Download = 'download',
+  Pro = 'pro',
+}
+
+export type TranslationTier = (typeof TRANSLATION_TIER)[keyof typeof TRANSLATION_TIER];
 
 type TranslationOptionProps = {
   title: string;
@@ -26,11 +33,11 @@ export function TranslationOption({
   selected,
   onSelect,
 }: TranslationOptionProps) {
-  const selectable = tier === 'available';
+  const selectable = tier === TRANSLATION_TIER.Available;
 
   return (
-    <Pressable
-      style={({ pressed }) => [styles.container, selected && styles.selected, pressed && selectable && styles.pressed]}
+    <PressableScale
+      style={[styles.container, selected && styles.selected, !selectable && styles.disabled]}
       onPress={selectable ? onSelect : undefined}
       disabled={!selectable}
       accessibilityRole="radio"
@@ -51,7 +58,7 @@ export function TranslationOption({
       </View>
 
       <View style={styles.badge}>
-        {tier === 'available' && (
+        {tier === TRANSLATION_TIER.Available && (
           <View style={styles.offlineBadge}>
             <Cloud size={14} color={styles.offlineBadge.color} />
             <Text variant={TEXT_VARIANTS.Caption} color="accent">
@@ -59,8 +66,8 @@ export function TranslationOption({
             </Text>
           </View>
         )}
-        {tier === 'download' && <Download size={18} color={styles.downloadIcon.color} />}
-        {tier === 'pro' && (
+        {tier === TRANSLATION_TIER.Download && <Download size={18} color={styles.downloadIcon.color} />}
+        {tier === TRANSLATION_TIER.Pro && (
           <View style={styles.proBadge}>
             <Lock size={12} color={styles.proBadge.color} />
             <Text variant={TEXT_VARIANTS.Caption} color="accent">
@@ -69,7 +76,7 @@ export function TranslationOption({
           </View>
         )}
       </View>
-    </Pressable>
+    </PressableScale>
   );
 }
 
@@ -88,8 +95,8 @@ const styles = StyleSheet.create((theme) => ({
     borderColor: theme.colors.semantic.accent,
     backgroundColor: theme.colors.semantic.accentSubtle,
   },
-  pressed: {
-    opacity: 0.9,
+  disabled: {
+    opacity: 0.5,
   },
   radio: {
     width: 24,

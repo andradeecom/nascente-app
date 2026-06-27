@@ -1,7 +1,8 @@
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { Text, TEXT_VARIANTS } from '@/components/atoms';
 import type { LocaleName } from '@/stores/locale';
+import { PressableScale } from 'pressto';
 
 type LanguageOptionProps = {
   code: LocaleName;
@@ -13,8 +14,8 @@ type LanguageOptionProps = {
 
 export function LanguageOption({ code, name, region, selected, onSelect }: LanguageOptionProps) {
   return (
-    <Pressable
-      style={({ pressed }) => [styles.container, selected && styles.selected, pressed && styles.pressed]}
+    <PressableScale
+      style={[styles.container, selected && styles.selected]}
       onPress={onSelect}
       accessibilityRole="radio"
       accessibilityState={{ selected }}
@@ -29,7 +30,7 @@ export function LanguageOption({ code, name, region, selected, onSelect }: Langu
       <View style={[styles.radio, selected && styles.radioSelected]}>
         {selected && <View style={styles.radioInner} />}
       </View>
-    </Pressable>
+    </PressableScale>
   );
 }
 
@@ -47,9 +48,6 @@ const styles = StyleSheet.create((theme) => ({
   selected: {
     borderColor: theme.colors.semantic.accent,
     backgroundColor: theme.colors.semantic.accentSubtle,
-  },
-  pressed: {
-    opacity: 0.9,
   },
   badge: {
     width: 40,

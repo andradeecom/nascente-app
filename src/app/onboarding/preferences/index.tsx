@@ -1,9 +1,8 @@
 import { ScrollView, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { Button, Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
-import { OnboardingStepHeader, ThemePreviewCard, FontSizeSlider } from '@/components/molecules';
+import { OnboardingStepHeader, ThemePreviewCard, FontSizeSlider, ReaderPreviewCard } from '@/components/molecules';
 import { useTranslate } from '@/i18n';
-import { typography } from '@/theme/typography';
 import useOnboardingPreferencesScreen from './use-onboarding-preferences-screen';
 import { BUTTON_SIZES } from '@/components/atoms/Button';
 
@@ -73,20 +72,12 @@ export default function OnboardingPreferencesScreen() {
           <FontSizeSlider steps={fontSizeSteps} value={fontSizeIndex} onChange={handleSelectFontSize} />
         </View>
 
-        <View style={styles.previewCard}>
-          <Text variant={TEXT_VARIANTS.Overline} color="textTertiary">
-            {t('onboarding.preferences.previewReference')}
-          </Text>
-          <Text
-            style={[
-              styles.previewText,
-              { fontFamily: typography.reader.families.serif, fontSize: fontSizePt, lineHeight: fontLineHeight },
-            ]}
-          >
-            <Text style={styles.previewVerseNumber}>1 </Text>
-            {t('settings.textSizePreview')}
-          </Text>
-        </View>
+        <ReaderPreviewCard
+          reference={t('onboarding.preferences.previewReference')}
+          previewText={t('settings.textSizePreview')}
+          fontSize={fontSizePt}
+          lineHeight={fontLineHeight}
+        />
       </ScrollView>
 
       <View style={styles.footer}>
@@ -140,21 +131,6 @@ const styles = StyleSheet.create((theme) => ({
   themeRow: {
     flexDirection: 'row',
     gap: theme.spacing[3],
-  },
-  previewCard: {
-    borderWidth: 1,
-    borderColor: theme.colors.semantic.bgTertiary,
-    borderRadius: theme.radius.xl,
-    backgroundColor: theme.colors.semantic.bgPrimary,
-    padding: theme.spacing[4],
-    gap: theme.spacing[2],
-  },
-  previewText: {
-    color: theme.colors.semantic.textPrimary,
-  },
-  previewVerseNumber: {
-    color: theme.colors.semantic.accent,
-    fontWeight: theme.font.weights.semibold,
   },
   footer: {
     paddingHorizontal: theme.spacing[5],

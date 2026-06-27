@@ -57,19 +57,14 @@ export default function OnboardingPreferencesScreen() {
         </View>
 
         <View style={styles.section}>
-          <View style={styles.sectionHeadingRow}>
-            <Text variant={TEXT_VARIANTS.Overline} color="textTertiary">
-              {t('onboarding.preferences.textSizeLabel')}
-            </Text>
-            <Text variant={TEXT_VARIANTS.Caption} color="textSecondary">
-              {fontSizePt} pt
-            </Text>
-          </View>
-          <Text variant={TEXT_VARIANTS.Caption} color="textTertiary" style={styles.sectionHint}>
-            {t('onboarding.preferences.textSizeHint')}
-          </Text>
-
-          <FontSizeSlider steps={fontSizeSteps} value={fontSizeIndex} onChange={handleSelectFontSize} />
+          <FontSizeSlider
+            label={t('onboarding.preferences.textSizeLabel')}
+            valueLabel={`${fontSizePt} pt`}
+            hint={t('onboarding.preferences.textSizeHint')}
+            steps={fontSizeSteps}
+            value={fontSizeIndex}
+            onChange={handleSelectFontSize}
+          />
         </View>
 
         <ReaderPreviewCard
@@ -118,15 +113,6 @@ const styles = StyleSheet.create((theme) => ({
   sectionHeading: {
     gap: theme.spacing[0.5],
     marginBottom: theme.spacing[3],
-  },
-  sectionHeadingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  sectionHint: {
-    marginTop: theme.spacing[0.5],
-    marginBottom: theme.spacing[4],
   },
   themeRow: {
     flexDirection: 'row',

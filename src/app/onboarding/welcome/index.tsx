@@ -1,13 +1,5 @@
-import { useEffect } from 'react';
 import { View } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  withRepeat,
-  Easing,
-  cancelAnimation,
-} from 'react-native-reanimated';
+import { EaseView } from 'react-native-ease';
 import { StyleSheet } from 'react-native-unistyles';
 import { ChevronRight } from 'lucide-react-native';
 import { Button, Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
@@ -23,18 +15,6 @@ const PULSE_DURATION = 2600;
 export default function OnboardingWelcomeScreen() {
   const { handleStartReading, handleExplorePlans } = useOnboardingWelcomeScreen();
   const t = useTranslate();
-
-  const glow = useSharedValue(0);
-
-  useEffect(() => {
-    glow.value = withRepeat(withTiming(1, { duration: PULSE_DURATION, easing: Easing.inOut(Easing.quad) }), -1, true);
-    return () => cancelAnimation(glow);
-  }, [glow]);
-
-  const glowStyle = useAnimatedStyle(() => ({
-    shadowOpacity: 0.18 + glow.value * 0.32,
-    shadowRadius: 10 + glow.value * 14,
-  }));
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -53,9 +33,19 @@ export default function OnboardingWelcomeScreen() {
       </View>
 
       <View style={styles.footer}>
-        <Animated.View style={[styles.glow, glowStyle]}>
+        <EaseView
+          style={styles.glow}
+          initialAnimate={{ shadowOpacity: 0.18, shadowRadius: 10 }}
+          animate={{ shadowOpacity: 0.5, shadowRadius: 24 }}
+          transition={{
+            type: 'timing',
+            duration: PULSE_DURATION,
+            easing: [0.455, 0.03, 0.515, 0.955],
+            loop: 'reverse',
+          }}
+        >
           <ShineButton label={t('onboarding.welcome.startButton')} onPress={handleStartReading} />
-        </Animated.View>
+        </EaseView>
         <Button
           label={t('onboarding.welcome.plansButton')}
           variant={BUTTON_VARIANTS.Ghost}

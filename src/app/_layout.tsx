@@ -29,7 +29,7 @@ NativeSplash.preventAutoHideAsync();
 NativeSplash.setOptions({ duration: 300, fade: true });
 
 // Flip to true during development to force the onboarding flow on every launch.
-const FORCE_ONBOARDING = __DEV__ && true;
+const FORCE_ONBOARDING = __DEV__ && false;
 
 function useHydrate() {
   const hydrate = useAuthStore((s) => s.hydrate);

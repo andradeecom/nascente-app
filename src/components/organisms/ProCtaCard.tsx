@@ -1,7 +1,7 @@
 import { View } from 'react-native';
-import { PressableScale } from 'pressto';
 import { StyleSheet } from 'react-native-unistyles';
 import { Text, TEXT_VARIANTS } from '@/components/atoms';
+import { PressableCard } from '../molecules';
 
 type ProCtaCardProps = {
   title: string;
@@ -17,7 +17,7 @@ type ProCtaCardProps = {
  */
 export function ProCtaCard({ title, description, badgeLabel, onPress }: ProCtaCardProps) {
   return (
-    <PressableScale style={styles.proCard} onPress={onPress} accessibilityRole="button">
+    <PressableCard style={styles.proCard} onPress={onPress} accessibilityRole="button">
       <View style={styles.proBadge}>
         <Text variant={TEXT_VARIANTS.Caption} style={styles.proBadgeText}>
           {badgeLabel}
@@ -27,16 +27,13 @@ export function ProCtaCard({ title, description, badgeLabel, onPress }: ProCtaCa
       <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
         {description}
       </Text>
-    </PressableScale>
+    </PressableCard>
   );
 }
 
 const styles = StyleSheet.create((theme) => ({
   proCard: {
     backgroundColor: theme.colors.semantic.accentSubtle,
-    borderRadius: theme.radius.xl,
-    padding: theme.spacing[5],
-    gap: theme.spacing[2],
   },
   proBadge: {
     alignSelf: 'flex-start',
@@ -48,5 +45,6 @@ const styles = StyleSheet.create((theme) => ({
   proBadgeText: {
     color: '#FFFFFF',
     fontWeight: theme.font.weights.bold,
+    marginBottom: theme.spacing[0.5],
   },
 }));

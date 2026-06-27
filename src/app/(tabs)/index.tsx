@@ -110,7 +110,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create((theme) => ({
   safe: {
     flex: 1,
-    backgroundColor: theme.colors.semantic.bgPrimary,
+    backgroundColor: theme.colors.semantic.bgSecondary,
   },
   scroll: {
     paddingHorizontal: theme.spacing[5],

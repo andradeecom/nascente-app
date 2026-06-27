@@ -1,8 +1,8 @@
 import { View } from 'react-native';
-import { PressableScale } from 'pressto';
 import { StyleSheet } from 'react-native-unistyles';
 import { CalendarDays } from 'lucide-react-native';
 import { Button, Text, TEXT_VARIANTS } from '@/components/atoms';
+import { PressableCard } from '@/components/molecules';
 import type { SuggestedReadingPlan } from '@/types/reading-plans';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '../atoms/Button';
 
@@ -20,7 +20,7 @@ type SuggestedPlanCardProps = {
 
 export function SuggestedPlanCard({ plan, meta, startLabel, onStart, onPress, loading }: SuggestedPlanCardProps) {
   return (
-    <PressableScale onPress={onPress} style={styles.card}>
+    <PressableCard onPress={onPress} style={styles.card}>
       <View style={styles.icon}>
         <CalendarDays size={22} color={styles.icon.color} />
       </View>
@@ -39,7 +39,7 @@ export function SuggestedPlanCard({ plan, meta, startLabel, onStart, onPress, lo
         onPress={onStart}
         disabled={loading}
       />
-    </PressableScale>
+    </PressableCard>
   );
 }
 
@@ -47,11 +47,8 @@ const styles = StyleSheet.create((theme) => ({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: theme.spacing[3],
-    backgroundColor: theme.colors.semantic.bgPrimary,
-    borderRadius: theme.radius.xl,
     padding: theme.spacing[4],
-    ...theme.shadows.lg,
+    gap: theme.spacing[3],
   },
   icon: {
     width: 44,

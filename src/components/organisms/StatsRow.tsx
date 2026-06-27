@@ -1,6 +1,7 @@
 import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { Text, TEXT_VARIANTS } from '@/components/atoms';
+import { Card } from '../molecules';
 
 type Stat = {
   value: string | number;
@@ -17,14 +18,14 @@ export function StatsRow({ stats }: StatsRowProps) {
   return (
     <View style={styles.row}>
       {stats.map((stat) => (
-        <View key={stat.label} style={[styles.card, stat.muted && styles.cardMuted]}>
+        <Card key={stat.label} style={[styles.card, stat.muted && styles.cardMuted]}>
           <Text variant={TEXT_VARIANTS.Title1} color={stat.muted ? 'textTertiary' : 'textPrimary'}>
             {stat.value}
           </Text>
           <Text variant={TEXT_VARIANTS.Caption} color="textSecondary">
             {stat.label}
           </Text>
-        </View>
+        </Card>
       ))}
     </View>
   );
@@ -37,7 +38,7 @@ const styles = StyleSheet.create((theme) => ({
   },
   card: {
     flex: 1,
-    backgroundColor: theme.colors.semantic.bgSecondary,
+    backgroundColor: theme.colors.semantic.bgPrimary,
     borderRadius: theme.radius.xl,
     padding: theme.spacing[4],
     gap: theme.spacing[1],

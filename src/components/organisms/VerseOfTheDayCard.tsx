@@ -1,8 +1,8 @@
 import { View } from 'react-native';
-import { PressableScale } from 'pressto';
 import { StyleSheet } from 'react-native-unistyles';
 import { ChevronRight } from 'lucide-react-native';
 import { Text, TEXT_VARIANTS } from '@/components/atoms';
+import { PressableCard } from '../molecules';
 
 type VerseOfTheDayCardProps = {
   title: string;
@@ -14,14 +14,16 @@ type VerseOfTheDayCardProps = {
 
 export function VerseOfTheDayCard({ title, verseText, reference, actionLabel, onPress }: VerseOfTheDayCardProps) {
   return (
-    <PressableScale onPress={onPress} style={styles.card}>
-      <Text variant={TEXT_VARIANTS.Overline} color="accent" style={styles.uppercase}>
-        {title}
-      </Text>
-      <Text variant={TEXT_VARIANTS.BodyEmphasis} style={styles.verseText}>
-        {verseText}
-      </Text>
-      <View style={styles.footer}>
+    <PressableCard onPress={onPress}>
+      <PressableCard.Header>
+        <Text variant={TEXT_VARIANTS.Overline} color="textSecondary" style={styles.uppercase}>
+          {title}
+        </Text>
+      </PressableCard.Header>
+      <PressableCard.Body>
+        <Text variant={TEXT_VARIANTS.BodyEmphasis}>{verseText}</Text>
+      </PressableCard.Body>
+      <PressableCard.Footer style={styles.footer}>
         <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
           {reference}
         </Text>
@@ -31,24 +33,14 @@ export function VerseOfTheDayCard({ title, verseText, reference, actionLabel, on
           </Text>
           <ChevronRight size={16} color={styles.accentColor.color} strokeWidth={2} />
         </View>
-      </View>
-    </PressableScale>
+      </PressableCard.Footer>
+    </PressableCard>
   );
 }
 
 const styles = StyleSheet.create((theme) => ({
-  card: {
-    backgroundColor: theme.colors.semantic.bgSecondary,
-    borderRadius: theme.radius.xl,
-    padding: theme.spacing[5],
-    gap: theme.spacing[3],
-  },
   uppercase: {
     textTransform: 'uppercase',
-  },
-  verseText: {
-    fontFamily: 'Literata',
-    lineHeight: 30,
   },
   footer: {
     flexDirection: 'row',

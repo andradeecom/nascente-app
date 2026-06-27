@@ -1,10 +1,12 @@
 import { View } from 'react-native';
 import { PressableScale } from 'pressto';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { Bookmark, NotebookPen } from 'lucide-react-native';
 import { Text, TEXT_VARIANTS } from '@/components/atoms';
 import { highlights as HIGHLIGHT_HEX } from '@/theme/colors';
 import type { StudyItem } from '@/app/(tabs)/study/use-study-screen';
+
+const ThemedPressableScale = withUnistyles(PressableScale);
 
 type StudyCardProps = {
   item: StudyItem;
@@ -13,7 +15,7 @@ type StudyCardProps = {
 
 export function StudyCard({ item, onPress }: StudyCardProps) {
   return (
-    <PressableScale onPress={onPress} style={styles.card} accessibilityRole="button">
+    <ThemedPressableScale onPress={onPress} style={styles.card} accessibilityRole="button">
       <View style={styles.leading}>
         {item.type === 'highlight' && item.color ? (
           <View style={[styles.colorDot, { backgroundColor: HIGHLIGHT_HEX[item.color] }]} />
@@ -42,7 +44,7 @@ export function StudyCard({ item, onPress }: StudyCardProps) {
           </Text>
         )}
       </View>
-    </PressableScale>
+    </ThemedPressableScale>
   );
 }
 

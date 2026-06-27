@@ -9,7 +9,7 @@ module.exports = defineConfig([
   eslintPluginPrettierRecommended,
   reactCompiler.configs.recommended,
   {
-    ignores: ['dist/*', 'node_modules/*', 'supabase/functions/*'],
+    ignores: ['dist/*', 'node_modules/*', 'ios/*', 'android/*', 'supabase/functions/**'],
   },
   {
     rules: {

@@ -9,16 +9,14 @@ import {
   ContinueReadingCard,
   StatsRow,
   ActivePlansSection,
-  SignInPromptCard,
-  ProCtaCard,
+  ProLockCard,
 } from '@/components/organisms';
 import { useHomeScreen } from '@/hooks/use-home-screen';
 
 export default function HomeScreen() {
   const {
     translate,
-    isAuthenticated,
-    showProCta,
+    isPro,
     greetingKey,
     verseOfTheDay,
     verseText,
@@ -30,7 +28,6 @@ export default function HomeScreen() {
     handleContinueReading,
     handleVerseOfTheDay,
     handleExplorePlans,
-    handleSignIn,
     handleOpenPlan,
     handleOpenPaywall,
   } = useHomeScreen();
@@ -39,12 +36,12 @@ export default function HomeScreen() {
     () => [
       { value: `${stats.progressPercent}%`, label: translate('home.progress') },
       { value: stats.streak, label: translate('home.streak') },
-      // Highlights are account-gated (Study tab); guests see a muted placeholder.
-      isAuthenticated
+      // Highlights are a Pro feature; non-Pro users see a muted placeholder.
+      isPro
         ? { value: stats.highlightCount, label: translate('home.highlights') }
         : { value: '—', label: translate('home.highlights'), muted: true },
     ],
-    [stats, isAuthenticated, translate]
+    [stats, isPro, translate]
   );
 
   return (
@@ -71,9 +68,9 @@ export default function HomeScreen() {
 
         <StatsRow stats={statItems} />
 
-        {/* Guests can't have active plans (plans need an account), so the active-plans
-            slot becomes a contextual sign-in prompt instead of a dead empty state. */}
-        {isAuthenticated ? (
+        {/* Reading plans are Pro, so the active-plans slot shows real plans for Pro
+            users and a Pro lock card (→ paywall) for everyone else. */}
+        {isPro ? (
           <ActivePlansSection
             title={translate('home.activePlans')}
             exploreLabel={translate('home.explore')}
@@ -84,24 +81,19 @@ export default function HomeScreen() {
             onPlanPress={handleOpenPlan}
           />
         ) : (
-          <SignInPromptCard
+          <ProLockCard
             icon={CalendarCheck}
-            title={translate('plans.signIn.title')}
-            description={translate('plans.signIn.description')}
-            actionLabel={translate('plans.signIn.action')}
-            onPress={handleSignIn}
-          />
-        )}
-
-        {/* ── Pro CTA ─────────────────────────────────────────────────────── */}
-        {showProCta && (
-          <ProCtaCard
-            badgeLabel="PRO"
-            title={translate('home.proTitle')}
-            description={translate('home.proDescription')}
+            title={translate('plans.proLock.title')}
+            description={translate('plans.proLock.description')}
+            ctaLabel={translate('plans.proLock.action')}
             onPress={handleOpenPaywall}
           />
         )}
+
+        {/* No separate bottom Pro card: under the new model a non-Pro user already
+            sees the contextual Pro lock card in the plans slot above (the single
+            Home nudge), and every Pro feature routes to the paywall when reached.
+            Stacking a second holistic Pro card would violate the one-nudge rule. */}
       </ScrollView>
     </SafeAreaView>
   );

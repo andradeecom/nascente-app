@@ -5,7 +5,7 @@ import { useVerses, useBookName } from '@/hooks/use-bible';
 import { useReaderStore } from '@/stores/reader';
 import { usePlanReadingStore } from '@/stores/plan-reading';
 import { useReadingProgressStore } from '@/stores/reading-progress';
-import { useAuthStore } from '@/stores/auth';
+import { useIsPro } from '@/hooks/use-profile';
 import { useMarkPlanDayComplete } from '@/hooks/use-reading-plans';
 import { useChapterHighlights, useHighlightActions } from '@/hooks/use-highlights';
 import { useChapterBookmarks, useBookmarkActions } from '@/hooks/use-bookmarks';
@@ -30,9 +30,9 @@ export default function useReaderScreen() {
   const markComplete = useMarkPlanDayComplete();
   const markChapterRead = useReadingProgressStore((s) => s.markChapterRead);
 
-  // Highlights + bookmarks (signed-in only). Per-chapter lookups feed both the
+  // Highlights + bookmarks (Pro only). Per-chapter lookups feed both the
   // verse rendering and the open action sheet.
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const isPro = useIsPro();
   const chapterHighlights = useChapterHighlights(bookId, chapter);
   const { setHighlight, removeHighlight } = useHighlightActions(translationId);
   const chapterBookmarks = useChapterBookmarks(bookId, chapter);
@@ -85,14 +85,15 @@ export default function useReaderScreen() {
     );
   }, [session, markComplete, clearSession, translate, router]);
 
-  // Verse highlighting (gated to signed-in users). Tapping a verse opens the
-  // action sheet; picking a color sets it, and there's a remove option.
+  // Verse study actions are Pro. The verse is only rendered as a pressable for Pro
+  // users (see the Reader's renderVerse — non-Pro verses are plain, non-interactive
+  // text), so this opens the action sheet. The `!isPro` guard is defense-in-depth.
   const handleVersePress = useCallback(
     (verse: number) => {
-      if (!isAuthenticated) return;
+      if (!isPro) return;
       setSelectedVerse(verse);
     },
-    [isAuthenticated]
+    [isPro]
   );
 
   const handlePickColor = useCallback(
@@ -191,6 +192,7 @@ export default function useReaderScreen() {
     chapter,
     verses,
     isLoading,
+    isPro,
     bookName,
     bookPickerVisible,
     translationPickerVisible,

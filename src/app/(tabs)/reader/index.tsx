@@ -21,6 +21,7 @@ export default function ReaderScreen() {
     chapter,
     verses,
     isLoading,
+    isPro,
     bookName,
     bookPickerVisible,
     translationPickerVisible,
@@ -62,8 +63,8 @@ export default function ReaderScreen() {
   const renderVerse = useCallback(
     ({ item }: { item: Verse }) => {
       const color = chapterHighlights[item.verse];
-      return (
-        <Pressable onPress={() => handleVersePress(item.verse)} style={styles.verseRow}>
+      const content = (
+        <>
           <Text variant={TEXT_VARIANTS.Caption} color="textTertiary" style={styles.verseNumber}>
             {item.verse}
           </Text>
@@ -77,10 +78,22 @@ export default function ReaderScreen() {
           >
             {item.text}
           </Text>
+        </>
+      );
+
+      // Verse study actions are Pro. For non-Pro users the verse is plain, non-
+      // interactive text (no press, no feedback) — reading itself stays free.
+      if (!isPro) {
+        return <View style={styles.verseRow}>{content}</View>;
+      }
+
+      return (
+        <Pressable onPress={() => handleVersePress(item.verse)} style={styles.verseRow}>
+          {content}
         </Pressable>
       );
     },
-    [readerFontSize, readerLineHeight, chapterHighlights, handleVersePress]
+    [readerFontSize, readerLineHeight, chapterHighlights, handleVersePress, isPro]
   );
 
   // When reading a plan day, a "finish today's reading" CTA sits at the end of

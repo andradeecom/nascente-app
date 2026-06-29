@@ -5,13 +5,13 @@ import { StyleSheet } from 'react-native-unistyles';
 import { Highlighter } from 'lucide-react-native';
 import { SafeAreaView, Text, TEXT_VARIANTS } from '@/components/atoms';
 import { SegmentedControl, type Segment } from '@/components/molecules';
-import { SignInPromptCard, StudyCard } from '@/components/organisms';
+import { ProLockCard, StudyCard } from '@/components/organisms';
 import useStudyScreen, { type StudyFilter, type StudyItem } from './use-study-screen';
 
 export default function StudyScreen() {
   const {
     translate,
-    isAuthenticated,
+    isPro,
     filter,
     setFilter,
     items,
@@ -19,7 +19,7 @@ export default function StudyScreen() {
     isError,
     isRefetching,
     refresh,
-    handleSignIn,
+    handleUpgrade,
     handleOpenItem,
   } = useStudyScreen();
 
@@ -36,19 +36,19 @@ export default function StudyScreen() {
     { key: 'bookmarks', label: translate('study.filters.bookmarks') },
   ];
 
-  if (!isAuthenticated) {
+  if (!isPro) {
     return (
       <SafeAreaView edges={['top']} style={styles.safe}>
         <View style={styles.content}>
           <Text variant={TEXT_VARIANTS.Title1} style={styles.heading}>
             {translate('study.title')}
           </Text>
-          <SignInPromptCard
+          <ProLockCard
             icon={Highlighter}
-            title={translate('study.signIn.title')}
-            description={translate('study.signIn.description')}
-            actionLabel={translate('study.signIn.action')}
-            onPress={handleSignIn}
+            title={translate('study.proLock.title')}
+            description={translate('study.proLock.description')}
+            ctaLabel={translate('study.proLock.action')}
+            onPress={handleUpgrade}
           />
         </View>
       </SafeAreaView>

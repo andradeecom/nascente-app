@@ -169,6 +169,12 @@ const en = {
       description: 'Create an account to highlight verses and access them across all your devices.',
       action: 'Create account',
     },
+    proLock: {
+      title: 'Highlights, notes & bookmarks are Pro',
+      description:
+        'Subscribe to Pro to highlight verses, write notes, and save bookmarks — synced across your devices.',
+      action: 'See Pro',
+    },
   },
   reader: {
     title: 'Bible',
@@ -203,6 +209,11 @@ const en = {
       title: 'Keep track of your reading plans',
       description: 'Create an account to start plans and save your progress across all your devices.',
       action: 'Create account',
+    },
+    proLock: {
+      title: 'Reading plans are Pro',
+      description: 'Subscribe to Pro to start and track reading plans, with your progress synced.',
+      action: 'See Pro',
     },
     remove: {
       action: 'Remove plan',

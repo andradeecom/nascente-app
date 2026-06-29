@@ -169,6 +169,12 @@ const pt = {
       description: 'Crie uma conta para destacar versículos e acessá-los em todos os seus aparelhos.',
       action: 'Criar conta',
     },
+    proLock: {
+      title: 'Destaques, notas e marcadores pertencem ao Plano Pro',
+      description:
+        'Assine o Pro para destacar versículos, escrever notas e salvar marcadores — sincronizados em todos os aparelhos.',
+      action: 'Conhecer o Pro',
+    },
   },
   reader: {
     title: 'Bíblia',
@@ -203,6 +209,11 @@ const pt = {
       title: 'Acompanhe seus planos de leitura',
       description: 'Crie uma conta para iniciar planos e salvar seu progresso em todos os seus aparelhos.',
       action: 'Criar conta',
+    },
+    proLock: {
+      title: 'Planos de leitura são Pro',
+      description: 'Assine o Pro para iniciar e acompanhar planos de leitura, com seu progresso sincronizado.',
+      action: 'Conhecer o Pro',
     },
     remove: {
       action: 'Remover plano',

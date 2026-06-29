@@ -133,8 +133,10 @@ export function useHomeScreen() {
   // Active plans
   const activePlans = useActivePlans();
 
-  // Pro CTA gating — only nudge non-Pro users (no-op grant until RevenueCat lands,
-  // so every account reads `free` for now). Guests are gated separately in the UI.
+  // Pro gating. Under the "free reading, Pro everything-else" model, the Pro
+  // nudge shows to ALL non-Pro users (guests included) — there's no competing
+  // create-account gate on features anymore. The active-plans slot + Destaques
+  // stat are Pro-gated too (plans/highlights are Pro).
   const isPro = useIsPro();
 
   // Verse of the day
@@ -190,7 +192,8 @@ export function useHomeScreen() {
   return {
     translate,
     isAuthenticated,
-    showProCta: isAuthenticated && !isPro,
+    isPro,
+    showProCta: !isPro,
     greetingKey,
     verseOfTheDay,
     verseText,

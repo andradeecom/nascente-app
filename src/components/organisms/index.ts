@@ -17,6 +17,7 @@ export { ContinueReadingCard } from './ContinueReadingCard';
 export { StatsRow } from './StatsRow';
 export { ActivePlansSection } from './ActivePlansSection';
 export { SignInPromptCard } from './SignInPromptCard';
+export { ProLockCard } from './ProLockCard';
 export { VerseActionSheet } from './VerseActionSheet';
 export { UpsellModal } from './UpsellModal';
 export { NoteEditorModal } from './NoteEditorModal';

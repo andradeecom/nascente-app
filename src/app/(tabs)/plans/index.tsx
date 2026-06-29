@@ -5,7 +5,7 @@ import { StyleSheet } from 'react-native-unistyles';
 import { CalendarCheck } from 'lucide-react-native';
 import { SafeAreaView, Text, TEXT_VARIANTS } from '@/components/atoms';
 import { SectionHeader } from '@/components/molecules';
-import { ActivePlanCard, SignInPromptCard, SuggestedPlanCard, UpsellModal } from '@/components/organisms';
+import { ActivePlanCard, ProLockCard, SuggestedPlanCard, UpsellModal } from '@/components/organisms';
 import type { ActiveReadingPlan, SuggestedReadingPlan } from '@/types/reading-plans';
 import usePlansScreen from './use-plans-screen';
 
@@ -18,12 +18,12 @@ type ListItem =
 export default function PlansScreen() {
   const {
     translate,
-    isAuthenticated,
+    isPro,
     activePlans,
     suggestedPlans,
     formatMeta,
     handleStart,
-    handleSignIn,
+    handleUpgrade,
     handleOpenPlan,
     startingPlanId,
     activeLimit,
@@ -59,19 +59,19 @@ export default function PlansScreen() {
     return list;
   }, [activePlans.data, activePlans.isError, suggestedPlans.data, suggestedPlans.isError, translate]);
 
-  if (!isAuthenticated) {
+  if (!isPro) {
     return (
       <SafeAreaView edges={['top']} style={styles.safe}>
         <View style={styles.content}>
           <Text variant={TEXT_VARIANTS.Title1} style={styles.heading}>
             {translate('plans.title')}
           </Text>
-          <SignInPromptCard
+          <ProLockCard
             icon={CalendarCheck}
-            title={translate('plans.signIn.title')}
-            description={translate('plans.signIn.description')}
-            actionLabel={translate('plans.signIn.action')}
-            onPress={handleSignIn}
+            title={translate('plans.proLock.title')}
+            description={translate('plans.proLock.description')}
+            ctaLabel={translate('plans.proLock.action')}
+            onPress={handleUpgrade}
           />
         </View>
       </SafeAreaView>

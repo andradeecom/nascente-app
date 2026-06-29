@@ -4,7 +4,7 @@ import Toast from 'react-native-toast-message';
 import { useActivePlans, useStartPlan, useSuggestedPlans } from '@/hooks/use-reading-plans';
 import { useRefetchOnFocus } from '@/hooks/use-refetch-on-focus';
 import { useSyncOnFocus } from '@/hooks/use-sync';
-import { useTier } from '@/hooks/use-profile';
+import { useTier, useIsPro } from '@/hooks/use-profile';
 import { useAuthStore } from '@/stores/auth';
 import { useTranslate } from '@/i18n';
 import { ACTIVE_PLAN_LIMIT, isPlanLimitError } from '@/types/subscription';
@@ -24,6 +24,8 @@ export default function usePlansScreen() {
   const translate = useTranslate();
   const router = useRouter();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  // Reading plans are a Pro feature — non-Pro users get the Pro lock card.
+  const isPro = useIsPro();
 
   const activePlans = useActivePlans();
   const suggestedPlans = useSuggestedPlans();
@@ -85,6 +87,11 @@ export default function usePlansScreen() {
     router.push('/register');
   }, [router]);
 
+  // Pro lock card CTA (non-Pro users) → paywall.
+  const handleUpgrade = useCallback(() => {
+    router.push('/paywall');
+  }, [router]);
+
   const handleOpenPlan = useCallback(
     (planId: string) => {
       router.push(`/(tabs)/plans/${planId}`);
@@ -95,11 +102,13 @@ export default function usePlansScreen() {
   return {
     translate,
     isAuthenticated,
+    isPro,
     activePlans,
     suggestedPlans,
     formatMeta,
     handleStart,
     handleSignIn,
+    handleUpgrade,
     handleOpenPlan,
     atActiveLimit,
     activeLimit,

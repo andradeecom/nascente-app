@@ -94,9 +94,16 @@ const pt = {
     language: 'Idioma',
     theme: 'Tema',
     textSize: 'Tamanho do texto',
-    downloads: 'Downloads',
+    translations: 'Traduções',
+    translationsUnlockPro: 'Desbloquear com o Pro',
     notifications: 'Notificações',
     notificationsEnabled: 'Ativadas',
+    credits: {
+      row: 'Créditos e licenças',
+      title: 'Créditos e licenças',
+      intro: 'Traduções da Bíblia incluídas no app e suas respectivas licenças.',
+      viewLicense: 'Ver licença',
+    },
     support: 'Suporte',
     themeOptions: {
       light: 'Claro',
@@ -172,6 +179,10 @@ const pt = {
     close: 'Fechar',
     back: '← Voltar',
     translation: 'Tradução',
+    translationPicker: {
+      free: 'Grátis',
+      pro: 'Pro',
+    },
   },
   plans: {
     title: 'Planos',
@@ -228,23 +239,19 @@ const pt = {
     },
     translation: {
       title: 'Escolha sua tradução',
-      subtitle: 'Você pode baixar outras traduções quando quiser.',
+      subtitle: 'Comece com a tradução gratuita. Mais traduções no Pro.',
       continueButton: 'Continuar',
       offlineBadge: 'Offline',
       proBadge: 'Pro',
       footer: '{{name}} · pronta para leitura offline',
       sections: {
-        publicDomain: {
-          label: 'Domínio público',
-          caption: 'Grátis · leitura offline completa',
-        },
-        freeLicensed: {
-          label: 'Gratuito licenciado',
-          caption: 'Grátis · conta para sincronizar',
+        free: {
+          label: 'Grátis',
+          caption: 'Domínio público · leitura offline completa',
         },
         pro: {
           label: 'Biblioteca Pro',
-          caption: 'Assinatura',
+          caption: 'Mais traduções com a assinatura Pro',
         },
       },
     },
@@ -303,7 +310,7 @@ const pt = {
       highlights: 'Destaques ilimitados — todas as cores e etiquetas personalizadas',
       notes: 'Notas ilimitadas com texto rico (markdown)',
       plans: 'Até 50 planos ativos + criador de planos personalizado',
-      translations: 'Biblioteca ampliada: NVI, NAA, ARA e mais — em cache para leitura offline',
+      translations: 'Mais traduções da Bíblia — todas offline e prontas para uso',
       audio: 'Bíblia em áudio (streaming + download offline)',
       crossReferences: 'Navegador completo de referências cruzadas',
       ai: 'Ferramentas de estudo com IA: 30 explicações/mês, 5 planos gerados/mês, 10 narrações/mês',

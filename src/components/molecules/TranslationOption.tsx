@@ -1,12 +1,11 @@
 import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Check, Cloud, Download, Lock } from 'lucide-react-native';
+import { Check, Cloud, Lock } from 'lucide-react-native';
 import { PressableScale } from 'pressto';
 import { Text, TEXT_VARIANTS } from '@/components/atoms';
 
 export enum TRANSLATION_TIER {
   Available = 'available',
-  Download = 'download',
   Pro = 'pro',
 }
 
@@ -66,7 +65,6 @@ export function TranslationOption({
             </Text>
           </View>
         )}
-        {tier === TRANSLATION_TIER.Download && <Download size={18} color={styles.downloadIcon.color} />}
         {tier === TRANSLATION_TIER.Pro && (
           <View style={styles.proBadge}>
             <Lock size={12} color={styles.proBadge.color} />
@@ -132,9 +130,6 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: 'center',
     gap: theme.spacing[1],
     color: theme.colors.semantic.accent,
-  },
-  downloadIcon: {
-    color: theme.colors.semantic.textSecondary,
   },
   proBadge: {
     flexDirection: 'row',

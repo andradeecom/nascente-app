@@ -28,6 +28,7 @@ export default function ReaderScreen() {
     setTranslationPickerVisible,
     handleBookChapterSelect,
     handleTranslationSelect,
+    handleTranslationUpsell,
     handlePrevChapter,
     handleNextChapter,
     isPlanDayEnd,
@@ -138,6 +139,7 @@ export default function ReaderScreen() {
         visible={translationPickerVisible}
         currentId={translationId}
         onSelect={handleTranslationSelect}
+        onUpsell={handleTranslationUpsell}
         onClose={() => setTranslationPickerVisible(false)}
       />
 

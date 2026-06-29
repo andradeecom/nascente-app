@@ -41,3 +41,9 @@ app-example
 # generated native folders
 /ios
 /android
+
+# Bible-DB build scripts — local one-off tooling, not shipped (see
+# .docs/bible-translation-licensing.md → "Build scripts & sources").
+scripts/build-bible-dbs.mjs
+scripts/build-bible-dbs-helloao.mjs
+scripts/lib/

@@ -94,9 +94,16 @@ const en = {
     language: 'Language',
     theme: 'Theme',
     textSize: 'Text Size',
-    downloads: 'Downloads',
+    translations: 'Translations',
+    translationsUnlockPro: 'Unlock with Pro',
     notifications: 'Notifications',
     notificationsEnabled: 'Enabled',
+    credits: {
+      row: 'Credits & licenses',
+      title: 'Credits & licenses',
+      intro: 'Bible translations included in the app and their licenses.',
+      viewLicense: 'View license',
+    },
     support: 'Support',
     themeOptions: {
       light: 'Light',
@@ -172,6 +179,10 @@ const en = {
     close: 'Close',
     back: '← Back',
     translation: 'Translation',
+    translationPicker: {
+      free: 'Free',
+      pro: 'Pro',
+    },
   },
   plans: {
     title: 'Plans',
@@ -228,23 +239,19 @@ const en = {
     },
     translation: {
       title: 'Choose your translation',
-      subtitle: 'You can download other translations whenever you like.',
+      subtitle: 'Start with the free translation. More translations on Pro.',
       continueButton: 'Continue',
       offlineBadge: 'Offline',
       proBadge: 'Pro',
       footer: '{{name}} · ready for offline reading',
       sections: {
-        publicDomain: {
-          label: 'Public domain',
-          caption: 'Free · full offline reading',
-        },
-        freeLicensed: {
-          label: 'Free licensed',
-          caption: 'Free · account to sync',
+        free: {
+          label: 'Free',
+          caption: 'Public domain · full offline reading',
         },
         pro: {
           label: 'Pro library',
-          caption: 'Subscription',
+          caption: 'More translations with the Pro subscription',
         },
       },
     },
@@ -303,7 +310,7 @@ const en = {
       highlights: 'Unlimited highlights — all colors and custom labels',
       notes: 'Unlimited notes with rich text (markdown)',
       plans: 'Up to 50 active plans + custom plan builder',
-      translations: 'Extended library: NIV, ESV, NLT, NVI, ARA and more — cached for offline',
+      translations: 'More Bible translations — all offline and ready to read',
       audio: 'Audio Bible (stream + offline download)',
       crossReferences: 'Full cross-reference browser',
       ai: 'AI study tools: 30 explanations/mo, 5 generated plans/mo, 10 narrations/mo',

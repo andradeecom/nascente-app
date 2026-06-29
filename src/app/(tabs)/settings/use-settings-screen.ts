@@ -35,6 +35,10 @@ export default function useSettingsScreen() {
     router.push('/settings/text-size');
   };
 
+  const handleCreditsPress = () => {
+    router.push('/settings/credits');
+  };
+
   const handleSupportPress = () => {
     Toast.show({
       type: 'success',
@@ -52,6 +56,7 @@ export default function useSettingsScreen() {
     handleThemePress,
     handleLanguagePress,
     handleTextSizePress,
+    handleCreditsPress,
     handleSupportPress,
   };
 }

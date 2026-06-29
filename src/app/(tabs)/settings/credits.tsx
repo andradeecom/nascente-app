@@ -1,0 +1,87 @@
+import { Linking, ScrollView, View } from 'react-native';
+import { StyleSheet } from 'react-native-unistyles';
+import { PressableScale } from 'pressto';
+import { ExternalLink } from 'lucide-react-native';
+import { SafeAreaView, Text, TEXT_VARIANTS } from '@/components/atoms';
+import { ScreenHeader } from '@/components/organisms';
+import { TRANSLATION_CREDITS } from '@/types/bible';
+import { useTranslate } from '@/i18n';
+
+/**
+ * Credits / attribution screen. Lists every bundled translation with its license
+ * + source. Required because some bundled translations are CC-BY / CC-BY-SA,
+ * which obligate attribution. Data-driven by `TRANSLATION_CREDITS` so enabling a
+ * new translation automatically surfaces (and credits) it here.
+ */
+export default function CreditsScreen() {
+  const translate = useTranslate();
+
+  return (
+    <SafeAreaView style={styles.safe} edges={['bottom']}>
+      <ScreenHeader title={translate('settings.credits.title')} />
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" style={styles.intro}>
+          {translate('settings.credits.intro')}
+        </Text>
+
+        {TRANSLATION_CREDITS.map((credit) => (
+          <View key={credit.id} style={styles.card}>
+            <Text variant={TEXT_VARIANTS.BodyEmphasis}>{credit.title}</Text>
+            <Text variant={TEXT_VARIANTS.Caption} color="textSecondary" style={styles.license}>
+              {credit.license}
+            </Text>
+            {credit.copyright && (
+              <Text variant={TEXT_VARIANTS.Caption} color="textTertiary">
+                {credit.copyright}
+              </Text>
+            )}
+            <PressableScale
+              style={styles.linkRow}
+              onPress={() => Linking.openURL(credit.licenseUrl ?? credit.sourceUrl)}
+            >
+              <Text variant={TEXT_VARIANTS.Caption} color="accent">
+                {translate('settings.credits.viewLicense')}
+              </Text>
+              <ExternalLink size={13} color={styles.linkIcon.color} />
+            </PressableScale>
+          </View>
+        ))}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create((theme) => ({
+  safe: {
+    flex: 1,
+    backgroundColor: theme.colors.semantic.bgSecondary,
+  },
+  scroll: {
+    paddingHorizontal: theme.spacing[5],
+    paddingVertical: theme.spacing[6],
+    gap: theme.spacing[3],
+  },
+  intro: {
+    marginBottom: theme.spacing[2],
+  },
+  card: {
+    padding: theme.spacing[4],
+    borderRadius: theme.radius.lg,
+    backgroundColor: theme.colors.semantic.bgPrimary,
+    borderWidth: 1,
+    borderColor: theme.colors.semantic.bgTertiary,
+    gap: theme.spacing[1],
+  },
+  license: {
+    marginBottom: theme.spacing[0.5],
+  },
+  linkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing[1],
+    marginTop: theme.spacing[2],
+  },
+  linkIcon: {
+    color: theme.colors.semantic.accent,
+  },
+}));

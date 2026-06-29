@@ -16,37 +16,27 @@ export type OnboardingTranslation = {
 };
 
 export type OnboardingTranslationSection = {
-  sectionKey: 'publicDomain' | 'freeLicensed' | 'pro';
+  sectionKey: 'free' | 'pro';
   items: OnboardingTranslation[];
 };
 
 // Content is inherently locale-specific, so the catalog lives here keyed by locale.
-// Only the `available` tier maps to a real bundled database; the other tiers are
-// visual placeholders until downloads/subscriptions are implemented.
+// V1 ships public-domain only (no copyrighted/modern translations). Everything is
+// bundled — `free` is available to all; `pro` is the same offline DB gated behind
+// the Pro subscription (entitlement only). During onboarding the user hasn't paid,
+// so Pro rows are shown locked (not selectable). See `.docs/bible-translation-licensing.md`.
 const CATALOG: Record<LocaleName, OnboardingTranslationSection[]> = {
   pt: [
     {
-      sectionKey: 'publicDomain',
+      sectionKey: 'free',
       items: [
         {
-          key: 'almeida1911',
+          key: 'onbv',
           tier: TRANSLATION_TIER.Available,
-          translationId: 'Almeida',
-          title: 'Almeida 1911',
-          description: 'Tradução clássica em domínio público',
-          size: '18 MB',
-        },
-      ],
-    },
-    {
-      sectionKey: 'freeLicensed',
-      items: [
-        {
-          key: 'almeidaRA',
-          tier: TRANSLATION_TIER.Download,
-          title: 'Almeida Revista e Atualizada',
-          description: 'Linguagem moderna e fiel ao texto',
-          size: '24 MB',
+          translationId: 'ONBV',
+          title: 'Nova Bíblia Viva',
+          description: 'Linguagem moderna e acessível',
+          size: '5 MB',
         },
       ],
     },
@@ -54,38 +44,35 @@ const CATALOG: Record<LocaleName, OnboardingTranslationSection[]> = {
       sectionKey: 'pro',
       items: [
         {
-          key: 'nvi',
+          key: 'almeida1911',
           tier: TRANSLATION_TIER.Pro,
-          title: 'Nova Versão Internacional',
-          description: 'Leitura natural e contemporânea',
-          size: '22 MB',
+          translationId: 'Almeida',
+          title: 'Almeida 1911',
+          description: 'Tradução clássica em domínio público',
+          size: '5 MB',
+        },
+        {
+          key: 'biblialivre',
+          tier: TRANSLATION_TIER.Pro,
+          translationId: 'BibliaLivre',
+          title: 'Bíblia Livre',
+          description: 'Tradução livre e de leitura acessível',
+          size: '5 MB',
         },
       ],
     },
   ],
   es: [
     {
-      sectionKey: 'publicDomain',
+      sectionKey: 'free',
       items: [
         {
-          key: 'rv1909',
+          key: 'onbves',
           tier: TRANSLATION_TIER.Available,
-          translationId: 'RV1909',
-          title: 'Reina-Valera 1909',
-          description: 'Traducción clásica de dominio público',
-          size: '18 MB',
-        },
-      ],
-    },
-    {
-      sectionKey: 'freeLicensed',
-      items: [
-        {
-          key: 'rv1960',
-          tier: TRANSLATION_TIER.Download,
-          title: 'Reina-Valera 1960',
-          description: 'Lenguaje moderno y fiel al texto',
-          size: '24 MB',
+          translationId: 'ONBVes',
+          title: 'Nueva Biblia Viva',
+          description: 'Lenguaje moderno y accesible',
+          size: '5 MB',
         },
       ],
     },
@@ -93,38 +80,35 @@ const CATALOG: Record<LocaleName, OnboardingTranslationSection[]> = {
       sectionKey: 'pro',
       items: [
         {
-          key: 'nvi-es',
+          key: 'rv1909',
           tier: TRANSLATION_TIER.Pro,
-          title: 'Nueva Versión Internacional',
-          description: 'Lectura natural y contemporánea',
-          size: '22 MB',
+          translationId: 'RV1909',
+          title: 'Reina-Valera 1909',
+          description: 'Traducción clásica de dominio público',
+          size: '5 MB',
+        },
+        {
+          key: 'sse',
+          tier: TRANSLATION_TIER.Pro,
+          translationId: 'SSE',
+          title: 'Sagradas Escrituras 1569',
+          description: 'Traducción histórica de dominio público',
+          size: '5 MB',
         },
       ],
     },
   ],
   en: [
     {
-      sectionKey: 'publicDomain',
+      sectionKey: 'free',
       items: [
         {
-          key: 'kjv',
+          key: 'asv',
           tier: TRANSLATION_TIER.Available,
-          translationId: 'KJV',
-          title: 'King James Version',
-          description: 'Classic public-domain translation',
-          size: '18 MB',
-        },
-      ],
-    },
-    {
-      sectionKey: 'freeLicensed',
-      items: [
-        {
-          key: 'esv',
-          tier: TRANSLATION_TIER.Download,
-          title: 'English Standard Version',
-          description: 'Modern, faithful to the text',
-          size: '24 MB',
+          translationId: 'ASV',
+          title: 'American Standard Version',
+          description: 'Precise public-domain classic',
+          size: '5 MB',
         },
       ],
     },
@@ -132,11 +116,20 @@ const CATALOG: Record<LocaleName, OnboardingTranslationSection[]> = {
       sectionKey: 'pro',
       items: [
         {
-          key: 'niv',
+          key: 'kjv',
           tier: TRANSLATION_TIER.Pro,
-          title: 'New International Version',
-          description: 'Natural, contemporary reading',
-          size: '22 MB',
+          translationId: 'KJV',
+          title: 'King James Version',
+          description: 'Classic public-domain translation',
+          size: '5 MB',
+        },
+        {
+          key: 'web',
+          tier: TRANSLATION_TIER.Pro,
+          translationId: 'WEB',
+          title: 'World English Bible',
+          description: 'Modern public-domain English',
+          size: '5 MB',
         },
       ],
     },

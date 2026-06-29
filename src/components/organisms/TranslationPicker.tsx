@@ -1,22 +1,30 @@
-import { Modal, Pressable, View } from 'react-native';
-import { FlashList } from '@shopify/flash-list';
+import { Modal, Pressable, SectionList, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Check, X } from 'lucide-react-native';
+import { Check, Lock, X } from 'lucide-react-native';
 import { Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
 import { useTranslate } from '@/i18n';
-import { TRANSLATIONS, type TranslationId } from '@/types/bible';
+import { useIsPro } from '@/hooks/use-profile';
+import { FREE_TRANSLATIONS, PRO_TRANSLATIONS, type TranslationId, type TranslationMeta } from '@/types/bible';
 
-const TRANSLATION_LIST = Object.values(TRANSLATIONS);
+type Section = { tier: 'free' | 'pro'; data: TranslationMeta[] };
 
 type Props = {
   visible: boolean;
   currentId: TranslationId;
   onSelect: (id: TranslationId) => void;
+  /** Called when a guest/free user taps a Pro-gated translation. Routes to the paywall. */
+  onUpsell: () => void;
   onClose: () => void;
 };
 
-export function TranslationPicker({ visible, currentId, onSelect, onClose }: Props) {
+export function TranslationPicker({ visible, currentId, onSelect, onUpsell, onClose }: Props) {
   const translate = useTranslate();
+  const isPro = useIsPro();
+
+  const sections: Section[] = [
+    { tier: 'free', data: FREE_TRANSLATIONS },
+    { tier: 'pro', data: PRO_TRANSLATIONS },
+  ];
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
@@ -31,23 +39,36 @@ export function TranslationPicker({ visible, currentId, onSelect, onClose }: Pro
           </Pressable>
         </View>
 
-        <FlashList
-          data={TRANSLATION_LIST}
+        <SectionList
+          sections={sections}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <Pressable
-              onPress={() => onSelect(item.id)}
-              style={({ pressed }) => [styles.row, pressed && styles.pressed]}
-            >
-              <View style={styles.rowContent}>
-                <Text variant={TEXT_VARIANTS.Body}>{item.label}</Text>
-                <Text variant={TEXT_VARIANTS.Caption} color="textSecondary">
-                  {item.lang.toUpperCase()}
-                </Text>
-              </View>
-              {item.id === currentId && <Check size={20} color={styles.checkIcon.color} />}
-            </Pressable>
+          stickySectionHeadersEnabled={false}
+          renderSectionHeader={({ section }) => (
+            <View style={styles.sectionHeader}>
+              <Text variant={TEXT_VARIANTS.Overline} color="textTertiary">
+                {translate(section.tier === 'free' ? 'reader.translationPicker.free' : 'reader.translationPicker.pro')}
+              </Text>
+            </View>
           )}
+          renderItem={({ item, section }) => {
+            // Pro rows are locked unless the user has Pro; tapping a locked row upsells.
+            const locked = section.tier === 'pro' && !isPro;
+            return (
+              <Pressable
+                onPress={() => (locked ? onUpsell() : onSelect(item.id))}
+                style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+              >
+                <View style={styles.rowContent}>
+                  <Text variant={TEXT_VARIANTS.Body}>{item.label}</Text>
+                  <Text variant={TEXT_VARIANTS.Caption} color="textSecondary">
+                    {item.lang.toUpperCase()}
+                  </Text>
+                </View>
+                {item.id === currentId && !locked && <Check size={20} color={styles.checkIcon.color} />}
+                {locked && <Lock size={16} color={styles.lockIcon.color} />}
+              </Pressable>
+            );
+          }}
           contentContainerStyle={styles.listContent}
         />
       </SafeAreaView>
@@ -82,6 +103,11 @@ const styles = StyleSheet.create((theme) => ({
   listContent: {
     paddingVertical: theme.spacing[2],
   },
+  sectionHeader: {
+    paddingHorizontal: theme.spacing[5],
+    paddingTop: theme.spacing[4],
+    paddingBottom: theme.spacing[2],
+  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -99,5 +125,8 @@ const styles = StyleSheet.create((theme) => ({
   },
   checkIcon: {
     color: theme.colors.semantic.accent,
+  },
+  lockIcon: {
+    color: theme.colors.semantic.textTertiary,
   },
 }));

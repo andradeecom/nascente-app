@@ -161,6 +161,12 @@ export default function useReaderScreen() {
     [setTranslation]
   );
 
+  // Tapping a Pro-gated translation closes the picker and opens the paywall.
+  const handleTranslationUpsell = useCallback(() => {
+    setTranslationPickerVisible(false);
+    router.push('/paywall');
+  }, [router]);
+
   const handlePrevChapter = useCallback(async () => {
     if (chapter > 1) {
       setChapter(chapter - 1);
@@ -192,6 +198,7 @@ export default function useReaderScreen() {
     setTranslationPickerVisible,
     handleBookChapterSelect,
     handleTranslationSelect,
+    handleTranslationUpsell,
     handlePrevChapter,
     handleNextChapter,
     isPlanDayEnd,

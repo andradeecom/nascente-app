@@ -9,10 +9,24 @@ import {
   type SearchResult,
 } from '@/types/bible';
 
-const DB_ASSETS: Record<TranslationId, number> = {
+// Every translation (free + Pro) is bundled — Pro is an entitlement gate, not a
+// download (see `.docs/bible-translation-licensing.md`). The Pro `.db` files are
+// produced by `scripts/build-bible-dbs.mjs`; uncomment each entry here once the
+// matching file exists in `assets/db/` (a `require` on a missing asset fails the
+// Metro bundler). A Pro translation with no asset yet throws a clear error if opened.
+const DB_ASSETS: Partial<Record<TranslationId, number>> = {
+  // Free (bundled, public-domain)
+  ONBV: require('@/assets/db/ONBV.db'),
+  ONBVes: require('@/assets/db/ONBVes.db'),
+  ASV: require('@/assets/db/ASV.db'),
+  // Pro (bundled, public-domain) — uncomment once each .db file is generated:
+  BibliaLivre: require('@/assets/db/BibliaLivre.db'),
   Almeida: require('@/assets/db/Almeida.db'),
+  SSE: require('@/assets/db/SSE.db'),
   RV1909: require('@/assets/db/RV1909.db'),
+  WEB: require('@/assets/db/WEB.db'),
   KJV: require('@/assets/db/KJV.db'),
+  // YLT: require('@/assets/db/YLT.db'),
 };
 
 const dbCache = new Map<TranslationId, SQLite.SQLiteDatabase>();
@@ -22,8 +36,15 @@ async function getDb(translationId: TranslationId): Promise<SQLite.SQLiteDatabas
   if (cached) return cached;
 
   const meta = TRANSLATIONS[translationId];
+  const assetId = DB_ASSETS[translationId];
+  if (assetId == null) {
+    throw new Error(
+      `Translation "${translationId}" is not bundled yet. Generate ${meta.dbFile} with ` +
+        `scripts/build-bible-dbs.mjs and enable its entry in DB_ASSETS.`
+    );
+  }
 
-  await importDatabaseFromAssetAsync(meta.dbFile, { assetId: DB_ASSETS[translationId] });
+  await importDatabaseFromAssetAsync(meta.dbFile, { assetId });
   const db = await SQLite.openDatabaseAsync(meta.dbFile);
 
   dbCache.set(translationId, db);

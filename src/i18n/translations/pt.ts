@@ -211,7 +211,7 @@ const pt = {
       action: 'Criar conta',
     },
     proLock: {
-      title: 'Planos de leitura são Pro',
+      title: 'Planos de leitura pertencem ao Plano Pro',
       description: 'Assine o Pro para iniciar e acompanhar planos de leitura, com seu progresso sincronizado.',
       action: 'Conhecer o Pro',
     },

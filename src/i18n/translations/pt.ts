@@ -97,6 +97,7 @@ const pt = {
     translations: 'Traduções',
     translationsUnlockPro: 'Desbloquear com o Pro',
     notifications: 'Notificações',
+    notificationsComingSoon: 'As notificações do app estão por vir',
     notificationsEnabled: 'Ativadas',
     credits: {
       row: 'Créditos e licenças',
@@ -105,6 +106,7 @@ const pt = {
       viewLicense: 'Ver licença',
     },
     support: 'Suporte',
+    supportEmail: 'Envie um e-mail para support@nascente.app',
     themeOptions: {
       light: 'Claro',
       dark: 'Escuro',

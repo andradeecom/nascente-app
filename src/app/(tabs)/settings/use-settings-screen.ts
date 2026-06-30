@@ -1,11 +1,11 @@
 import { useRouter } from 'expo-router';
-import Toast from 'react-native-toast-message';
 import { useAuthStore } from '@/stores/auth';
 import { useThemeStore } from '@/stores/theme';
 import { useLocaleStore } from '@/stores/locale';
 import { useReaderStore } from '@/stores/reader';
 import { useTranslate } from '@/i18n';
 import { typography } from '@/theme/typography';
+import { Alert, Linking } from 'react-native';
 
 export default function useSettingsScreen() {
   const router = useRouter();
@@ -35,16 +35,20 @@ export default function useSettingsScreen() {
     router.push('/settings/text-size');
   };
 
+  const handleNotifications = () => {
+    Alert.alert(translate('settings.notifications'), translate('settings.notificationsComingSoon'));
+  };
+
   const handleCreditsPress = () => {
     router.push('/settings/credits');
   };
 
-  const handleSupportPress = () => {
-    Toast.show({
-      type: 'success',
-      text1: translate('settings.supportToastTitle'),
-      text2: translate('settings.supportToastMessage'),
-    });
+  const handleSupportPress = async () => {
+    try {
+      await Linking.openURL('mailto:support@nascente.app');
+    } catch {
+      Alert.alert(translate('settings.support'), translate('settings.supportEmail'));
+    }
   };
 
   return {
@@ -56,6 +60,7 @@ export default function useSettingsScreen() {
     handleThemePress,
     handleLanguagePress,
     handleTextSizePress,
+    handleNotifications,
     handleCreditsPress,
     handleSupportPress,
   };

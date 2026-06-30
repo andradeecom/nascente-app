@@ -27,6 +27,7 @@ export default function SettingsScreen() {
     handleThemePress,
     handleLanguagePress,
     handleTextSizePress,
+    handleNotifications,
     handleCreditsPress,
     handleSupportPress,
   } = useSettingsScreen();
@@ -76,8 +77,7 @@ export default function SettingsScreen() {
           <SettingsRow
             icon={<Bell size={20} color={styles.icon.color} />}
             label={translate('settings.notifications')}
-            value={translate('settings.notificationsEnabled')}
-            showChevron={false}
+            onPress={handleNotifications}
           />
           <SettingsRow
             icon={<FileText size={20} color={styles.icon.color} />}

@@ -1,19 +1,17 @@
 import { View } from 'react-native';
 import { EaseView } from 'react-native-ease';
 import { StyleSheet } from 'react-native-unistyles';
-import { ChevronRight } from 'lucide-react-native';
-import { Button, Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
+import { Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
 import { ShineButton } from '@/components/molecules';
 import { AnimatedSun } from '@/components/organisms';
 import { useTranslate } from '@/i18n';
 import { typography } from '@/theme/typography';
 import useOnboardingWelcomeScreen from './use-onboarding-welcome-screen';
-import { BUTTON_SIZES, BUTTON_VARIANTS } from '@/components/atoms/Button';
 
 const PULSE_DURATION = 2600;
 
 export default function OnboardingWelcomeScreen() {
-  const { handleStartReading, handleExplorePlans } = useOnboardingWelcomeScreen();
+  const { handleStartReading } = useOnboardingWelcomeScreen();
   const t = useTranslate();
 
   return (
@@ -36,7 +34,7 @@ export default function OnboardingWelcomeScreen() {
         <EaseView
           style={styles.glow}
           initialAnimate={{ shadowOpacity: 0.18, shadowRadius: 10 }}
-          animate={{ shadowOpacity: 0.5, shadowRadius: 24 }}
+          animate={{ shadowOpacity: 0.5, shadowRadius: 10 }}
           transition={{
             type: 'timing',
             duration: PULSE_DURATION,
@@ -46,15 +44,6 @@ export default function OnboardingWelcomeScreen() {
         >
           <ShineButton label={t('onboarding.welcome.startButton')} onPress={handleStartReading} />
         </EaseView>
-        <Button
-          label={t('onboarding.welcome.plansButton')}
-          variant={BUTTON_VARIANTS.Ghost}
-          size={BUTTON_SIZES.Large}
-          fullWidth
-          icon={<ChevronRight size={18} color={styles.chevron.color} strokeWidth={2.5} />}
-          iconPosition="right"
-          onPress={handleExplorePlans}
-        />
       </View>
     </SafeAreaView>
   );
@@ -103,6 +92,6 @@ const styles = StyleSheet.create((theme) => ({
   glow: {
     borderRadius: theme.radius.lg,
     shadowColor: theme.colors.semantic.accent,
-    shadowOffset: { width: 0, height: 6 },
+    shadowOffset: { width: 0, height: 8 },
   },
 }));

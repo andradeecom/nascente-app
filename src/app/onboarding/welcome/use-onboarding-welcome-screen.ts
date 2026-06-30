@@ -10,13 +10,7 @@ export default function useOnboardingWelcomeScreen() {
     router.replace('/(tabs)');
   };
 
-  const handleExplorePlans = () => {
-    complete();
-    router.replace('/(tabs)/plans');
-  };
-
   return {
     handleStartReading,
-    handleExplorePlans,
   };
 }

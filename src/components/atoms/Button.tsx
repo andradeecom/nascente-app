@@ -54,7 +54,7 @@ export function Button({
     >
       {iconPosition === 'left' && icon}
       <Text
-        variant={size === BUTTON_SIZES.Small ? TEXT_VARIANTS.Caption : TEXT_VARIANTS.Label}
+        variant={size === BUTTON_SIZES.Small ? TEXT_VARIANTS.Caption : TEXT_VARIANTS.Callout}
         style={[textVariantStyles[variant]]}
       >
         {label}

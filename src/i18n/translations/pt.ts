@@ -254,7 +254,7 @@ const pt = {
       title: 'Escolha sua tradução',
       subtitle: 'Comece com a tradução gratuita. Mais traduções no Pro.',
       continueButton: 'Continuar',
-      offlineBadge: 'Offline',
+      availableOffline: 'Disponível',
       proBadge: 'Pro',
       footer: '{{name}} · pronta para leitura offline',
       sections: {
@@ -296,7 +296,6 @@ const pt = {
       verse: '« A tua palavra é lâmpada para os meus pés e luz para o meu caminho. »',
       verseRef: 'Salmos 119:105',
       startButton: 'Começar a ler',
-      plansButton: 'Explorar planos de leitura',
     },
   },
   paywall: {

@@ -40,7 +40,7 @@ export default function OnboardingTranslationScreen() {
                   description={item.description}
                   size={item.size}
                   tier={item.tier}
-                  offlineLabel={t('onboarding.translation.offlineBadge')}
+                  offlineLabel={t('onboarding.translation.availableOffline')}
                   proLabel={t('onboarding.translation.proBadge')}
                   selected={selectedKey === item.key}
                   onSelect={() => handleSelect(item.key)}

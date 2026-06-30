@@ -254,7 +254,7 @@ const en = {
       title: 'Choose your translation',
       subtitle: 'Start with the free translation. More translations on Pro.',
       continueButton: 'Continue',
-      offlineBadge: 'Offline',
+      availableOffline: 'Available',
       proBadge: 'Pro',
       footer: '{{name}} · ready for offline reading',
       sections: {
@@ -296,7 +296,6 @@ const en = {
       verse: '“Your word is a lamp for my feet, a light on my path.”',
       verseRef: 'Psalm 119:105',
       startButton: 'Start reading',
-      plansButton: 'Explore reading plans',
     },
   },
   paywall: {

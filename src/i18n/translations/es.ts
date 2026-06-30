@@ -254,7 +254,7 @@ const es = {
       title: 'Elige tu traducción',
       subtitle: 'Empieza con la traducción gratuita. Más traducciones en Pro.',
       continueButton: 'Continuar',
-      offlineBadge: 'Offline',
+      availableOffline: 'Disponible',
       proBadge: 'Pro',
       footer: '{{name}} · lista para lectura offline',
       sections: {
@@ -296,7 +296,6 @@ const es = {
       verse: '« Lámpara es a mis pies tu palabra, y lumbrera a mi camino. »',
       verseRef: 'Salmos 119:105',
       startButton: 'Empezar a leer',
-      plansButton: 'Explorar planes de lectura',
     },
   },
   paywall: {

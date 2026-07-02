@@ -326,7 +326,7 @@ const pt = {
       translations: 'Mais traduções da Bíblia — todas offline e prontas para uso',
       audio: 'Bíblia em áudio (streaming + download offline)',
       crossReferences: 'Navegador completo de referências cruzadas',
-      ai: 'Ferramentas de estudo com IA: 30 explicações/mês, 5 planos gerados/mês, 10 narrações/mês',
+      ai: 'Ferramentas de estudo com IA — explicações de passagens, resumos de capítulos, devocionais, planos gerados, narrações',
       sync: 'Sincronização prioritária + exportação de backup (PDF, JSON)',
     },
     cta: 'Assinar · {{price}}{{period}}',

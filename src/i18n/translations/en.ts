@@ -326,7 +326,7 @@ const en = {
       translations: 'More Bible translations — all offline and ready to read',
       audio: 'Audio Bible (stream + offline download)',
       crossReferences: 'Full cross-reference browser',
-      ai: 'AI study tools: 30 explanations/mo, 5 generated plans/mo, 10 narrations/mo',
+      ai: 'AI study tools — explain passages, chapter summaries, devotionals, generated plans, narrations',
       sync: 'Priority sync + backup export (PDF, JSON)',
     },
     cta: 'Subscribe · {{price}}{{period}}',

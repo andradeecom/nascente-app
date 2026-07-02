@@ -2,20 +2,18 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { i18n } from '@/i18n/i18n';
-
-export const LOCALE_OPTIONS = ['pt', 'es', 'en'] as const;
-export type LocaleName = (typeof LOCALE_OPTIONS)[number];
+import { Locales } from '@/types';
 
 type LocaleState = {
-  locale: LocaleName | null;
-  setLocale: (locale: LocaleName) => void;
+  locale: Locales | null;
+  setLocale: (locale: Locales) => void;
 };
 
 export const useLocaleStore = create<LocaleState>()(
   persist(
     (set) => ({
       locale: null,
-      setLocale: (locale: LocaleName) => {
+      setLocale: (locale: Locales) => {
         set({ locale });
         i18n.locale = locale;
       },

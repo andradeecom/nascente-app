@@ -65,6 +65,7 @@ export function SegmentedControl<T extends string>({ segments, value, onChange }
           segment={segment}
           index={index}
           progress={progress}
+          activeIndex={activeIndex}
           onPress={() => onChange(segment.key)}
           activeColor={theme.colors.semantic.accent}
           inactiveColor={theme.colors.semantic.textSecondary}
@@ -78,6 +79,7 @@ type SegmentItemProps<T extends string> = {
   segment: Segment<T>;
   index: number;
   progress: { value: number };
+  activeIndex: number;
   onPress: () => void;
   activeColor: string;
   inactiveColor: string;
@@ -87,6 +89,7 @@ function SegmentItem<T extends string>({
   segment,
   index,
   progress,
+  activeIndex,
   onPress,
   activeColor,
   inactiveColor,
@@ -99,7 +102,11 @@ function SegmentItem<T extends string>({
     };
   });
 
-  const active = Math.round(progress.value) === index;
+  // `activeIndex` (a plain number prop from the parent) drives the a11y state
+  // instead of reading `progress.value` here — reading a shared value's `.value`
+  // synchronously during render (JS thread, not a worklet) trips Reanimated's
+  // strict-mode "reading value during render" warning, one per mounted segment.
+  const active = activeIndex === index;
 
   return (
     <Pressable

@@ -1,11 +1,11 @@
 import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { Text, TEXT_VARIANTS } from '@/components/atoms';
-import type { LocaleName } from '@/stores/locale';
 import { PressableScale } from 'pressto';
+import { Locales } from '@/types';
 
 type LanguageOptionProps = {
-  code: LocaleName;
+  code: Locales;
   name: string;
   region: string;
   selected: boolean;

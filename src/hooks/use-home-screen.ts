@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useTranslate } from '@/i18n';
 import { useAuthStore } from '@/stores/auth';
@@ -10,7 +10,9 @@ import { useCurrentUserHighlights } from '@/hooks/use-highlights';
 import { useIsPro } from '@/hooks/use-profile';
 import { useBookName } from '@/hooks/use-bible';
 import { useActivePlans } from '@/hooks/use-reading-plans';
+import { useAiGenerate } from '@/hooks/use-ai-generate';
 import { TOTAL_BIBLE_CHAPTERS, TRANSLATIONS } from '@/types/bible';
+import type { AiGenerateError } from '@/types/ai';
 
 // ── Verse of the day ────────────────────────────────────────────────────────
 
@@ -144,6 +146,20 @@ export function useHomeScreen() {
   const verseText =
     locale === 'es' ? verseOfTheDay.textEs : locale === 'en' ? verseOfTheDay.textEn : verseOfTheDay.textPt;
 
+  // AI — Devotional
+  const [devotionalVisible, setDevotionalVisible] = useState(false);
+  const devotionalQuery = useAiGenerate({
+    translationId: 'ONBV',
+    bookId: verseOfTheDay.bookId,
+    chapter: verseOfTheDay.chapter,
+    verseStart: verseOfTheDay.verse,
+    verseEnd: verseOfTheDay.verse,
+    promptType: 'devotional',
+    passageText: verseText,
+    locale: locale as 'en' | 'es' | 'pt',
+    enabled: devotionalVisible && isPro,
+  });
+
   // Greeting
   const greetingKey = getGreetingKey();
 
@@ -189,6 +205,16 @@ export function useHomeScreen() {
     router.push('/paywall');
   };
 
+  const handleOpenDevotional = useCallback(() => {
+    if (!isPro) {
+      router.push('/paywall');
+      return;
+    }
+    setDevotionalVisible(true);
+  }, [isPro, router]);
+
+  const closeDevotionalSheet = useCallback(() => setDevotionalVisible(false), []);
+
   return {
     translate,
     isAuthenticated,
@@ -208,5 +234,12 @@ export function useHomeScreen() {
     handleSignIn,
     handleOpenPlan,
     handleOpenPaywall,
+    devotionalVisible,
+    devotionalContent: devotionalQuery.data?.content ?? null,
+    devotionalLoading: devotionalQuery.isFetching,
+    devotionalError: devotionalQuery.error as AiGenerateError | null,
+    handleOpenDevotional,
+    closeDevotionalSheet,
+    retryDevotional: devotionalQuery.refetch,
   };
 }

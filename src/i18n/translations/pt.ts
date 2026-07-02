@@ -5,6 +5,7 @@ const pt = {
     signOut: 'Sair',
     cancel: 'Cancelar',
     close: 'Fechar',
+    retry: 'Tentar novamente',
   },
   login: {
     title: 'Bem-vindo de volta',
@@ -337,6 +338,32 @@ const pt = {
     purchaseError: 'Não foi possível concluir a compra. Tente novamente.',
     restoreSuccess: 'Sua assinatura Pro foi restaurada.',
     restoreNone: 'Nenhuma compra para restaurar.',
+  },
+  ai: {
+    explain: {
+      label: 'Explicar',
+      action: 'Explicar',
+      loading: 'Explicando esta passagem…',
+      error: 'Não foi possível carregar a explicação. Tente novamente.',
+    },
+    explainSimple: {
+      label: 'Sou novo',
+      action: 'Explicar de forma simples',
+    },
+    chapterSummary: {
+      action: 'Resumo do capítulo',
+      subtitle: 'Resumo do capítulo',
+      loading: 'Resumindo este capítulo…',
+      error: 'Não foi possível carregar o resumo. Tente novamente.',
+    },
+    devotional: {
+      action: 'Reflexão diária',
+      subtitle: 'Reflexão diária',
+      reflectionLabel: 'Reflexão',
+      journalLabel: 'Diário',
+      loading: 'Preparando sua reflexão…',
+      error: 'Não foi possível carregar a reflexão. Tente novamente.',
+    },
   },
   errors: {
     loginFailed: 'Falha ao entrar',

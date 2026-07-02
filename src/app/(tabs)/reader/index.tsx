@@ -5,7 +5,14 @@ import { StyleSheet } from 'react-native-unistyles';
 import { Check } from 'lucide-react-native';
 import { Button, Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
 import { ReaderHeader, ChapterNavBar } from '@/components/molecules';
-import { BookChapterPicker, NoteEditorModal, TranslationPicker, VerseActionSheet } from '@/components/organisms';
+import {
+  AiExplainSheet,
+  ChapterSummarySheet,
+  BookChapterPicker,
+  NoteEditorModal,
+  TranslationPicker,
+  VerseActionSheet,
+} from '@/components/organisms';
 import { useReaderStore } from '@/stores/reader';
 import { useTranslate } from '@/i18n';
 import { highlights as HIGHLIGHT_HEX } from '@/theme/colors';
@@ -53,6 +60,22 @@ export default function ReaderScreen() {
     handleSaveNote,
     handleDeleteNote,
     closeNoteEditor,
+    explainVerse,
+    explainMode,
+    explainContent,
+    explainLoading,
+    explainError,
+    handleOpenExplain,
+    handleToggleExplainMode,
+    closeExplainSheet,
+    retryExplain,
+    summaryVisible,
+    summaryContent,
+    summaryLoading,
+    summaryError,
+    handleOpenSummary,
+    closeSummarySheet,
+    retrySummary,
   } = useReaderScreen();
   const t = useTranslate();
 
@@ -137,7 +160,13 @@ export default function ReaderScreen() {
         />
       )}
 
-      <ChapterNavBar bookName={bookName} chapter={chapter} onPrev={handlePrevChapter} onNext={handleNextChapter} />
+      <ChapterNavBar
+        bookName={bookName}
+        chapter={chapter}
+        onPrev={handlePrevChapter}
+        onNext={handleNextChapter}
+        onSummary={isPro ? handleOpenSummary : undefined}
+      />
 
       <BookChapterPicker
         visible={bookPickerVisible}
@@ -167,6 +196,7 @@ export default function ReaderScreen() {
         onToggleBookmark={handleToggleBookmark}
         hasNote={selectedVerseHasNote}
         onOpenNote={handleOpenNote}
+        onExplain={handleOpenExplain}
       />
 
       <NoteEditorModal
@@ -178,6 +208,28 @@ export default function ReaderScreen() {
         onSave={handleSaveNote}
         onDelete={handleDeleteNote}
         onClose={closeNoteEditor}
+      />
+
+      <AiExplainSheet
+        visible={explainVerse != null}
+        reference={`${bookName ?? ''} ${chapter}:${explainVerse ?? ''}`}
+        promptType={explainMode}
+        content={explainContent}
+        isLoading={explainLoading}
+        error={explainError}
+        onClose={closeExplainSheet}
+        onSwitchMode={handleToggleExplainMode}
+        onRetry={retryExplain}
+      />
+
+      <ChapterSummarySheet
+        visible={summaryVisible}
+        chapterLabel={`${bookName ?? ''} ${chapter}`}
+        content={summaryContent}
+        isLoading={summaryLoading}
+        error={summaryError}
+        onClose={closeSummarySheet}
+        onRetry={retrySummary}
       />
     </SafeAreaView>
   );

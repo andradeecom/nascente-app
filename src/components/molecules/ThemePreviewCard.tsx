@@ -1,11 +1,9 @@
 import { View } from 'react-native';
-import { StyleSheet, withUnistyles } from 'react-native-unistyles';
+import { StyleSheet } from 'react-native-unistyles';
 import { PressableScale } from 'pressto';
 import { Text, TEXT_VARIANTS } from '@/components/atoms';
 import { colors } from '@/theme/colors';
 import type { ThemeName } from '@/stores/theme';
-
-const ThemedPressableScale = withUnistyles(PressableScale);
 
 type ThemePreviewCardProps = {
   name: ThemeName;
@@ -18,8 +16,11 @@ export function ThemePreviewCard({ name, label, selected, onSelect }: ThemePrevi
   // Each card always shows its own theme's palette, regardless of the active theme.
   const palette = colors[name].semantic;
 
+  // Not wrapped with withUnistyles: PressableScale (pressto) is Reanimated-based,
+  // and forcing it to re-render on every theme tick trips Reanimated's strict-mode
+  // "reading value during render" warning even while off-screen.
   return (
-    <ThemedPressableScale
+    <PressableScale
       style={[styles.card, selected && styles.cardSelected]}
       onPress={onSelect}
       accessibilityRole="radio"
@@ -32,7 +33,7 @@ export function ThemePreviewCard({ name, label, selected, onSelect }: ThemePrevi
       <Text variant={TEXT_VARIANTS.Caption} style={styles.label}>
         {label}
       </Text>
-    </ThemedPressableScale>
+    </PressableScale>
   );
 }
 

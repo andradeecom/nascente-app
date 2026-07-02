@@ -1,12 +1,11 @@
 import { View } from 'react-native';
 import { PressableScale } from 'pressto';
-import { StyleSheet, withUnistyles } from 'react-native-unistyles';
+import { StyleSheet, UnistylesRuntime } from 'react-native-unistyles';
 import { Bookmark, NotebookPen } from 'lucide-react-native';
 import { Text, TEXT_VARIANTS } from '@/components/atoms';
+import { useThemeStore } from '@/stores/theme';
 import { highlights as HIGHLIGHT_HEX } from '@/theme/colors';
 import type { StudyItem } from '@/app/(tabs)/study/use-study-screen';
-
-const ThemedPressableScale = withUnistyles(PressableScale);
 
 type StudyCardProps = {
   item: StudyItem;
@@ -14,15 +13,31 @@ type StudyCardProps = {
 };
 
 export function StudyCard({ item, onPress }: StudyCardProps) {
+  // Not wrapped with withUnistyles: PressableScale (pressto) is Reanimated-based,
+  // and forcing it to re-render on every theme tick (which withUnistyles would do)
+  // trips Reanimated's strict-mode "reading value during render" warning even
+  // while off-screen. Read theme name reactively and derive plain styles instead.
+  const themeName = useThemeStore((s) => s.theme);
+  const theme = UnistylesRuntime.getTheme(themeName);
+  const cardStyle = {
+    flexDirection: 'row' as const,
+    gap: theme.spacing[3],
+    backgroundColor: theme.colors.semantic.bgPrimary,
+    borderRadius: theme.radius.lg,
+    padding: theme.spacing[4],
+    ...theme.shadows.sm,
+  };
+  const iconAccentColor = theme.colors.semantic.accent;
+
   return (
-    <ThemedPressableScale onPress={onPress} style={styles.card} accessibilityRole="button">
+    <PressableScale onPress={onPress} style={cardStyle} accessibilityRole="button">
       <View style={styles.leading}>
         {item.type === 'highlight' && item.color ? (
           <View style={[styles.colorDot, { backgroundColor: HIGHLIGHT_HEX[item.color] }]} />
         ) : item.type === 'bookmark' ? (
-          <Bookmark size={16} color={styles.iconAccent.color} strokeWidth={2} fill={styles.iconAccent.color} />
+          <Bookmark size={16} color={iconAccentColor} strokeWidth={2} fill={iconAccentColor} />
         ) : (
-          <NotebookPen size={16} color={styles.iconAccent.color} strokeWidth={2} />
+          <NotebookPen size={16} color={iconAccentColor} strokeWidth={2} />
         )}
       </View>
       <View style={styles.cardBody}>
@@ -44,26 +59,15 @@ export function StudyCard({ item, onPress }: StudyCardProps) {
           </Text>
         )}
       </View>
-    </ThemedPressableScale>
+    </PressableScale>
   );
 }
 
 const styles = StyleSheet.create((theme) => ({
-  card: {
-    flexDirection: 'row',
-    gap: theme.spacing[3],
-    backgroundColor: theme.colors.semantic.bgPrimary,
-    borderRadius: theme.radius.lg,
-    padding: theme.spacing[4],
-    ...theme.shadows.sm,
-  },
   leading: {
     width: 16,
     alignItems: 'center',
     marginTop: 4,
-  },
-  iconAccent: {
-    color: theme.colors.semantic.accent,
   },
   colorDot: {
     width: 12,

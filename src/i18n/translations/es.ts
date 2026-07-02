@@ -5,6 +5,7 @@ const es = {
     signOut: 'Cerrar sesión',
     cancel: 'Cancelar',
     close: 'Cerrar',
+    retry: 'Intentar de nuevo',
   },
   login: {
     title: 'Bienvenido de nuevo',
@@ -337,6 +338,32 @@ const es = {
     purchaseError: 'No se pudo completar la compra. Inténtalo de nuevo.',
     restoreSuccess: 'Tu suscripción Pro fue restaurada.',
     restoreNone: 'No hay compras para restaurar.',
+  },
+  ai: {
+    explain: {
+      label: 'Explicar',
+      action: 'Explicar',
+      loading: 'Explicando este pasaje…',
+      error: 'No se pudo cargar la explicación. Inténtalo de nuevo.',
+    },
+    explainSimple: {
+      label: 'Soy nuevo',
+      action: 'Explicar de forma sencilla',
+    },
+    chapterSummary: {
+      action: 'Resumen del capítulo',
+      subtitle: 'Resumen del capítulo',
+      loading: 'Resumiendo este capítulo…',
+      error: 'No se pudo cargar el resumen. Inténtalo de nuevo.',
+    },
+    devotional: {
+      action: 'Reflexión diaria',
+      subtitle: 'Reflexión diaria',
+      reflectionLabel: 'Reflexión',
+      journalLabel: 'Diario',
+      loading: 'Preparando tu reflexión…',
+      error: 'No se pudo cargar la reflexión. Inténtalo de nuevo.',
+    },
   },
   errors: {
     loginFailed: 'Error al iniciar sesión',

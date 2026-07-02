@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
-import { LOCALE_OPTIONS, useLocaleStore, type LocaleName } from '@/stores/locale';
+import { useLocaleStore } from '@/stores/locale';
+import { LOCALE_OPTIONS, Locales } from '@/types';
 
 export default function useOnboardingScreen() {
   const router = useRouter();
   const setLocale = useLocaleStore((s) => s.setLocale);
-  const [selected, setSelected] = useState<LocaleName>(() => {
+  const [selected, setSelected] = useState<Locales>(() => {
     const current = useLocaleStore.getState().locale;
-    return LOCALE_OPTIONS.includes(current as LocaleName) ? (current as LocaleName) : 'pt';
+    return LOCALE_OPTIONS.includes(current as Locales) ? (current as Locales) : 'pt';
   });
 
-  const handleSelect = (locale: LocaleName) => {
+  const handleSelect = (locale: Locales) => {
     setSelected(locale);
     setLocale(locale);
   };

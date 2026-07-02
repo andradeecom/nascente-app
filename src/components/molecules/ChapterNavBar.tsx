@@ -1,7 +1,8 @@
 import { Pressable, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { ChevronLeft, ChevronRight } from 'lucide-react-native';
-import { Text, TEXT_VARIANTS } from '@/components/atoms';
+import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react-native';
+import { Button, Text, TEXT_VARIANTS } from '@/components/atoms';
+import { BUTTON_SIZES, BUTTON_VARIANTS } from '@/components/atoms/Button';
 import { useTranslate } from '@/i18n';
 
 type ChapterNavBarProps = {
@@ -9,9 +10,10 @@ type ChapterNavBarProps = {
   chapter: number;
   onPrev: () => void;
   onNext: () => void;
+  onSummary?: () => void;
 };
 
-export function ChapterNavBar({ bookName, chapter, onPrev, onNext }: ChapterNavBarProps) {
+export function ChapterNavBar({ bookName, chapter, onPrev, onNext, onSummary }: ChapterNavBarProps) {
   const translate = useTranslate();
 
   return (
@@ -23,15 +25,26 @@ export function ChapterNavBar({ bookName, chapter, onPrev, onNext }: ChapterNavB
         </Text>
       </Pressable>
 
-      <Text variant={TEXT_VARIANTS.Label} color="textSecondary">
-        {bookName} {chapter}
-      </Text>
+      {onSummary ? (
+        <Button
+          onPress={onSummary}
+          label={`${bookName} ${chapter}`}
+          icon={<Sparkles size={16} color={styles.summaryIcon.color} strokeWidth={1.5} />}
+          iconPosition="right"
+          variant={BUTTON_VARIANTS.Ghost}
+          size={BUTTON_SIZES.Medium}
+        />
+      ) : (
+        <Text variant={TEXT_VARIANTS.Label} color="textSecondary">
+          {bookName} {chapter}
+        </Text>
+      )}
 
       <Pressable onPress={onNext} style={styles.navButton} hitSlop={8}>
         <Text variant={TEXT_VARIANTS.Label} color="accent">
           {translate('reader.next')}
         </Text>
-        <ChevronRight size={22} color={styles.chevron.color} />
+        <ChevronRight size={22} color={styles.chevron.color} strokeWidth={1.5} />
       </Pressable>
     </View>
   );
@@ -55,5 +68,8 @@ const styles = StyleSheet.create((theme) => ({
   },
   chevron: {
     color: theme.colors.semantic.accent,
+  },
+  summaryIcon: {
+    color: theme.colors.semantic.textSecondary,
   },
 }));

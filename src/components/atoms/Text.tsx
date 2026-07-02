@@ -8,8 +8,8 @@ export enum TEXT_VARIANTS {
   Title3 = 'title3',
   Body = 'body',
   BodyEmphasis = 'bodyEmphasis',
-  Callout = 'callout',
   Caption = 'caption',
+  Callout = 'callout',
   Label = 'label',
   Overline = 'overline',
 }
@@ -69,11 +69,6 @@ const variantStyles = StyleSheet.create((theme) => ({
     lineHeight: theme.font.lineHeights.callout,
     fontWeight: theme.font.weights.regular,
   },
-  caption: {
-    fontSize: theme.font.sizes.caption,
-    lineHeight: theme.font.lineHeights.caption,
-    fontWeight: theme.font.weights.regular,
-  },
   label: {
     fontSize: theme.font.sizes.label,
     lineHeight: theme.font.lineHeights.label,
@@ -84,6 +79,11 @@ const variantStyles = StyleSheet.create((theme) => ({
     lineHeight: theme.font.lineHeights.overline,
     fontWeight: theme.font.weights.semibold,
     letterSpacing: theme.font.letterSpacing.wider,
+  },
+  caption: {
+    fontSize: theme.font.sizes.caption,
+    lineHeight: theme.font.lineHeights.caption,
+    fontWeight: theme.font.weights.regular,
   },
 }));
 

@@ -12,6 +12,57 @@ export type Database = {
   };
   public: {
     Tables: {
+      ai_cache: {
+        Row: {
+          book_id: number;
+          chapter: number;
+          content: string;
+          created_at: string;
+          id: string;
+          input_tokens: number | null;
+          locale: string;
+          model: string;
+          output_tokens: number | null;
+          prompt_type: Database['public']['Enums']['ai_prompt_type'];
+          prompt_version: number;
+          translation_id: string;
+          verse_end: number;
+          verse_start: number;
+        };
+        Insert: {
+          book_id: number;
+          chapter: number;
+          content: string;
+          created_at?: string;
+          id?: string;
+          input_tokens?: number | null;
+          locale?: string;
+          model: string;
+          output_tokens?: number | null;
+          prompt_type: Database['public']['Enums']['ai_prompt_type'];
+          prompt_version?: number;
+          translation_id: string;
+          verse_end: number;
+          verse_start: number;
+        };
+        Update: {
+          book_id?: number;
+          chapter?: number;
+          content?: string;
+          created_at?: string;
+          id?: string;
+          input_tokens?: number | null;
+          locale?: string;
+          model?: string;
+          output_tokens?: number | null;
+          prompt_type?: Database['public']['Enums']['ai_prompt_type'];
+          prompt_version?: number;
+          translation_id?: string;
+          verse_end?: number;
+          verse_start?: number;
+        };
+        Relationships: [];
+      };
       bookmarks: {
         Row: {
           book_id: number;
@@ -342,6 +393,7 @@ export type Database = {
     };
     Enums: {
       account_tier: 'free' | 'pro';
+      ai_prompt_type: 'explain' | 'explain_simple' | 'chapter_summary' | 'devotional';
       plan_cadence: 'daily';
       user_plan_status: 'active' | 'completed' | 'archived';
     };
@@ -464,6 +516,7 @@ export const Constants = {
   public: {
     Enums: {
       account_tier: ['free', 'pro'],
+      ai_prompt_type: ['explain', 'explain_simple', 'chapter_summary', 'devotional'],
       plan_cadence: ['daily'],
       user_plan_status: ['active', 'completed', 'archived'],
     },

@@ -1,12 +1,21 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { Pressable, View } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, UnistylesRuntime, withUnistyles } from 'react-native-unistyles';
+import { useFocusEffect } from 'expo-router';
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView, type BottomSheetBackdropProps } from '@gorhom/bottom-sheet';
-import { Bookmark, BookmarkCheck, Check, NotebookPen, Trash2 } from 'lucide-react-native';
-import { Text, TEXT_VARIANTS } from '@/components/atoms';
+import { Bookmark, BookmarkCheck, Check, NotebookPen, Sparkles, Trash2 } from 'lucide-react-native';
+import { Button, Text, TEXT_VARIANTS } from '@/components/atoms';
+import { BUTTON_SIZES, BUTTON_VARIANTS } from '@/components/atoms/Button';
 import { useTranslate } from '@/i18n';
+import { useThemeStore } from '@/stores/theme';
 import { highlights as HIGHLIGHT_HEX } from '@/theme/colors';
 import { HIGHLIGHT_COLORS, type HighlightColor } from '@/types/study';
+
+const UniBookmark = withUnistyles(Bookmark, (theme) => ({ color: theme.colors.semantic.textPrimary }));
+const UniBookmarkCheck = withUnistyles(BookmarkCheck, (theme) => ({ color: theme.colors.semantic.accent }));
+const UniNotebookPen = withUnistyles(NotebookPen, (theme) => ({ color: theme.colors.semantic.textPrimary }));
+const UniSparkles = withUnistyles(Sparkles, (theme) => ({ color: theme.colors.semantic.textPrimary }));
+const UniTrash2 = withUnistyles(Trash2, (theme) => ({ color: theme.colors.semantic.danger }));
 
 type Props = {
   visible: boolean;
@@ -23,6 +32,7 @@ type Props = {
   /** Whether this verse already has a note (changes the action label). */
   hasNote: boolean;
   onOpenNote: () => void;
+  onExplain: () => void;
 };
 
 export function VerseActionSheet({
@@ -36,9 +46,27 @@ export function VerseActionSheet({
   onToggleBookmark,
   hasNote,
   onOpenNote,
+  onExplain,
 }: Props) {
   const translate = useTranslate();
   const sheetRef = useRef<BottomSheet>(null);
+
+  // BottomSheet is not wrapped with withUnistyles: gorhom's internals read
+  // Reanimated shared values (animatedIndex/animatedPosition) during their own
+  // render, and forcing this component to re-render on every theme tick (which
+  // withUnistyles would do) trips Reanimated's strict-mode "reading value during
+  // render" warning even while the sheet is closed/off-screen. Instead we read
+  // the theme name reactively (a plain Zustand string, not a shared-value proxy)
+  // and derive plain style objects — cheap, and doesn't force BottomSheet's
+  // internal re-render machinery.
+  const themeName = useThemeStore((s) => s.theme);
+  const { colors, radius } = UnistylesRuntime.getTheme(themeName);
+  const sheetBackgroundStyle = {
+    backgroundColor: colors.semantic.bgPrimary,
+    borderTopLeftRadius: radius.xl,
+    borderTopRightRadius: radius.xl,
+  };
+  const handleIndicatorStyle = { backgroundColor: colors.semantic.bgTertiary, width: 36 };
 
   // Drive the imperative sheet from the declarative `visible` prop so the
   // Reader keeps its existing show/hide contract.
@@ -49,6 +77,16 @@ export function VerseActionSheet({
       sheetRef.current?.close();
     }
   }, [visible]);
+
+  // Force-close on screen blur (tab switch / navigation away) — the sheet is
+  // screen-local UI and shouldn't stay mounted-open over an unrelated screen.
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        sheetRef.current?.close();
+      };
+    }, [])
+  );
 
   // Fire onClose when the sheet settles closed (covers swipe-down and backdrop tap).
   const handleChange = useCallback(
@@ -67,6 +105,35 @@ export function VerseActionSheet({
     []
   );
 
+  const actions = [
+    {
+      key: 'bookmark',
+      onPress: onToggleBookmark,
+      label: translate(isBookmarked ? 'study.removeBookmark' : 'study.addBookmark'),
+      icon: isBookmarked ? (
+        <UniBookmarkCheck size={20} strokeWidth={1.5} />
+      ) : (
+        <UniBookmark size={20} strokeWidth={1.5} />
+      ),
+    },
+    {
+      key: 'note',
+      onPress: onOpenNote,
+      label: translate(hasNote ? 'study.editNote' : 'study.addNote'),
+      icon: hasNote ? (
+        <UniNotebookPen size={20} strokeWidth={1.5} uniProps={(theme) => ({ color: theme.colors.semantic.accent })} />
+      ) : (
+        <UniNotebookPen size={20} strokeWidth={1.5} />
+      ),
+    },
+    {
+      key: 'explain',
+      onPress: onExplain,
+      label: translate('ai.explain.action'),
+      icon: <UniSparkles size={20} strokeWidth={1.5} />,
+    },
+  ];
+
   return (
     <BottomSheet
       ref={sheetRef}
@@ -75,8 +142,8 @@ export function VerseActionSheet({
       enableDynamicSizing
       onChange={handleChange}
       backdropComponent={renderBackdrop}
-      backgroundStyle={styles.sheetBackground}
-      handleIndicatorStyle={styles.handleIndicator}
+      backgroundStyle={sheetBackgroundStyle}
+      handleIndicatorStyle={handleIndicatorStyle}
     >
       <BottomSheetView style={styles.content}>
         <Text variant={TEXT_VARIANTS.Title3} style={styles.reference}>
@@ -95,14 +162,14 @@ export function VerseActionSheet({
               accessibilityRole="button"
               accessibilityLabel={color}
             >
-              {currentColor === color ? <Check size={18} color={styles.swatchCheck.color} strokeWidth={3} /> : null}
+              {currentColor === color ? <Check size={18} color="#1A1A1A" strokeWidth={3} /> : null}
             </Pressable>
           ))}
         </View>
 
         {currentColor ? (
           <Pressable onPress={onRemove} style={({ pressed }) => [styles.remove, pressed && styles.pressed]}>
-            <Trash2 size={18} color={styles.removeIcon.color} strokeWidth={2} />
+            <UniTrash2 size={18} strokeWidth={2} />
             <Text variant={TEXT_VARIANTS.Label} color="danger">
               {translate('study.removeHighlight')}
             </Text>
@@ -112,35 +179,17 @@ export function VerseActionSheet({
         <View style={styles.divider} />
 
         <View style={styles.actions}>
-          <Pressable
-            onPress={onToggleBookmark}
-            style={({ pressed }) => [styles.action, pressed && styles.pressed]}
-            accessibilityRole="button"
-          >
-            {isBookmarked ? (
-              <BookmarkCheck size={20} color={styles.actionAccent.color} strokeWidth={2} />
-            ) : (
-              <Bookmark size={20} color={styles.actionIcon.color} strokeWidth={2} />
-            )}
-            <Text variant={TEXT_VARIANTS.Label} color={isBookmarked ? 'accent' : 'textPrimary'}>
-              {translate(isBookmarked ? 'study.removeBookmark' : 'study.addBookmark')}
-            </Text>
-          </Pressable>
-
-          <Pressable
-            onPress={onOpenNote}
-            style={({ pressed }) => [styles.action, pressed && styles.pressed]}
-            accessibilityRole="button"
-          >
-            <NotebookPen
-              size={20}
-              color={hasNote ? styles.actionAccent.color : styles.actionIcon.color}
-              strokeWidth={2}
+          {actions.map((action) => (
+            <Button
+              key={action.key}
+              onPress={action.onPress}
+              label={action.label}
+              icon={action.icon}
+              variant={BUTTON_VARIANTS.Ghost}
+              size={BUTTON_SIZES.Small}
+              style={styles.action}
             />
-            <Text variant={TEXT_VARIANTS.Label} color={hasNote ? 'accent' : 'textPrimary'}>
-              {translate(hasNote ? 'study.editNote' : 'study.addNote')}
-            </Text>
-          </Pressable>
+          ))}
         </View>
       </BottomSheetView>
     </BottomSheet>
@@ -148,15 +197,6 @@ export function VerseActionSheet({
 }
 
 const styles = StyleSheet.create((theme) => ({
-  sheetBackground: {
-    backgroundColor: theme.colors.semantic.bgPrimary,
-    borderTopLeftRadius: theme.radius.xl,
-    borderTopRightRadius: theme.radius.xl,
-  },
-  handleIndicator: {
-    backgroundColor: theme.colors.semantic.bgTertiary,
-    width: 36,
-  },
   content: {
     paddingHorizontal: theme.spacing[5],
     paddingTop: theme.spacing[1],
@@ -182,9 +222,6 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  swatchCheck: {
-    color: '#1A1A1A',
-  },
   remove: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -193,9 +230,6 @@ const styles = StyleSheet.create((theme) => ({
     marginTop: theme.spacing[2],
     paddingVertical: theme.spacing[2],
   },
-  removeIcon: {
-    color: theme.colors.semantic.danger,
-  },
   divider: {
     height: 1,
     backgroundColor: theme.colors.semantic.bgTertiary,
@@ -203,23 +237,13 @@ const styles = StyleSheet.create((theme) => ({
   },
   actions: {
     flexDirection: 'row',
-    gap: theme.spacing[3],
+    justifyContent: 'space-between',
+    gap: theme.spacing[1],
   },
   action: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: theme.spacing[2],
-    paddingVertical: theme.spacing[3],
+    paddingHorizontal: theme.spacing[3],
     borderRadius: theme.radius.lg,
-    backgroundColor: theme.colors.semantic.bgSecondary,
-  },
-  actionIcon: {
-    color: theme.colors.semantic.textPrimary,
-  },
-  actionAccent: {
-    color: theme.colors.semantic.accent,
   },
   pressed: {
     opacity: 0.6,

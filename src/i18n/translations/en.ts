@@ -5,6 +5,7 @@ const en = {
     signOut: 'Sign Out',
     cancel: 'Cancel',
     close: 'Close',
+    retry: 'Try again',
   },
   login: {
     title: 'Welcome Back',
@@ -337,6 +338,32 @@ const en = {
     purchaseError: "Couldn't complete the purchase. Please try again.",
     restoreSuccess: 'Your Pro subscription was restored.',
     restoreNone: 'No purchases to restore.',
+  },
+  ai: {
+    explain: {
+      label: 'Explain',
+      action: 'Explain',
+      loading: 'Explaining this passage…',
+      error: 'Could not load the explanation. Please try again.',
+    },
+    explainSimple: {
+      label: "I'm new",
+      action: 'Explain simply',
+    },
+    chapterSummary: {
+      action: 'Chapter summary',
+      subtitle: 'Chapter summary',
+      loading: 'Summarizing this chapter…',
+      error: 'Could not load the summary. Please try again.',
+    },
+    devotional: {
+      action: 'Daily reflection',
+      subtitle: 'Daily reflection',
+      reflectionLabel: 'Reflection',
+      journalLabel: 'Journal prompt',
+      loading: 'Preparing your reflection…',
+      error: 'Could not load the reflection. Please try again.',
+    },
   },
   errors: {
     loginFailed: 'Login failed',

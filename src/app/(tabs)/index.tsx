@@ -4,6 +4,7 @@ import { StyleSheet } from 'react-native-unistyles';
 import { CalendarCheck } from 'lucide-react-native';
 import { SafeAreaView } from '@/components/atoms';
 import {
+  AiDevotionalSheet,
   WelcomeHeader,
   VerseOfTheDayCard,
   ContinueReadingCard,
@@ -30,6 +31,13 @@ export default function HomeScreen() {
     handleExplorePlans,
     handleOpenPlan,
     handleOpenPaywall,
+    devotionalVisible,
+    devotionalContent,
+    devotionalLoading,
+    devotionalError,
+    handleOpenDevotional,
+    closeDevotionalSheet,
+    retryDevotional,
   } = useHomeScreen();
 
   const statItems = useMemo(
@@ -55,6 +63,7 @@ export default function HomeScreen() {
           reference={verseOfTheDay.ref}
           actionLabel={translate('home.readInContext')}
           onPress={handleVerseOfTheDay}
+          onDevotional={isPro ? handleOpenDevotional : undefined}
         />
 
         <ContinueReadingCard
@@ -95,6 +104,16 @@ export default function HomeScreen() {
             Home nudge), and every Pro feature routes to the paywall when reached.
             Stacking a second holistic Pro card would violate the one-nudge rule. */}
       </ScrollView>
+
+      <AiDevotionalSheet
+        visible={devotionalVisible}
+        reference={verseOfTheDay.ref}
+        content={devotionalContent}
+        isLoading={devotionalLoading}
+        error={devotionalError}
+        onClose={closeDevotionalSheet}
+        onRetry={retryDevotional}
+      />
     </SafeAreaView>
   );
 }

@@ -5,8 +5,9 @@ import { SafeAreaView } from '@/components/atoms';
 import { Check } from 'lucide-react-native';
 import { SettingsRow } from '@/components/molecules';
 import { SettingsList, ScreenHeader } from '@/components/organisms';
-import { LOCALE_OPTIONS, useLocaleStore, type LocaleName } from '@/stores/locale';
+import { useLocaleStore } from '@/stores/locale';
 import { useTranslate } from '@/i18n';
+import { LOCALE_OPTIONS, Locales } from '@/types';
 
 export default function LanguageScreen() {
   const router = useRouter();
@@ -14,7 +15,7 @@ export default function LanguageScreen() {
   const locale = useLocaleStore((s) => s.locale);
   const setLocale = useLocaleStore((s) => s.setLocale);
 
-  const handleSelect = (code: LocaleName) => {
+  const handleSelect = (code: Locales) => {
     setLocale(code);
     router.back();
   };

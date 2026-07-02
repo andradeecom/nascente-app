@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import { useVerses, useBookName } from '@/hooks/use-bible';
@@ -13,8 +13,11 @@ import { useChapterNotes, useNoteActions } from '@/hooks/use-notes';
 import { useSyncOnFocus } from '@/hooks/use-sync';
 import { useTranslate } from '@/i18n';
 import { getMaxChapter } from '@/services/bible';
+import { useLocaleStore } from '@/stores/locale';
+import { useAiGenerate } from '@/hooks/use-ai-generate';
 import type { TranslationId } from '@/types/bible';
 import type { HighlightColor } from '@/types/study';
+import type { AiGenerateError } from '@/types/ai';
 
 export default function useReaderScreen() {
   const { translationId, bookId, chapter, setTranslation, setPosition, setChapter } = useReaderStore();
@@ -44,11 +47,51 @@ export default function useReaderScreen() {
   // from `selectedVerse` so opening the editor can close the action sheet.
   const [noteVerse, setNoteVerse] = useState<number | null>(null);
 
+  // AI state
+  const locale = useLocaleStore((s) => s.locale) ?? 'pt';
+  const [explainVerse, setExplainVerse] = useState<number | null>(null);
+  const [explainMode, setExplainMode] = useState<'explain' | 'explain_simple'>('explain');
+  const [summaryVisible, setSummaryVisible] = useState(false);
+
   const [bookPickerVisible, setBookPickerVisible] = useState(false);
   const [translationPickerVisible, setTranslationPickerVisible] = useState(false);
 
   const { data: verses, isLoading } = useVerses(translationId, bookId, chapter);
   const { data: bookName } = useBookName(translationId, bookId);
+
+  const explainPassageText = useMemo(() => {
+    if (explainVerse == null || !verses) return '';
+    return verses.find((v) => v.verse === explainVerse)?.text ?? '';
+  }, [explainVerse, verses]);
+
+  const chapterPassageText = useMemo(() => {
+    if (!verses) return '';
+    return verses.map((v) => `${v.verse}. ${v.text}`).join(' ');
+  }, [verses]);
+
+  const explainQuery = useAiGenerate({
+    translationId,
+    bookId,
+    chapter,
+    verseStart: explainVerse ?? 0,
+    verseEnd: explainVerse ?? 0,
+    promptType: explainMode,
+    passageText: explainPassageText,
+    locale: locale as 'en' | 'es' | 'pt',
+    enabled: explainVerse != null && isPro,
+  });
+
+  const summaryQuery = useAiGenerate({
+    translationId,
+    bookId,
+    chapter,
+    verseStart: 0,
+    verseEnd: 0,
+    promptType: 'chapter_summary',
+    passageText: chapterPassageText,
+    locale: locale as 'en' | 'es' | 'pt',
+    enabled: summaryVisible && isPro,
+  });
 
   // Local-first reading tracking: a chapter counts as read once its verses are on
   // screen; this also stamps "read today" for the streak. Idempotent in the store.
@@ -144,6 +187,29 @@ export default function useReaderScreen() {
     setNoteVerse(null);
   }, [noteVerse, bookId, chapter, removeNote]);
 
+  const handleOpenExplain = useCallback(() => {
+    if (selectedVerse == null) return;
+    setExplainVerse(selectedVerse);
+    setExplainMode('explain');
+    setSelectedVerse(null);
+  }, [selectedVerse]);
+
+  const handleToggleExplainMode = useCallback((mode: 'explain' | 'explain_simple') => {
+    setExplainMode(mode);
+  }, []);
+
+  const closeExplainSheet = useCallback(() => setExplainVerse(null), []);
+
+  const handleOpenSummary = useCallback(() => {
+    if (!isPro) {
+      router.push('/paywall');
+      return;
+    }
+    setSummaryVisible(true);
+  }, [isPro, router]);
+
+  const closeSummarySheet = useCallback(() => setSummaryVisible(false), []);
+
   const handleBookChapterSelect = useCallback(
     (newBookId: number, newChapter: number) => {
       // Manually choosing different content ends the plan-reading session.
@@ -228,5 +294,23 @@ export default function useReaderScreen() {
     handleSaveNote,
     handleDeleteNote,
     closeNoteEditor,
+    // AI — Explain
+    explainVerse,
+    explainMode,
+    explainContent: explainQuery.data?.content ?? null,
+    explainLoading: explainQuery.isFetching,
+    explainError: explainQuery.error as AiGenerateError | null,
+    handleOpenExplain,
+    handleToggleExplainMode,
+    closeExplainSheet,
+    retryExplain: explainQuery.refetch,
+    // AI — Chapter Summary
+    summaryVisible,
+    summaryContent: summaryQuery.data?.content ?? null,
+    summaryLoading: summaryQuery.isFetching,
+    summaryError: summaryQuery.error as AiGenerateError | null,
+    handleOpenSummary,
+    closeSummarySheet,
+    retrySummary: summaryQuery.refetch,
   };
 }

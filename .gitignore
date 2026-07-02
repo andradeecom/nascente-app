@@ -47,3 +47,9 @@ app-example
 scripts/build-bible-dbs.mjs
 scripts/build-bible-dbs-helloao.mjs
 scripts/lib/
+
+# Supabase 
+supabase/.temp/*
+supabase/.env
+supabase/.env.local
+supabase/.env.*.local

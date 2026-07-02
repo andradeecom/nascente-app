@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { useLocaleStore, type LocaleName } from '@/stores/locale';
+import { useLocaleStore } from '@/stores/locale';
 import { useReaderStore } from '@/stores/reader';
 import type { TranslationTier } from '@/components/molecules';
-import type { TranslationId } from '@/types/bible';
+import type { TranslationId, Locales } from '@/types';
 import { TRANSLATION_TIER } from '@/components/molecules/TranslationOption';
 
 export type OnboardingTranslation = {
@@ -25,7 +25,7 @@ export type OnboardingTranslationSection = {
 // bundled — `free` is available to all; `pro` is the same offline DB gated behind
 // the Pro subscription (entitlement only). During onboarding the user hasn't paid,
 // so Pro rows are shown locked (not selectable). See `.docs/bible-translation-licensing.md`.
-const CATALOG: Record<LocaleName, OnboardingTranslationSection[]> = {
+const CATALOG: Record<Locales, OnboardingTranslationSection[]> = {
   pt: [
     {
       sectionKey: 'free',
@@ -141,7 +141,7 @@ export default function useOnboardingTranslationScreen() {
   const locale = useLocaleStore((s) => s.locale);
   const setTranslation = useReaderStore((s) => s.setTranslation);
 
-  const activeLocale: LocaleName = locale ?? 'pt';
+  const activeLocale: Locales = locale ?? 'pt';
   const sections = useMemo(() => CATALOG[activeLocale] ?? CATALOG.pt, [activeLocale]);
 
   const defaultKey = useMemo(() => {

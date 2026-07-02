@@ -1,9 +1,7 @@
 import { View } from 'react-native';
 import type { ViewProps } from 'react-native';
 import { PressableScale } from 'pressto';
-import { StyleSheet, withUnistyles } from 'react-native-unistyles';
-
-const ThemedPressableScale = withUnistyles(PressableScale);
+import { StyleSheet } from 'react-native-unistyles';
 
 function CardHeader({ style, ...props }: ViewProps) {
   return <View style={[styles.header, style]} {...props} />;
@@ -26,14 +24,14 @@ function CardRoot({ style, ...props }: ViewProps) {
 /** Static, non-tappable card surface. */
 export const Card = Object.assign(CardRoot, sections);
 
-type PressableScaleProps = Omit<React.ComponentProps<typeof ThemedPressableScale>, 'style' | 'children'>;
+type PressableScaleProps = Omit<React.ComponentProps<typeof PressableScale>, 'style' | 'children'>;
 type PressableCardProps = PressableScaleProps & Pick<ViewProps, 'style' | 'children'>;
 
 function PressableCardRoot({ style, children, ...pressableProps }: PressableCardProps) {
   return (
-    <ThemedPressableScale {...pressableProps}>
+    <PressableScale {...pressableProps}>
       <Card style={style}>{children}</Card>
-    </ThemedPressableScale>
+    </PressableScale>
   );
 }
 

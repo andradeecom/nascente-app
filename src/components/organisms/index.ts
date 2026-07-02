@@ -25,3 +25,6 @@ export { StudyCard } from './StudyCard';
 export { PlanDayRow } from './PlanDayRow';
 export { ProCtaCard } from './ProCtaCard';
 export { Paywall, type PaywallOffer } from './Paywall';
+export { AiExplainSheet } from './AiExplainSheet';
+export { ChapterSummarySheet } from './ChapterSummarySheet';
+export { AiDevotionalSheet } from './AiDevotionalSheet';

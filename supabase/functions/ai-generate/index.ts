@@ -9,13 +9,18 @@ import { createClient } from 'jsr:@supabase/supabase-js@2';
  *   1. Parse + validate request body
  *   2. Verify JWT via userClient.auth.getUser()
  *   3. Check profiles.tier === 'pro'
- *   4. Check shared ai_cache table (scripture-keyed) → return at $0 on hit
- *   5. Call Gemini 2.5 Flash REST API
- *   6. Upsert into ai_cache (idempotent on race conditions)
- *   7. Return { content, fromCache: false }
+ *   4. Check this month's ai_usage cost ceiling → reject if already at/over ceiling
+ *   5. Check shared ai_cache table (scripture-keyed) → return at $0 on hit
+ *   6. Call Gemini 2.5 Flash REST API
+ *   7. Upsert into ai_cache (idempotent on race conditions)
+ *   8. Record cost into ai_usage (cache misses only — hits are $0 and exempt)
+ *   9. Return { content, fromCache: false }
  *
- * Scripture-keyed cache misses do NOT count against the requesting user's quota
- * (shared infrastructure cost). Quota tracking for user-keyed calls is Tier B.
+ * Scripture-keyed cache misses do NOT count against any *per-feature* quota
+ * (shared infrastructure cost) — that's Tier B (Ask/plans/narrations, not
+ * built yet). They DO count toward the per-user monthly *cost ceiling*, which
+ * is a backstop against abuse independent of per-feature counters — see
+ * .docs/ai-features.md §3.
  *
  * Secrets (set with `supabase secrets set`, never in the repo):
  *   - GOOGLE_GEMINI_API_KEY   Gemini REST API key
@@ -32,6 +37,12 @@ const PROMPT_VERSION = 5;
 const LOCALES = ['en', 'es', 'pt'];
 const MAX_PASSAGE_TEXT_LENGTH = 20000; // generous cap for a full chapter; blocks abuse/oversized payloads
 const MAX_TRANSLATION_ID_LENGTH = 64;
+
+// Gemini 2.5 Flash pricing (per .docs/ai-features.md §4) — used only to estimate
+// spend for the cost-ceiling backstop, not billed anywhere else.
+const GEMINI_INPUT_COST_PER_TOKEN = 0.3 / 1_000_000;
+const GEMINI_OUTPUT_COST_PER_TOKEN = 2.5 / 1_000_000;
+const MONTHLY_COST_CEILING_USD = 1.5; // .docs/ai-features.md §3 "soft monthly cost ceiling"
 
 // ── System prompts ──────────────────────────────────────────────────────────
 
@@ -63,6 +74,32 @@ function maxOutputTokens(promptType) {
   if (promptType === 'devotional') return 700;
   if (promptType === 'chapter_summary') return 1600;
   return 1300; // explain + explain_simple: 3 full paragraphs in Portuguese, thinking disabled
+}
+
+const CYCLE_LENGTH_MS = 30 * 24 * 60 * 60 * 1000;
+
+// Returns the start date (YYYY-MM-DD) of the current 30-day cycle anchored to
+// `proSince` (profiles.pro_since). Falls back to the calendar month if
+// proSince is missing (defensive — shouldn't happen for a 'pro' row).
+//
+// Deliberately a fixed 30-day window, not a calendar-month anniversary: it
+// drifts slightly against the calendar (~12.2 resets/year instead of 12), but
+// this is a soft abuse ceiling, not billing — simplicity and correctness of
+// the arithmetic matter more than exact calendar-month alignment. Don't "fix"
+// this into calendar-month math without re-reading .docs/ai-features.md §3.
+function currentCycleStart(proSince) {
+  if (!proSince) {
+    const monthStart = new Date();
+    monthStart.setUTCDate(1);
+    monthStart.setUTCHours(0, 0, 0, 0);
+    return monthStart.toISOString().slice(0, 10);
+  }
+
+  const anchor = new Date(proSince).getTime();
+  const now = Date.now();
+  const cyclesElapsed = Math.floor((now - anchor) / CYCLE_LENGTH_MS);
+  const cycleStart = new Date(anchor + cyclesElapsed * CYCLE_LENGTH_MS);
+  return cycleStart.toISOString().slice(0, 10);
 }
 
 // ── Main handler ────────────────────────────────────────────────────────────
@@ -122,12 +159,30 @@ async function handleRequest(req) {
   if (authError || !user) return json({ error: 'NOT_AUTHENTICATED' }, 401);
 
   // 3. Check Pro tier
-  const { data: profile } = await userClient.from('profiles').select('tier').eq('id', user.id).maybeSingle();
+  const { data: profile } = await userClient.from('profiles').select('tier, pro_since').eq('id', user.id).maybeSingle();
   if (profile?.tier !== 'pro') return json({ error: 'NOT_PRO', message: 'This feature requires a Pro subscription' }, 403);
 
-  // 4. Check shared cache
   const adminClient = createClient(Deno.env.get('SUPABASE_URL'), Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'));
 
+  // 4. Check this cycle's cost ceiling (backstop against abuse, independent of
+  // any per-feature quota — see .docs/ai-features.md §3). The cycle is a 30-day
+  // rolling window anchored to the user's Pro start date (profiles.pro_since),
+  // not the calendar month — falls back to calendar-month if pro_since is unset
+  // (shouldn't happen for a 'pro' row, but keeps this from throwing).
+  const cycleKey = currentCycleStart(profile.pro_since);
+
+  const { data: usage } = await adminClient
+    .from('ai_usage')
+    .select('cost_usd')
+    .eq('user_id', user.id)
+    .eq('month', cycleKey)
+    .maybeSingle();
+
+  if ((usage?.cost_usd ?? 0) >= MONTHLY_COST_CEILING_USD) {
+    return json({ error: 'COST_CEILING_REACHED', message: 'Monthly AI usage limit reached' }, 429);
+  }
+
+  // 5. Check shared cache
   const { data: cached } = await adminClient
     .from('ai_cache')
     .select('content')
@@ -145,7 +200,7 @@ async function handleRequest(req) {
     return json({ content: cached.content, fromCache: true });
   }
 
-  // 5. Call Gemini
+  // 6. Call Gemini
   const geminiKey = Deno.env.get('GOOGLE_GEMINI_API_KEY');
   if (!geminiKey) {
     console.error('GOOGLE_GEMINI_API_KEY not set');
@@ -197,7 +252,7 @@ async function handleRequest(req) {
     return json({ error: 'GEMINI_ERROR', message: 'AI generation failed' }, 503);
   }
 
-  // 6. Upsert into shared cache (idempotent on concurrent first-requests)
+  // 7. Upsert into shared cache (idempotent on concurrent first-requests)
   const { error: upsertError } = await adminClient.from('ai_cache').upsert(
     {
       translation_id: translationId,
@@ -221,7 +276,21 @@ async function handleRequest(req) {
     // Still return the content — the cache miss is non-fatal
   }
 
-  // 7. Return
+  // 8. Record cost toward this cycle's ceiling (cache misses only — hits never reach here)
+  const callCost = (inputTokens ?? 0) * GEMINI_INPUT_COST_PER_TOKEN + (outputTokens ?? 0) * GEMINI_OUTPUT_COST_PER_TOKEN;
+
+  const { error: usageError } = await adminClient.rpc('increment_ai_usage', {
+    p_user_id: user.id,
+    p_month: cycleKey,
+    p_cost_usd: callCost,
+  });
+
+  if (usageError) {
+    console.error('ai_usage increment failed', usageError);
+    // Non-fatal — still return the content; worst case the ceiling under-counts this call
+  }
+
+  // 9. Return
   return json({ content: geminiContent, fromCache: false });
 }
 

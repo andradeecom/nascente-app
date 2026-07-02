@@ -63,6 +63,30 @@ export type Database = {
         };
         Relationships: [];
       };
+      ai_usage: {
+        Row: {
+          call_count: number;
+          cost_usd: number;
+          month: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          call_count?: number;
+          cost_usd?: number;
+          month: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          call_count?: number;
+          cost_usd?: number;
+          month?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       bookmarks: {
         Row: {
           book_id: number;
@@ -181,18 +205,21 @@ export type Database = {
         Row: {
           created_at: string;
           id: string;
+          pro_since: string | null;
           tier: Database['public']['Enums']['account_tier'];
           updated_at: string;
         };
         Insert: {
           created_at?: string;
           id: string;
+          pro_since?: string | null;
           tier?: Database['public']['Enums']['account_tier'];
           updated_at?: string;
         };
         Update: {
           created_at?: string;
           id?: string;
+          pro_since?: string | null;
           tier?: Database['public']['Enums']['account_tier'];
           updated_at?: string;
         };
@@ -386,6 +413,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      increment_ai_usage: {
+        Args: { p_cost_usd: number; p_month: string; p_user_id: string };
+        Returns: undefined;
+      };
       purge_study_tombstones: {
         Args: { retention_days?: number };
         Returns: undefined;

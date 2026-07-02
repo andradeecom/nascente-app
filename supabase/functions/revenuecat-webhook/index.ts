@@ -83,7 +83,25 @@ Deno.serve(async (req: Request) => {
 
   // 4. Apply with the service-role client (bypasses RLS; idempotent update).
   const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
-  const { error } = await admin.from('profiles').update({ tier: nextTier }).eq('id', appUserId);
+
+  // pro_since anchors the AI cost-ceiling's rolling cycle (see ai-generate) to the
+  // start of the user's *current continuous* Pro period — not the calendar month.
+  // Only stamp it on a fresh grant (row is currently 'free'); a RENEWAL of an
+  // already-Pro row must NOT reset it, or every renewal would restart the cycle.
+  // Cleared on revoke so the next grant starts a new period.
+  let update: { tier: 'free' | 'pro'; pro_since?: string | null } = { tier: nextTier };
+
+  if (nextTier === 'pro') {
+    const { data: current } = await admin.from('profiles').select('tier').eq('id', appUserId).maybeSingle();
+    if (current?.tier !== 'pro') {
+      const purchasedAtMs = event.purchased_at_ms as number | undefined;
+      update.pro_since = purchasedAtMs ? new Date(purchasedAtMs).toISOString() : new Date().toISOString();
+    }
+  } else {
+    update.pro_since = null;
+  }
+
+  const { error } = await admin.from('profiles').update(update).eq('id', appUserId);
 
   if (error) {
     console.error('profiles tier update failed', { appUserId, nextTier, error });

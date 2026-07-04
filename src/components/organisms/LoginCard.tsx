@@ -3,16 +3,16 @@ import { Pressable, View } from 'react-native';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { useForm, Controller } from 'react-hook-form';
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Eye, EyeOff } from 'lucide-react-native';
 import { Text, TEXT_VARIANTS, Button, Divider } from '@/components/atoms';
 import { InputField, SocialButton } from '@/components/molecules';
 import { createLoginSchema, type LoginFormData } from '@/schemas/login';
 import { useTranslate } from '@/i18n';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '../atoms/Button';
+import { PROVIDERS } from '@/types/providers';
 
-const ThemedMaterialCommunityIcons = withUnistyles(MaterialCommunityIcons, (theme) => ({
-  color: theme.colors.semantic.textSecondary,
-}));
+const ThemedEye = withUnistyles(Eye, (theme) => ({ color: theme.colors.semantic.textSecondary }));
+const ThemedEyeOff = withUnistyles(EyeOff, (theme) => ({ color: theme.colors.semantic.textSecondary }));
 
 type LoginCardProps = {
   onLogin: (email: string, password: string) => void;
@@ -54,7 +54,7 @@ export function LoginCard({
         accessibilityRole="button"
         accessibilityLabel={t(isPasswordVisible ? 'login.hidePassword' : 'login.showPassword')}
       >
-        <ThemedMaterialCommunityIcons name={isPasswordVisible ? 'eye-off-outline' : 'eye-outline'} size={20} />
+        {isPasswordVisible ? <ThemedEyeOff size={20} /> : <ThemedEye size={20} />}
       </Pressable>
     );
   }
@@ -121,8 +121,8 @@ export function LoginCard({
       <Divider label={t('login.or')} />
 
       <View style={styles.socialButtons}>
-        <SocialButton provider="google" onPress={onLoginWithGoogle} />
-        <SocialButton provider="apple" onPress={onLoginWithApple} />
+        <SocialButton provider={PROVIDERS.Google} onPress={onLoginWithGoogle} />
+        <SocialButton provider={PROVIDERS.Apple} onPress={onLoginWithApple} />
       </View>
     </View>
   );

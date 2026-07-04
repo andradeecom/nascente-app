@@ -3,16 +3,16 @@ import { Pressable, View } from 'react-native';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { useForm, Controller } from 'react-hook-form';
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Eye, EyeOff } from 'lucide-react-native';
 import { Text, TEXT_VARIANTS, Button, Divider } from '@/components/atoms';
 import { InputField, SocialButton } from '@/components/molecules';
 import { createRegisterSchema, type RegisterFormData } from '@/schemas/register';
 import { useTranslate } from '@/i18n';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '../atoms/Button';
+import { PROVIDERS } from '@/types/providers';
 
-const ThemedMaterialCommunityIcons = withUnistyles(MaterialCommunityIcons, (theme) => ({
-  color: theme.colors.semantic.textSecondary,
-}));
+const ThemedEye = withUnistyles(Eye, (theme) => ({ color: theme.colors.semantic.textSecondary }));
+const ThemedEyeOff = withUnistyles(EyeOff, (theme) => ({ color: theme.colors.semantic.textSecondary }));
 
 type RegisterCardProps = {
   onRegister: (data: { email: string; password: string; firstName: string; lastName: string }) => void;
@@ -48,7 +48,7 @@ export function RegisterCard({ onRegister, onRegisterWithGoogle, onRegisterWithA
         accessibilityRole="button"
         accessibilityLabel={t(visible ? 'login.hidePassword' : 'login.showPassword')}
       >
-        <ThemedMaterialCommunityIcons name={visible ? 'eye-off-outline' : 'eye-outline'} size={20} />
+        {visible ? <ThemedEyeOff size={20} /> : <ThemedEye size={20} />}
       </Pressable>
     );
   }
@@ -167,8 +167,8 @@ export function RegisterCard({ onRegister, onRegisterWithGoogle, onRegisterWithA
       <Divider label={t('register.or')} />
 
       <View style={styles.socialButtons}>
-        <SocialButton provider="google" onPress={onRegisterWithGoogle} />
-        <SocialButton provider="apple" onPress={onRegisterWithApple} />
+        <SocialButton provider={PROVIDERS.Google} onPress={onRegisterWithGoogle} />
+        <SocialButton provider={PROVIDERS.Apple} onPress={onRegisterWithApple} />
       </View>
     </View>
   );

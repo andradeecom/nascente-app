@@ -1,10 +1,12 @@
 import { View } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { CalendarDays } from 'lucide-react-native';
 import { Button, Text, TEXT_VARIANTS } from '@/components/atoms';
 import { PressableCard } from '@/components/molecules';
 import type { SuggestedReadingPlan } from '@/types/reading-plans';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '../atoms/Button';
+
+const ThemedCalendarDays = withUnistyles(CalendarDays, (theme) => ({ color: theme.colors.semantic.accent }));
 
 type SuggestedPlanCardProps = {
   plan: SuggestedReadingPlan;
@@ -22,7 +24,7 @@ export function SuggestedPlanCard({ plan, meta, startLabel, onStart, onPress, lo
   return (
     <PressableCard onPress={onPress} style={styles.card}>
       <View style={styles.icon}>
-        <CalendarDays size={22} color={styles.icon.color} />
+        <ThemedCalendarDays size={22} />
       </View>
       <View style={styles.body}>
         <Text variant={TEXT_VARIANTS.BodyEmphasis} numberOfLines={2}>
@@ -57,7 +59,6 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: theme.colors.semantic.accentSubtle,
-    color: theme.colors.semantic.accent,
   },
   body: {
     flex: 1,

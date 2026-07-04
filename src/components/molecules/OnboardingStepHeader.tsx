@@ -1,6 +1,8 @@
 import { Pressable, View } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { ChevronLeft } from 'lucide-react-native';
+
+const ThemedChevronLeft = withUnistyles(ChevronLeft, (theme) => ({ color: theme.colors.semantic.textPrimary }));
 
 type OnboardingStepHeaderProps = {
   step: number;
@@ -14,7 +16,7 @@ export function OnboardingStepHeader({ step, total, onBack }: OnboardingStepHead
   return (
     <View style={styles.container}>
       <Pressable style={styles.back} onPress={onBack} disabled={!onBack} accessibilityRole="button" hitSlop={8}>
-        {onBack && <ChevronLeft size={26} color={styles.backIcon.color} />}
+        {onBack && <ThemedChevronLeft size={26} />}
       </Pressable>
 
       <View style={styles.dots}>
@@ -44,9 +46,6 @@ const styles = StyleSheet.create((theme) => ({
     height: 32,
     alignItems: 'flex-start',
     justifyContent: 'center',
-  },
-  backIcon: {
-    color: theme.colors.semantic.textPrimary,
   },
   dots: {
     flexDirection: 'row',

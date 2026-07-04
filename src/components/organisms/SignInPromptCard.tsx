@@ -1,8 +1,9 @@
 import { View } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, UnistylesRuntime } from 'react-native-unistyles';
 import { ChevronRight, type LucideIcon } from 'lucide-react-native';
 import { Text, TEXT_VARIANTS } from '@/components/atoms';
 import { PressableCard } from '@/components/molecules';
+import { useThemeStore } from '@/stores/theme';
 
 type SignInPromptCardProps = {
   icon: LucideIcon;
@@ -18,10 +19,15 @@ type SignInPromptCardProps = {
  * tab for usage. Reusable for other account-gated surfaces.
  */
 export function SignInPromptCard({ icon: Icon, title, description, actionLabel, onPress }: SignInPromptCardProps) {
+  // Icon is a caller-supplied component, so it can't be wrapped with withUnistyles at
+  // module scope. Read theme name reactively and pass the color as a plain prop instead.
+  const themeName = useThemeStore((s) => s.theme);
+  const theme = UnistylesRuntime.getTheme(themeName);
+
   return (
     <PressableCard style={styles.card} onPress={onPress} accessibilityRole="button">
       <View style={styles.iconBadge}>
-        <Icon size={26} color={styles.iconColor.color} strokeWidth={2} />
+        <Icon size={26} color={theme.colors.semantic.accent} strokeWidth={2} />
       </View>
       <Text variant={TEXT_VARIANTS.Title3} style={styles.title}>
         {title}
@@ -33,7 +39,7 @@ export function SignInPromptCard({ icon: Icon, title, description, actionLabel, 
         <Text variant={TEXT_VARIANTS.Label} color="accent">
           {actionLabel}
         </Text>
-        <ChevronRight size={18} color={styles.iconColor.color} strokeWidth={2.5} />
+        <ChevronRight size={18} color={theme.colors.semantic.accent} strokeWidth={2.5} />
       </View>
     </PressableCard>
   );
@@ -52,9 +58,6 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: theme.spacing[2],
-  },
-  iconColor: {
-    color: theme.colors.semantic.accent,
   },
   title: {
     textAlign: 'center',

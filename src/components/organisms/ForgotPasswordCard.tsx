@@ -6,7 +6,7 @@ import { standardSchemaResolver } from '@hookform/resolvers/standard-schema';
 import { Text, TEXT_VARIANTS, Button } from '@/components/atoms';
 import { InputField } from '@/components/molecules';
 import { createForgotPasswordSchema, type ForgotPasswordFormData } from '@/schemas/forgot-password';
-import { translate } from '@/i18n';
+import { useTranslate } from '@/i18n';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '../atoms/Button';
 
 type ForgotPasswordCardProps = {
@@ -17,6 +17,7 @@ type ForgotPasswordCardProps = {
 };
 
 export function ForgotPasswordCard({ onSubmit, isLoading, isSubmitted, submittedEmail }: ForgotPasswordCardProps) {
+  const t = useTranslate();
   const schema = useMemo(() => createForgotPasswordSchema(), []);
 
   const {
@@ -37,10 +38,10 @@ export function ForgotPasswordCard({ onSubmit, isLoading, isSubmitted, submitted
       <View style={styles.card}>
         <View style={styles.header}>
           <Text variant={TEXT_VARIANTS.Title1} style={styles.title}>
-            {translate('forgotPassword.successTitle')}
+            {t('forgotPassword.successTitle')}
           </Text>
           <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" style={styles.title}>
-            {translate('forgotPassword.successMessage', { email: submittedEmail ?? '' })}
+            {t('forgotPassword.successMessage', { email: submittedEmail ?? '' })}
           </Text>
         </View>
       </View>
@@ -51,10 +52,10 @@ export function ForgotPasswordCard({ onSubmit, isLoading, isSubmitted, submitted
     <View style={styles.card}>
       <View style={styles.header}>
         <Text variant={TEXT_VARIANTS.Title1} style={styles.title}>
-          {translate('forgotPassword.title')}
+          {t('forgotPassword.title')}
         </Text>
         <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" style={styles.title}>
-          {translate('forgotPassword.subtitle')}
+          {t('forgotPassword.subtitle')}
         </Text>
       </View>
 
@@ -64,8 +65,8 @@ export function ForgotPasswordCard({ onSubmit, isLoading, isSubmitted, submitted
           name="email"
           render={({ field: { onChange, onBlur, value } }) => (
             <InputField
-              label={translate('forgotPassword.emailLabel')}
-              placeholder={translate('forgotPassword.emailPlaceholder')}
+              label={t('forgotPassword.emailLabel')}
+              placeholder={t('forgotPassword.emailPlaceholder')}
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
@@ -78,7 +79,7 @@ export function ForgotPasswordCard({ onSubmit, isLoading, isSubmitted, submitted
         />
 
         <Button
-          label={isLoading ? translate('forgotPassword.sending') : translate('forgotPassword.submitButton')}
+          label={isLoading ? t('forgotPassword.sending') : t('forgotPassword.submitButton')}
           variant={BUTTON_VARIANTS.Primary}
           size={BUTTON_SIZES.Large}
           fullWidth

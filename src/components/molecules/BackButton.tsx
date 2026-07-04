@@ -1,7 +1,9 @@
 import { Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { ChevronLeft } from 'lucide-react-native';
+
+const ThemedChevronLeft = withUnistyles(ChevronLeft, (theme) => ({ color: theme.colors.semantic.textPrimary }));
 
 type BackButtonProps = {
   onPress?: () => void;
@@ -23,7 +25,7 @@ export function BackButton({ onPress }: BackButtonProps) {
 
   return (
     <Pressable onPress={handlePress} hitSlop={8} style={({ pressed }) => [styles.button, pressed && styles.pressed]}>
-      <ChevronLeft size={26} color={styles.button.color} />
+      <ThemedChevronLeft size={26} />
     </Pressable>
   );
 }
@@ -36,7 +38,6 @@ const styles = StyleSheet.create((theme) => ({
     justifyContent: 'center',
     marginLeft: theme.spacing[2],
     marginTop: theme.spacing[2],
-    color: theme.colors.semantic.textPrimary,
   },
   pressed: {
     opacity: 0.6,

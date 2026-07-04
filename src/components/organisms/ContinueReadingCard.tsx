@@ -1,8 +1,10 @@
 import { View, type ViewStyle } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { BookOpen } from 'lucide-react-native';
 import { Text, TEXT_VARIANTS } from '@/components/atoms';
 import { PressableCard } from '../molecules';
+
+const ThemedBookOpen = withUnistyles(BookOpen, (theme) => ({ color: theme.colors.semantic.accent }));
 
 type ContinueReadingCardProps = {
   title: string;
@@ -25,7 +27,7 @@ export function ContinueReadingCard({
     <PressableCard onPress={onPress}>
       <View style={styles.header}>
         <View style={styles.icon}>
-          <BookOpen size={20} color={styles.accentColor.color} strokeWidth={2} />
+          <ThemedBookOpen size={20} strokeWidth={2} />
         </View>
         <View style={styles.body}>
           <Text variant={TEXT_VARIANTS.Overline} color="textSecondary" style={styles.uppercase}>
@@ -56,9 +58,6 @@ const styles = StyleSheet.create((theme) => ({
     backgroundColor: theme.colors.semantic.accentSubtle,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  accentColor: {
-    color: theme.colors.semantic.accent,
   },
   body: {
     flex: 1,

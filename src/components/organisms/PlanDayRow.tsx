@@ -1,10 +1,13 @@
 import { View } from 'react-native';
 import { PressableScale } from 'pressto';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, UnistylesRuntime, withUnistyles } from 'react-native-unistyles';
 import { Check, ChevronRight } from 'lucide-react-native';
 import { Text, TEXT_VARIANTS } from '@/components/atoms';
 import { useTranslate } from '@/i18n';
+import { useThemeStore } from '@/stores/theme';
 import type { PlanDayGroup } from '@/types/reading-plans';
+
+const ThemedChevronRight = withUnistyles(ChevronRight, (theme) => ({ color: theme.colors.semantic.textTertiary }));
 
 type PlanDayRowProps = {
   item: PlanDayGroup;
@@ -22,9 +25,34 @@ type PlanDayRowProps = {
  */
 export function PlanDayRow({ item, isEnrolled, markingDay, onToggleComplete, onOpenReading }: PlanDayRowProps) {
   const translate = useTranslate();
+  // Not wrapped with withUnistyles: PressableScale (pressto) is Reanimated-based,
+  // and forcing it to re-render on every theme tick would trip Reanimated's strict-mode
+  // "reading value during render" warning. Read theme name reactively and derive plain styles instead.
+  const themeName = useThemeStore((s) => s.theme);
+  const theme = UnistylesRuntime.getTheme(themeName);
+  const dayRowStyle = {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: theme.spacing[3],
+    backgroundColor: theme.colors.semantic.bgSecondary,
+    borderRadius: theme.radius.lg,
+    paddingHorizontal: theme.spacing[4],
+    paddingVertical: theme.spacing[3],
+  };
+  const checkStyle = {
+    width: 28,
+    height: 28,
+    borderRadius: theme.radius.full,
+    borderWidth: 2,
+    borderColor: item.completed ? theme.colors.semantic.accent : theme.colors.semantic.bgTertiary,
+    backgroundColor: item.completed ? theme.colors.semantic.accent : undefined,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  };
+  const checkDoneIconColor = theme.colors.semantic.bgPrimary;
 
   return (
-    <PressableScale style={styles.dayRow} onPress={() => onOpenReading(item)}>
+    <PressableScale style={dayRowStyle} onPress={() => onOpenReading(item)}>
       {isEnrolled ? (
         <PressableScale
           onPress={() => onToggleComplete(item)}
@@ -32,9 +60,9 @@ export function PlanDayRow({ item, isEnrolled, markingDay, onToggleComplete, onO
           hitSlop={8}
           accessibilityRole="checkbox"
           accessibilityState={{ checked: item.completed }}
-          style={[styles.check, item.completed && styles.checkDone]}
+          style={checkStyle}
         >
-          {item.completed ? <Check size={16} color={styles.checkDoneIcon.color} strokeWidth={3} /> : null}
+          {item.completed ? <Check size={16} color={checkDoneIconColor} strokeWidth={3} /> : null}
         </PressableScale>
       ) : (
         <View style={styles.dayBadge}>
@@ -53,37 +81,12 @@ export function PlanDayRow({ item, isEnrolled, markingDay, onToggleComplete, onO
         </Text>
       </View>
 
-      <ChevronRight size={18} color={styles.chevron.color} />
+      <ThemedChevronRight size={18} />
     </PressableScale>
   );
 }
 
 const styles = StyleSheet.create((theme) => ({
-  dayRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: theme.spacing[3],
-    backgroundColor: theme.colors.semantic.bgSecondary,
-    borderRadius: theme.radius.lg,
-    paddingHorizontal: theme.spacing[4],
-    paddingVertical: theme.spacing[3],
-  },
-  check: {
-    width: 28,
-    height: 28,
-    borderRadius: theme.radius.full,
-    borderWidth: 2,
-    borderColor: theme.colors.semantic.bgTertiary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkDone: {
-    backgroundColor: theme.colors.semantic.accent,
-    borderColor: theme.colors.semantic.accent,
-  },
-  checkDoneIcon: {
-    color: theme.colors.semantic.bgPrimary,
-  },
   dayBadge: {
     width: 28,
     height: 28,
@@ -98,8 +101,5 @@ const styles = StyleSheet.create((theme) => ({
   dayBody: {
     flex: 1,
     gap: theme.spacing[0.5],
-  },
-  chevron: {
-    color: theme.colors.semantic.textTertiary,
   },
 }));

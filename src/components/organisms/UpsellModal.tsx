@@ -1,8 +1,9 @@
 import { View } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, UnistylesRuntime } from 'react-native-unistyles';
 import { Sparkles, type LucideIcon } from 'lucide-react-native';
 import { Button, Text, TEXT_VARIANTS } from '@/components/atoms';
 import { AppModal } from '@/components/molecules';
+import { useThemeStore } from '@/stores/theme';
 import { BUTTON_VARIANTS } from '../atoms/Button';
 
 type UpsellModalProps = {
@@ -31,11 +32,16 @@ export function UpsellModal({
   onClose,
   icon: Icon = Sparkles,
 }: UpsellModalProps) {
+  // Icon is a caller-supplied component, so it can't be wrapped with withUnistyles at
+  // module scope. Read theme name reactively and pass the color as a plain prop instead.
+  const themeName = useThemeStore((s) => s.theme);
+  const theme = UnistylesRuntime.getTheme(themeName);
+
   return (
     <AppModal visible={visible} onClose={onClose}>
       <View style={styles.content}>
         <View style={styles.iconBadge}>
-          <Icon size={26} color={styles.iconColor.color} strokeWidth={2} />
+          <Icon size={26} color={theme.colors.semantic.accent} strokeWidth={2} />
         </View>
         <Text variant={TEXT_VARIANTS.Title3} style={styles.title}>
           {title}
@@ -62,9 +68,6 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: theme.spacing[2],
-  },
-  iconColor: {
-    color: theme.colors.semantic.accent,
   },
   title: {
     textAlign: 'center',

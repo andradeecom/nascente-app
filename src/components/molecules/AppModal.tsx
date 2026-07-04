@@ -1,7 +1,9 @@
 import { Modal, Pressable } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { X } from 'lucide-react-native';
 import { useTranslate } from '@/i18n';
+
+const ThemedX = withUnistyles(X, (theme) => ({ color: theme.colors.semantic.textSecondary }));
 
 type AppModalProps = {
   visible: boolean;
@@ -34,7 +36,7 @@ export function AppModal({ visible, onClose, children, showClose = true, dismiss
         <Pressable style={styles.card} onPress={() => {}}>
           {showClose ? (
             <Pressable onPress={onClose} hitSlop={8} style={styles.close} accessibilityRole="button">
-              <X size={20} color={styles.closeIcon.color} />
+              <ThemedX size={20} />
             </Pressable>
           ) : null}
           {children}
@@ -65,8 +67,5 @@ const styles = StyleSheet.create((theme) => ({
     top: theme.spacing[3],
     right: theme.spacing[3],
     zIndex: theme.zIndex.base + 1,
-  },
-  closeIcon: {
-    color: theme.colors.semantic.textSecondary,
   },
 }));

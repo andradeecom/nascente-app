@@ -4,10 +4,11 @@ import { StyleSheet } from 'react-native-unistyles';
 import { Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
 import { OnboardingStepHeader } from '@/components/molecules';
 import { ForgotPasswordCard } from '@/components/organisms';
-import { translate } from '@/i18n';
+import { useTranslate } from '@/i18n';
 import useOnboardingForgotPasswordScreen from './use-onboarding-forgot-password-screen';
 
 export default function OnboardingForgotPasswordScreen() {
+  const t = useTranslate();
   const { handleSubmit, isLoading, isSubmitted, submittedEmail } = useOnboardingForgotPasswordScreen();
   const router = useRouter();
 
@@ -24,7 +25,7 @@ export default function OnboardingForgotPasswordScreen() {
           />
           <Link href="/onboarding/account/login" style={styles.footerLink}>
             <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
-              {translate('forgotPassword.backToLogin')}
+              {t('forgotPassword.backToLogin')}
             </Text>
           </Link>
         </ScrollView>

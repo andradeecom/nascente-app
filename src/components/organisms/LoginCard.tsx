@@ -1,14 +1,18 @@
 import { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { useForm, Controller } from 'react-hook-form';
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, TEXT_VARIANTS, Button, Divider } from '@/components/atoms';
 import { InputField, SocialButton } from '@/components/molecules';
 import { createLoginSchema, type LoginFormData } from '@/schemas/login';
-import { translate } from '@/i18n';
+import { useTranslate } from '@/i18n';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '../atoms/Button';
+
+const ThemedMaterialCommunityIcons = withUnistyles(MaterialCommunityIcons, (theme) => ({
+  color: theme.colors.semantic.textSecondary,
+}));
 
 type LoginCardProps = {
   onLogin: (email: string, password: string) => void;
@@ -25,6 +29,7 @@ export function LoginCard({
   onForgotPassword,
   isLoading,
 }: LoginCardProps) {
+  const t = useTranslate();
   const schema = useMemo(() => createLoginSchema(), []);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
@@ -47,13 +52,9 @@ export function LoginCard({
         onPress={() => setIsPasswordVisible((prev) => !prev)}
         hitSlop={8}
         accessibilityRole="button"
-        accessibilityLabel={translate(isPasswordVisible ? 'login.hidePassword' : 'login.showPassword')}
+        accessibilityLabel={t(isPasswordVisible ? 'login.hidePassword' : 'login.showPassword')}
       >
-        <MaterialCommunityIcons
-          name={isPasswordVisible ? 'eye-off-outline' : 'eye-outline'}
-          size={20}
-          color={styles.eyeIcon.color}
-        />
+        <ThemedMaterialCommunityIcons name={isPasswordVisible ? 'eye-off-outline' : 'eye-outline'} size={20} />
       </Pressable>
     );
   }
@@ -62,10 +63,10 @@ export function LoginCard({
     <View style={styles.card}>
       <View style={styles.header}>
         <Text variant={TEXT_VARIANTS.Title1} style={styles.title}>
-          {translate('login.title')}
+          {t('login.title')}
         </Text>
         <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
-          {translate('login.subtitle')}
+          {t('login.subtitle')}
         </Text>
       </View>
 
@@ -75,8 +76,8 @@ export function LoginCard({
           name="email"
           render={({ field: { onChange, onBlur, value } }) => (
             <InputField
-              label={translate('login.emailLabel')}
-              placeholder={translate('login.emailPlaceholder')}
+              label={t('login.emailLabel')}
+              placeholder={t('login.emailPlaceholder')}
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
@@ -93,10 +94,10 @@ export function LoginCard({
           name="password"
           render={({ field: { onChange, onBlur, value } }) => (
             <InputField
-              label={translate('login.passwordLabel')}
-              rightLabel={translate('login.forgotPassword')}
+              label={t('login.passwordLabel')}
+              rightLabel={t('login.forgotPassword')}
               onRightLabelPress={onForgotPassword}
-              placeholder={translate('login.passwordPlaceholder')}
+              placeholder={t('login.passwordPlaceholder')}
               secureTextEntry={!isPasswordVisible}
               rightIcon={rightIcon()}
               value={value}
@@ -108,7 +109,7 @@ export function LoginCard({
         />
 
         <Button
-          label={isLoading ? translate('login.signingIn') : translate('login.loginButton')}
+          label={isLoading ? t('login.signingIn') : t('login.loginButton')}
           variant={BUTTON_VARIANTS.Primary}
           size={BUTTON_SIZES.Large}
           fullWidth
@@ -117,7 +118,7 @@ export function LoginCard({
         />
       </View>
 
-      <Divider label={translate('login.or')} />
+      <Divider label={t('login.or')} />
 
       <View style={styles.socialButtons}>
         <SocialButton provider="google" onPress={onLoginWithGoogle} />
@@ -129,7 +130,7 @@ export function LoginCard({
 
 const styles = StyleSheet.create((theme) => ({
   card: {
-    backgroundColor: theme.colors.semantic.bgPrimary,
+    backgroundColor: theme.colors.semantic.bgTertiary,
     borderRadius: theme.radius.xl,
     padding: theme.spacing[6],
     gap: theme.spacing[6],
@@ -147,8 +148,5 @@ const styles = StyleSheet.create((theme) => ({
   },
   socialButtons: {
     gap: theme.spacing[3],
-  },
-  eyeIcon: {
-    color: theme.colors.semantic.textSecondary,
   },
 }));

@@ -1,10 +1,13 @@
 import { View } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { ChevronRight, Sparkles } from 'lucide-react-native';
 import { Button, Text, TEXT_VARIANTS } from '@/components/atoms';
 import { Card } from '../molecules';
 import { useTranslate } from '@/i18n';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '../atoms/Button';
+
+const ThemedChevronRight = withUnistyles(ChevronRight, (theme) => ({ color: theme.colors.semantic.accent }));
+const ThemedSparkles = withUnistyles(Sparkles, (theme) => ({ color: theme.colors.semantic.accent }));
 
 type VerseOfTheDayCardProps = {
   title: string;
@@ -44,7 +47,7 @@ export function VerseOfTheDayCard({
           label={actionLabel}
           variant={BUTTON_VARIANTS.Ghost}
           size={BUTTON_SIZES.Small}
-          icon={<ChevronRight size={16} color={styles.accentColor.color} strokeWidth={2} />}
+          icon={<ThemedChevronRight size={16} strokeWidth={2} />}
           iconPosition="right"
         />
       </Card.Footer>
@@ -54,7 +57,7 @@ export function VerseOfTheDayCard({
             onPress={onDevotional}
             label={translate('ai.devotional.action')}
             variant={BUTTON_VARIANTS.Ghost}
-            icon={<Sparkles size={14} color={styles.accentColor.color} strokeWidth={1.5} />}
+            icon={<ThemedSparkles size={14} strokeWidth={1.5} />}
           />
         </View>
       ) : null}
@@ -70,9 +73,6 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  accentColor: {
-    color: theme.colors.semantic.accent,
   },
   devotionalButtonWrapper: {
     borderTopWidth: 1,

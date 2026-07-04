@@ -1,9 +1,13 @@
 import { Pressable, View } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react-native';
 import { Button, Text, TEXT_VARIANTS } from '@/components/atoms';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '@/components/atoms/Button';
 import { useTranslate } from '@/i18n';
+
+const ThemedChevronLeft = withUnistyles(ChevronLeft, (theme) => ({ color: theme.colors.semantic.accent }));
+const ThemedChevronRight = withUnistyles(ChevronRight, (theme) => ({ color: theme.colors.semantic.accent }));
+const ThemedSparkles = withUnistyles(Sparkles, (theme) => ({ color: theme.colors.semantic.textSecondary }));
 
 type ChapterNavBarProps = {
   bookName: string | undefined;
@@ -19,7 +23,7 @@ export function ChapterNavBar({ bookName, chapter, onPrev, onNext, onSummary }: 
   return (
     <View style={styles.navBar}>
       <Pressable onPress={onPrev} style={styles.navButton} hitSlop={8}>
-        <ChevronLeft size={22} color={styles.chevron.color} />
+        <ThemedChevronLeft size={22} />
         <Text variant={TEXT_VARIANTS.Label} color="accent">
           {translate('reader.prev')}
         </Text>
@@ -29,7 +33,7 @@ export function ChapterNavBar({ bookName, chapter, onPrev, onNext, onSummary }: 
         <Button
           onPress={onSummary}
           label={`${bookName} ${chapter}`}
-          icon={<Sparkles size={16} color={styles.summaryIcon.color} strokeWidth={1.5} />}
+          icon={<ThemedSparkles size={16} strokeWidth={1.5} />}
           iconPosition="right"
           variant={BUTTON_VARIANTS.Ghost}
           size={BUTTON_SIZES.Medium}
@@ -44,7 +48,7 @@ export function ChapterNavBar({ bookName, chapter, onPrev, onNext, onSummary }: 
         <Text variant={TEXT_VARIANTS.Label} color="accent">
           {translate('reader.next')}
         </Text>
-        <ChevronRight size={22} color={styles.chevron.color} strokeWidth={1.5} />
+        <ThemedChevronRight size={22} strokeWidth={1.5} />
       </Pressable>
     </View>
   );
@@ -65,11 +69,5 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: 'row',
     alignItems: 'center',
     gap: theme.spacing[1],
-  },
-  chevron: {
-    color: theme.colors.semantic.accent,
-  },
-  summaryIcon: {
-    color: theme.colors.semantic.textSecondary,
   },
 }));

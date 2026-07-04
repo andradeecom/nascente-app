@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { TextInput, View } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, UnistylesRuntime } from 'react-native-unistyles';
 import { Trash2 } from 'lucide-react-native';
 import { Button, Text, TEXT_VARIANTS } from '@/components/atoms';
 import { AppModal } from '@/components/molecules';
 import { useTranslate } from '@/i18n';
+import { useThemeStore } from '@/stores/theme';
 import { BUTTON_VARIANTS } from '../atoms/Button';
 
 type NoteEditorModalProps = {
@@ -41,6 +42,11 @@ export function NoteEditorModal({
 
   const trimmed = body.trim();
 
+  // placeholderTextColor and the delete icon's color are plain props read once at
+  // mount, not Unistyles-processed style values — read theme name reactively instead.
+  const themeName = useThemeStore((s) => s.theme);
+  const theme = UnistylesRuntime.getTheme(themeName);
+
   return (
     <AppModal visible={visible} onClose={onClose}>
       <View style={styles.content}>
@@ -55,7 +61,7 @@ export function NoteEditorModal({
           value={body}
           onChangeText={setBody}
           placeholder={translate('study.note.placeholder')}
-          placeholderTextColor={styles.placeholder.color}
+          placeholderTextColor={theme.colors.semantic.textSecondary}
           style={styles.input}
           multiline
           textAlignVertical="top"
@@ -73,7 +79,7 @@ export function NoteEditorModal({
           <Button
             variant={BUTTON_VARIANTS.Ghost}
             label={translate('study.note.delete')}
-            icon={<Trash2 size={18} color={styles.deleteIcon.color} strokeWidth={2} />}
+            icon={<Trash2 size={18} color={theme.colors.semantic.danger} strokeWidth={2} />}
             onPress={onDelete}
             fullWidth
             style={styles.delete}
@@ -106,12 +112,6 @@ const styles = StyleSheet.create((theme) => ({
     fontFamily: theme.font.family,
     color: theme.colors.semantic.textPrimary,
     marginBottom: theme.spacing[2],
-  },
-  placeholder: {
-    color: theme.colors.semantic.textSecondary,
-  },
-  deleteIcon: {
-    color: theme.colors.semantic.danger,
   },
   delete: {
     marginTop: theme.spacing[1],

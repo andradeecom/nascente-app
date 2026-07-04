@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { Check } from 'lucide-react-native';
 import { Button, Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
 import { ReaderHeader, ChapterNavBar } from '@/components/molecules';
@@ -21,6 +21,9 @@ import { typography } from '@/theme/typography';
 import type { Verse } from '@/types/bible';
 import useReaderScreen from './use-reader-screen';
 import { BUTTON_SIZES } from '@/components/atoms/Button';
+
+const ThemedActivityIndicator = withUnistyles(ActivityIndicator, (theme) => ({ color: theme.colors.semantic.accent }));
+const ThemedCheck = withUnistyles(Check, (theme) => ({ color: theme.colors.semantic.bgPrimary }));
 
 export default function ReaderScreen() {
   const {
@@ -137,7 +140,7 @@ export default function ReaderScreen() {
         label={t('plans.reading.finishButton')}
         onPress={handleFinishPlanDay}
         disabled={isFinishingPlanDay}
-        icon={<Check size={18} color={styles.planFooterIcon.color} strokeWidth={3} />}
+        icon={<ThemedCheck size={18} strokeWidth={3} />}
       />
     </View>
   ) : null;
@@ -155,7 +158,7 @@ export default function ReaderScreen() {
       {/* Verse List */}
       {isLoading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={styles.accentColor.color} />
+          <ThemedActivityIndicator size="large" />
         </View>
       ) : (
         <FlashList
@@ -264,9 +267,6 @@ const styles = StyleSheet.create((theme) => ({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  accentColor: {
-    color: theme.colors.semantic.accent,
-  },
   listContent: {
     paddingHorizontal: theme.spacing[5],
     paddingVertical: theme.spacing[4],
@@ -291,8 +291,5 @@ const styles = StyleSheet.create((theme) => ({
     paddingTop: theme.spacing[4],
     borderTopWidth: 1,
     borderTopColor: theme.colors.semantic.bgTertiary,
-  },
-  planFooterIcon: {
-    color: theme.colors.semantic.bgPrimary,
   },
 }));

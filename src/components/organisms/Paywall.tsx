@@ -1,10 +1,12 @@
 import { Pressable, ScrollView, View } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { Check, Target, X } from 'lucide-react-native';
 import { Button, Text, TEXT_VARIANTS } from '@/components/atoms';
 import { PlanOption } from '@/components/molecules';
 import type { ProBillingCycle } from '@/types/subscription';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '../atoms/Button';
+
+const ThemedCheck = withUnistyles(Check, (theme) => ({ color: theme.colors.semantic.accent }));
 
 /** A billing offer rendered as a selectable row. */
 export type PaywallOffer = {
@@ -126,7 +128,7 @@ export function Paywall({
             {features.map((feature) => (
               <View key={feature} style={styles.featureRow}>
                 <View style={styles.featureCheck}>
-                  <Check size={14} color={styles.featureCheckIcon.color} strokeWidth={3} />
+                  <ThemedCheck size={14} strokeWidth={3} />
                 </View>
                 <Text variant={TEXT_VARIANTS.Callout} style={styles.featureText}>
                   {feature}
@@ -255,9 +257,6 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: theme.spacing[0.5],
-  },
-  featureCheckIcon: {
-    color: theme.colors.semantic.accent,
   },
   featureText: {
     flex: 1,

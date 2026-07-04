@@ -1,9 +1,11 @@
 import { Pressable, type PressableProps, type ViewStyle } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { FontAwesome } from '@expo/vector-icons';
 import { Text, TEXT_VARIANTS } from '@/components/atoms';
 import { translate } from '@/i18n';
 import type { TxKeyPath } from '@/i18n';
+
+const ThemedFontAwesome = withUnistyles(FontAwesome, (theme) => ({ color: theme.colors.semantic.textPrimary }));
 
 type SocialProvider = 'google' | 'apple';
 
@@ -24,7 +26,7 @@ const ICONS: Record<SocialProvider, React.ComponentProps<typeof FontAwesome>['na
 export function SocialButton({ provider, style, ...rest }: SocialButtonProps) {
   return (
     <Pressable style={({ pressed }) => [styles.container, pressed && styles.pressed, style as ViewStyle]} {...rest}>
-      <FontAwesome name={ICONS[provider]} size={18} color={styles.icon.color} />
+      <ThemedFontAwesome name={ICONS[provider]} size={18} />
       <Text variant={TEXT_VARIANTS.Label}>{translate(LABEL_KEYS[provider])}</Text>
     </Pressable>
   );
@@ -46,8 +48,5 @@ const styles = StyleSheet.create((theme) => ({
   pressed: {
     opacity: 0.8,
     backgroundColor: theme.colors.semantic.bgTertiary,
-  },
-  icon: {
-    color: theme.colors.semantic.textPrimary,
   },
 }));

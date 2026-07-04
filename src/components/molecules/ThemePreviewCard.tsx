@@ -1,9 +1,9 @@
 import { View } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, UnistylesRuntime } from 'react-native-unistyles';
 import { PressableScale } from 'pressto';
 import { Text, TEXT_VARIANTS } from '@/components/atoms';
 import { colors } from '@/theme/colors';
-import type { ThemeName } from '@/stores/theme';
+import { useThemeStore, type ThemeName } from '@/stores/theme';
 
 type ThemePreviewCardProps = {
   name: ThemeName;
@@ -17,15 +17,22 @@ export function ThemePreviewCard({ name, label, selected, onSelect }: ThemePrevi
   const palette = colors[name].semantic;
 
   // Not wrapped with withUnistyles: PressableScale (pressto) is Reanimated-based,
-  // and forcing it to re-render on every theme tick trips Reanimated's strict-mode
-  // "reading value during render" warning even while off-screen.
+  // and forcing it to re-render on every theme tick would trip Reanimated's strict-mode
+  // "reading value during render" warning. Read theme name reactively and derive plain styles instead.
+  const themeName = useThemeStore((s) => s.theme);
+  const theme = UnistylesRuntime.getTheme(themeName);
+  const cardStyle = {
+    flex: 1,
+    padding: theme.spacing[2],
+    borderRadius: theme.radius.xl,
+    borderWidth: 1.5,
+    borderColor: selected ? theme.colors.semantic.accent : theme.colors.semantic.bgTertiary,
+    backgroundColor: selected ? theme.colors.semantic.accentSubtle : theme.colors.semantic.bgPrimary,
+    gap: theme.spacing[2],
+  };
+
   return (
-    <PressableScale
-      style={[styles.card, selected && styles.cardSelected]}
-      onPress={onSelect}
-      accessibilityRole="radio"
-      accessibilityState={{ selected }}
-    >
+    <PressableScale style={cardStyle} onPress={onSelect} accessibilityRole="radio" accessibilityState={{ selected }}>
       <View style={[styles.swatch, { backgroundColor: palette.bgPrimary }]}>
         <View style={[styles.line, styles.lineLong, { backgroundColor: palette.textPrimary }]} />
         <View style={[styles.line, styles.lineShort, { backgroundColor: palette.textTertiary }]} />
@@ -38,19 +45,6 @@ export function ThemePreviewCard({ name, label, selected, onSelect }: ThemePrevi
 }
 
 const styles = StyleSheet.create((theme) => ({
-  card: {
-    flex: 1,
-    padding: theme.spacing[2],
-    borderRadius: theme.radius.xl,
-    borderWidth: 1.5,
-    borderColor: theme.colors.semantic.bgTertiary,
-    backgroundColor: theme.colors.semantic.bgPrimary,
-    gap: theme.spacing[2],
-  },
-  cardSelected: {
-    borderColor: theme.colors.semantic.accent,
-    backgroundColor: theme.colors.semantic.accentSubtle,
-  },
   swatch: {
     height: 64,
     borderRadius: theme.radius.lg,

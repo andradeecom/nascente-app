@@ -1,7 +1,9 @@
 import { Pressable, View, type PressableProps, type ViewStyle } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { ChevronRight } from 'lucide-react-native';
 import { Text, TEXT_VARIANTS } from '@/components/atoms';
+
+const ThemedChevronRight = withUnistyles(ChevronRight, (theme) => ({ color: theme.colors.semantic.textTertiary }));
 
 type SettingsRowProps = Omit<PressableProps, 'children'> & {
   icon?: React.ReactNode;
@@ -31,7 +33,7 @@ export function SettingsRow({
           {value}
         </Text>
       )}
-      {showChevron && <ChevronRight size={18} color={styles.chevron.color} />}
+      {showChevron && <ThemedChevronRight size={18} />}
     </Pressable>
   );
 }
@@ -52,8 +54,5 @@ const styles = StyleSheet.create((theme) => ({
   },
   label: {
     flex: 1,
-  },
-  chevron: {
-    color: theme.colors.semantic.textTertiary,
   },
 }));

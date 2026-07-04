@@ -1,11 +1,13 @@
 import { Linking, ScrollView, View } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { PressableScale } from 'pressto';
 import { ExternalLink } from 'lucide-react-native';
 import { SafeAreaView, Text, TEXT_VARIANTS } from '@/components/atoms';
 import { ScreenHeader } from '@/components/organisms';
 import { TRANSLATION_CREDITS } from '@/types/bible';
 import { useTranslate } from '@/i18n';
+
+const ThemedExternalLink = withUnistyles(ExternalLink, (theme) => ({ color: theme.colors.semantic.accent }));
 
 /**
  * Credits / attribution screen. Lists every bundled translation with its license
@@ -42,7 +44,7 @@ export default function CreditsScreen() {
               <Text variant={TEXT_VARIANTS.Caption} color="accent">
                 {translate('settings.credits.viewLicense')}
               </Text>
-              <ExternalLink size={13} color={styles.linkIcon.color} />
+              <ThemedExternalLink size={13} />
             </PressableScale>
           </View>
         ))}
@@ -80,8 +82,5 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: 'center',
     gap: theme.spacing[1],
     marginTop: theme.spacing[2],
-  },
-  linkIcon: {
-    color: theme.colors.semantic.accent,
   },
 }));

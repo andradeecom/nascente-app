@@ -1,12 +1,14 @@
 import { View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { SafeAreaView } from '@/components/atoms';
 import { Check } from 'lucide-react-native';
 import { SettingsRow } from '@/components/molecules';
 import { SettingsList, ScreenHeader } from '@/components/organisms';
 import { useThemeStore, THEME_OPTIONS, type ThemeName } from '@/stores/theme';
 import { useTranslate } from '@/i18n';
+
+const ThemedCheck = withUnistyles(Check, (theme) => ({ color: theme.colors.semantic.accent }));
 
 export default function ThemeScreen() {
   const router = useRouter();
@@ -29,7 +31,7 @@ export default function ThemeScreen() {
               key={option}
               label={translate(`settings.themeOptions.${option}`)}
               showChevron={false}
-              icon={option === theme ? <Check size={20} color={styles.check.color} /> : undefined}
+              icon={option === theme ? <ThemedCheck size={20} /> : undefined}
               onPress={() => handleSelect(option)}
             />
           ))}
@@ -47,8 +49,5 @@ const styles = StyleSheet.create((theme) => ({
   container: {
     paddingHorizontal: theme.spacing[5],
     paddingVertical: theme.spacing[6],
-  },
-  check: {
-    color: theme.colors.semantic.accent,
   },
 }));

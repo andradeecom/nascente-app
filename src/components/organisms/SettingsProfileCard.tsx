@@ -1,7 +1,10 @@
 import { Pressable, View } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { User, ChevronRight } from 'lucide-react-native';
 import { Text, TEXT_VARIANTS, Avatar } from '@/components/atoms';
+
+const ThemedUser = withUnistyles(User, (theme) => ({ color: theme.colors.semantic.accent }));
+const ThemedChevronRight = withUnistyles(ChevronRight, (theme) => ({ color: theme.colors.semantic.textTertiary }));
 
 type SettingsProfileCardProps = {
   isAuthenticated: boolean;
@@ -28,7 +31,7 @@ export function SettingsProfileCard({
         <Avatar uri={avatar} fallback={name} size="md" />
       ) : (
         <View style={styles.iconContainer}>
-          <User size={24} color={styles.icon.color} />
+          <ThemedUser size={24} />
         </View>
       )}
       <View style={styles.info}>
@@ -37,7 +40,7 @@ export function SettingsProfileCard({
           {isAuthenticated ? email : subtitle}
         </Text>
       </View>
-      <ChevronRight size={18} color={styles.chevron.color} />
+      <ThemedChevronRight size={18} />
     </Pressable>
   );
 }
@@ -63,14 +66,8 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  icon: {
-    color: theme.colors.semantic.accent,
-  },
   info: {
     flex: 1,
     gap: theme.spacing[0.5],
-  },
-  chevron: {
-    color: theme.colors.semantic.textTertiary,
   },
 }));

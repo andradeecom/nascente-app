@@ -1,10 +1,14 @@
 import { Modal, Pressable, SectionList, View } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { Check, Lock, X } from 'lucide-react-native';
 import { Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
 import { useTranslate } from '@/i18n';
 import { useIsPro } from '@/hooks/use-profile';
 import { FREE_TRANSLATIONS, PRO_TRANSLATIONS, type TranslationId, type TranslationMeta } from '@/types/bible';
+
+const ThemedX = withUnistyles(X, (theme) => ({ color: theme.colors.semantic.textSecondary }));
+const ThemedCheck = withUnistyles(Check, (theme) => ({ color: theme.colors.semantic.accent }));
+const ThemedLock = withUnistyles(Lock, (theme) => ({ color: theme.colors.semantic.textTertiary }));
 
 type Section = { tier: 'free' | 'pro'; data: TranslationMeta[] };
 
@@ -35,7 +39,7 @@ export function TranslationPicker({ visible, currentId, onSelect, onUpsell, onCl
             {translate('reader.translation')}
           </Text>
           <Pressable onPress={onClose} hitSlop={8}>
-            <X size={22} color={styles.closeIcon.color} />
+            <ThemedX size={22} />
           </Pressable>
         </View>
 
@@ -64,8 +68,8 @@ export function TranslationPicker({ visible, currentId, onSelect, onUpsell, onCl
                     {item.lang.toUpperCase()}
                   </Text>
                 </View>
-                {item.id === currentId && !locked && <Check size={20} color={styles.checkIcon.color} />}
-                {locked && <Lock size={16} color={styles.lockIcon.color} />}
+                {item.id === currentId && !locked && <ThemedCheck size={20} />}
+                {locked && <ThemedLock size={16} />}
               </Pressable>
             );
           }}
@@ -97,9 +101,6 @@ const styles = StyleSheet.create((theme) => ({
     flex: 1,
     textAlign: 'center',
   },
-  closeIcon: {
-    color: theme.colors.semantic.textSecondary,
-  },
   listContent: {
     paddingVertical: theme.spacing[2],
   },
@@ -122,11 +123,5 @@ const styles = StyleSheet.create((theme) => ({
   rowContent: {
     flex: 1,
     gap: theme.spacing[0.5],
-  },
-  checkIcon: {
-    color: theme.colors.semantic.accent,
-  },
-  lockIcon: {
-    color: theme.colors.semantic.textTertiary,
   },
 }));

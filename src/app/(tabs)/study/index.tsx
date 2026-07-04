@@ -1,12 +1,14 @@
 import { useEffect, useRef } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { FlashList, type FlashListRef } from '@shopify/flash-list';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { Highlighter } from 'lucide-react-native';
 import { SafeAreaView, Text, TEXT_VARIANTS } from '@/components/atoms';
 import { SegmentedControl, type Segment } from '@/components/molecules';
 import { ProLockCard, StudyCard } from '@/components/organisms';
 import useStudyScreen, { type StudyFilter, type StudyItem } from './use-study-screen';
+
+const ThemedActivityIndicator = withUnistyles(ActivityIndicator, (theme) => ({ color: theme.colors.semantic.accent }));
 
 export default function StudyScreen() {
   const {
@@ -57,7 +59,7 @@ export default function StudyScreen() {
 
   const listEmpty = isLoading ? (
     <View style={styles.centered}>
-      <ActivityIndicator size="large" color={styles.accent.color} />
+      <ThemedActivityIndicator size="large" />
     </View>
   ) : isError ? (
     <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
@@ -119,9 +121,6 @@ const styles = StyleSheet.create((theme) => ({
   centered: {
     paddingTop: theme.spacing[10],
     alignItems: 'center',
-  },
-  accent: {
-    color: theme.colors.semantic.accent,
   },
   empty: {
     marginTop: theme.spacing[2],

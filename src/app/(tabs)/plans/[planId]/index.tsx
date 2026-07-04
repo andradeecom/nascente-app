@@ -1,11 +1,13 @@
 import { ActivityIndicator, View, type ViewStyle } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { Button, SafeAreaView, Text, TEXT_VARIANTS } from '@/components/atoms';
 import { PlanDayRow, ScreenHeader, UpsellModal } from '@/components/organisms';
 import type { PlanDayGroup } from '@/types/reading-plans';
 import usePlanDetailScreen from './use-plan-detail-screen';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '@/components/atoms/Button';
+
+const ThemedActivityIndicator = withUnistyles(ActivityIndicator, (theme) => ({ color: theme.colors.semantic.accent }));
 
 export default function PlanDetailScreen() {
   const {
@@ -96,7 +98,7 @@ export default function PlanDetailScreen() {
 
       {isLoading ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color={styles.accent.color} />
+          <ThemedActivityIndicator size="large" />
         </View>
       ) : isError || !plan ? (
         <View style={styles.center}>
@@ -138,9 +140,6 @@ const styles = StyleSheet.create((theme) => ({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  accent: {
-    color: theme.colors.semantic.accent,
   },
   listContent: {
     paddingHorizontal: theme.spacing[5],

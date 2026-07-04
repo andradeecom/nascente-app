@@ -1,8 +1,9 @@
 import { View } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, UnistylesRuntime } from 'react-native-unistyles';
 import { Check, Cloud, Lock } from 'lucide-react-native';
 import { PressableScale } from 'pressto';
 import { Text, TEXT_VARIANTS } from '@/components/atoms';
+import { useThemeStore } from '@/stores/theme';
 
 export enum TRANSLATION_TIER {
   Available = 'available',
@@ -34,16 +35,41 @@ export function TranslationOption({
 }: TranslationOptionProps) {
   const selectable = tier === TRANSLATION_TIER.Available;
 
+  // Not wrapped with withUnistyles: PressableScale (pressto) is Reanimated-based,
+  // and forcing it to re-render on every theme tick would trip Reanimated's strict-mode
+  // "reading value during render" warning. Read theme name reactively and derive plain styles instead.
+  const themeName = useThemeStore((s) => s.theme);
+  const theme = UnistylesRuntime.getTheme(themeName);
+  const containerStyle = {
+    flexDirection: 'row' as const,
+    alignItems: 'flex-start' as const,
+    padding: theme.spacing[4],
+    borderRadius: theme.radius.lg,
+    borderWidth: 1,
+    borderColor: selected ? theme.colors.semantic.accent : theme.colors.semantic.bgTertiary,
+    backgroundColor: selected ? theme.colors.semantic.accentSubtle : theme.colors.semantic.bgPrimary,
+    gap: theme.spacing[3],
+    opacity: selectable ? 1 : 0.5,
+  };
+
   return (
     <PressableScale
-      style={[styles.container, selected && styles.selected, !selectable && styles.disabled]}
+      style={containerStyle}
       onPress={selectable ? onSelect : undefined}
       disabled={!selectable}
       accessibilityRole="radio"
       accessibilityState={{ selected, disabled: !selectable }}
     >
-      <View style={[styles.radio, selected && styles.radioSelected]}>
-        {selected && <Check size={14} color={styles.checkIcon.color} strokeWidth={3} />}
+      <View
+        style={[
+          styles.radio,
+          {
+            borderColor: selected ? theme.colors.semantic.accent : theme.colors.semantic.textTertiary,
+            backgroundColor: selected ? theme.colors.semantic.accent : undefined,
+          },
+        ]}
+      >
+        {selected && <Check size={14} color={theme.colors.semantic.bgPrimary} strokeWidth={3} />}
       </View>
 
       <View style={styles.text}>
@@ -59,15 +85,15 @@ export function TranslationOption({
       <View style={styles.badge}>
         {tier === TRANSLATION_TIER.Available && (
           <View style={styles.offlineBadge}>
-            <Cloud size={14} color={styles.offlineBadge.color} />
+            <Cloud size={14} color={theme.colors.semantic.accent} />
             <Text variant={TEXT_VARIANTS.Caption} color="accent">
               {offlineLabel}
             </Text>
           </View>
         )}
         {tier === TRANSLATION_TIER.Pro && (
-          <View style={styles.proBadge}>
-            <Lock size={12} color={styles.proBadge.color} />
+          <View style={[styles.proBadge, { borderColor: theme.colors.semantic.accent }]}>
+            <Lock size={12} color={theme.colors.semantic.accent} />
             <Text variant={TEXT_VARIANTS.Caption} color="accent">
               {proLabel}
             </Text>
@@ -79,39 +105,14 @@ export function TranslationOption({
 }
 
 const styles = StyleSheet.create((theme) => ({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    padding: theme.spacing[4],
-    borderRadius: theme.radius.lg,
-    borderWidth: 1,
-    borderColor: theme.colors.semantic.bgTertiary,
-    backgroundColor: theme.colors.semantic.bgPrimary,
-    gap: theme.spacing[3],
-  },
-  selected: {
-    borderColor: theme.colors.semantic.accent,
-    backgroundColor: theme.colors.semantic.accentSubtle,
-  },
-  disabled: {
-    opacity: 0.5,
-  },
   radio: {
     width: 24,
     height: 24,
     borderRadius: theme.radius.full,
     borderWidth: 1.5,
-    borderColor: theme.colors.semantic.textTertiary,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: theme.spacing[0.5],
-  },
-  radioSelected: {
-    borderColor: theme.colors.semantic.accent,
-    backgroundColor: theme.colors.semantic.accent,
-  },
-  checkIcon: {
-    color: theme.colors.semantic.bgPrimary,
   },
   text: {
     flex: 1,
@@ -129,7 +130,6 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: 'row',
     alignItems: 'center',
     gap: theme.spacing[1],
-    color: theme.colors.semantic.accent,
   },
   proBadge: {
     flexDirection: 'row',
@@ -139,8 +139,6 @@ const styles = StyleSheet.create((theme) => ({
     paddingVertical: theme.spacing[1],
     borderRadius: theme.radius.full,
     borderWidth: 1,
-    borderColor: theme.colors.semantic.accent,
     borderStyle: 'dashed',
-    color: theme.colors.semantic.accent,
   },
 }));

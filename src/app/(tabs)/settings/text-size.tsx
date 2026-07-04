@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { Check } from 'lucide-react-native';
 import { SafeAreaView, Text, TEXT_VARIANTS } from '@/components/atoms';
 import { SettingsRow } from '@/components/molecules';
@@ -7,6 +7,8 @@ import { SettingsList, ScreenHeader } from '@/components/organisms';
 import { useReaderStore, type ReaderFontSize } from '@/stores/reader';
 import { useTranslate } from '@/i18n';
 import { typography } from '@/theme/typography';
+
+const ThemedCheck = withUnistyles(Check, (theme) => ({ color: theme.colors.semantic.accent }));
 
 const FONT_SIZE_OPTIONS: ReaderFontSize[] = ['small', 'medium', 'large', 'xl'];
 
@@ -45,7 +47,7 @@ export default function TextSizeScreen() {
               label={translate(`settings.textSizeOptions.${option}`)}
               value={`${typography.reader.sizes[option]} pt`}
               showChevron={false}
-              icon={option === fontSize ? <Check size={20} color={styles.check.color} /> : undefined}
+              icon={option === fontSize ? <ThemedCheck size={20} /> : undefined}
               onPress={() => setFontSize(option)}
             />
           ))}
@@ -73,8 +75,5 @@ const styles = StyleSheet.create((theme) => ({
   },
   previewLabel: {
     textAlign: 'right',
-  },
-  check: {
-    color: theme.colors.semantic.accent,
   },
 }));

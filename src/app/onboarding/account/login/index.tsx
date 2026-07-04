@@ -4,11 +4,12 @@ import { StyleSheet } from 'react-native-unistyles';
 import { Button, Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
 import { OnboardingStepHeader } from '@/components/molecules';
 import { LoginCard } from '@/components/organisms';
-import { translate } from '@/i18n';
+import { useTranslate } from '@/i18n';
 import useOnboardingLoginScreen from './use-onboarding-login-screen';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '@/components/atoms/Button';
 
 export default function OnboardingLoginScreen() {
+  const t = useTranslate();
   const { handleLogin, handleGoogleLogin, handleAppleLogin, handleForgotPassword, handleBack, mockLogin, isLoading } =
     useOnboardingLoginScreen();
 
@@ -26,7 +27,7 @@ export default function OnboardingLoginScreen() {
           />
           <Link href="/onboarding/account/register" style={styles.footerLink}>
             <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
-              {translate('login.noAccount')} {translate('login.signUp')}
+              {t('login.noAccount')} {t('login.signUp')}
             </Text>
           </Link>
           {__DEV__ && (

@@ -1,6 +1,6 @@
 import { ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { SafeAreaView } from '@/components/atoms';
 import { Globe, Palette, Type, BookOpen, Bell, HelpCircle, FileText } from 'lucide-react-native';
 import { SettingsProfileCard, SettingsList } from '@/components/organisms';
@@ -10,6 +10,14 @@ import { useIsPro } from '@/hooks/use-profile';
 import { FREE_TRANSLATIONS, PRO_TRANSLATIONS } from '@/types/bible';
 import { useTranslate } from '@/i18n';
 import useSettingsScreen from './use-settings-screen';
+
+const ThemedGlobe = withUnistyles(Globe, (theme) => ({ color: theme.colors.semantic.accent }));
+const ThemedPalette = withUnistyles(Palette, (theme) => ({ color: theme.colors.semantic.accent }));
+const ThemedType = withUnistyles(Type, (theme) => ({ color: theme.colors.semantic.accent }));
+const ThemedBookOpen = withUnistyles(BookOpen, (theme) => ({ color: theme.colors.semantic.accent }));
+const ThemedBell = withUnistyles(Bell, (theme) => ({ color: theme.colors.semantic.accent }));
+const ThemedFileText = withUnistyles(FileText, (theme) => ({ color: theme.colors.semantic.accent }));
+const ThemedHelpCircle = withUnistyles(HelpCircle, (theme) => ({ color: theme.colors.semantic.accent }));
 
 export default function SettingsScreen() {
   const translate = useTranslate();
@@ -49,25 +57,25 @@ export default function SettingsScreen() {
 
         <SettingsList>
           <SettingsRow
-            icon={<Globe size={20} color={styles.icon.color} />}
+            icon={<ThemedGlobe size={20} />}
             label={translate('settings.language')}
             value={currentLanguageLabel}
             onPress={handleLanguagePress}
           />
           <SettingsRow
-            icon={<Palette size={20} color={styles.icon.color} />}
+            icon={<ThemedPalette size={20} />}
             label={translate('settings.theme')}
             value={currentThemeLabel}
             onPress={handleThemePress}
           />
           <SettingsRow
-            icon={<Type size={20} color={styles.icon.color} />}
+            icon={<ThemedType size={20} />}
             label={translate('settings.textSize')}
             value={currentTextSizeLabel}
             onPress={handleTextSizePress}
           />
           <SettingsRow
-            icon={<BookOpen size={20} color={styles.icon.color} />}
+            icon={<ThemedBookOpen size={20} />}
             label={translate('settings.translations')}
             // Pro users: show how many are unlocked. Free users: nudge to unlock the rest.
             value={isPro ? `${unlockedTranslations}` : translate('settings.translationsUnlockPro')}
@@ -75,17 +83,17 @@ export default function SettingsScreen() {
             onPress={isPro ? undefined : () => router.push('/paywall')}
           />
           <SettingsRow
-            icon={<Bell size={20} color={styles.icon.color} />}
+            icon={<ThemedBell size={20} />}
             label={translate('settings.notifications')}
             onPress={handleNotifications}
           />
           <SettingsRow
-            icon={<FileText size={20} color={styles.icon.color} />}
+            icon={<ThemedFileText size={20} />}
             label={translate('settings.credits.row')}
             onPress={handleCreditsPress}
           />
           <SettingsRow
-            icon={<HelpCircle size={20} color={styles.icon.color} />}
+            icon={<ThemedHelpCircle size={20} />}
             label={translate('settings.support')}
             onPress={handleSupportPress}
           />
@@ -105,8 +113,5 @@ const styles = StyleSheet.create((theme) => ({
     gap: theme.spacing[5],
     paddingHorizontal: theme.spacing[5],
     paddingVertical: theme.spacing[6],
-  },
-  icon: {
-    color: theme.colors.semantic.accent,
   },
 }));

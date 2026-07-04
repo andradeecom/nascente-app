@@ -1,7 +1,9 @@
 import { View } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { BookOpen } from 'lucide-react-native';
 import { Text, TEXT_VARIANTS } from '@/components/atoms';
+
+const ThemedBookOpen = withUnistyles(BookOpen, (theme) => ({ color: theme.colors.semantic.accent }));
 
 type WelcomeHeaderProps = {
   greeting: string;
@@ -12,7 +14,7 @@ export function WelcomeHeader({ greeting, subtitle }: WelcomeHeaderProps) {
   return (
     <View style={styles.header}>
       <View style={styles.icon}>
-        <BookOpen size={24} color={styles.iconColor.color} strokeWidth={2} />
+        <ThemedBookOpen size={24} strokeWidth={2} />
       </View>
       <View>
         <Text variant={TEXT_VARIANTS.Title1}>{greeting}</Text>
@@ -37,8 +39,5 @@ const styles = StyleSheet.create((theme) => ({
     backgroundColor: theme.colors.semantic.accentSubtle,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  iconColor: {
-    color: theme.colors.semantic.accent,
   },
 }));

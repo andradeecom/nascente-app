@@ -1,8 +1,10 @@
 import { Pressable, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { ChevronLeft } from 'lucide-react-native';
 import { Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
+
+const ThemedChevronLeft = withUnistyles(ChevronLeft, (theme) => ({ color: theme.colors.semantic.textPrimary }));
 
 type ScreenHeaderProps = {
   title: string;
@@ -20,7 +22,7 @@ export function ScreenHeader({ title, showBack = true, onBack }: ScreenHeaderPro
       <View style={styles.row}>
         {showBack ? (
           <Pressable onPress={handleBack} hitSlop={8} style={({ pressed }) => [styles.back, pressed && styles.pressed]}>
-            <ChevronLeft size={26} color={styles.back.color} />
+            <ThemedChevronLeft size={26} />
           </Pressable>
         ) : (
           <View style={styles.back} />
@@ -50,7 +52,6 @@ const styles = StyleSheet.create((theme) => ({
     height: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    color: theme.colors.semantic.textPrimary,
   },
   pressed: {
     opacity: 0.6,

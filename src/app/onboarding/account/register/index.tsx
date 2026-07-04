@@ -4,10 +4,11 @@ import { StyleSheet } from 'react-native-unistyles';
 import { Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
 import { OnboardingStepHeader } from '@/components/molecules';
 import { RegisterCard } from '@/components/organisms';
-import { translate } from '@/i18n';
+import { useTranslate } from '@/i18n';
 import useOnboardingRegisterScreen from './use-onboarding-register-screen';
 
 export default function OnboardingRegisterScreen() {
+  const t = useTranslate();
   const { handleRegister, handleGoogleRegister, handleAppleRegister, handleBack, isLoading } =
     useOnboardingRegisterScreen();
 
@@ -24,7 +25,7 @@ export default function OnboardingRegisterScreen() {
           />
           <Link href="/onboarding/account/login" style={styles.footerLink}>
             <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
-              {translate('register.alreadyHaveAccount')} {translate('register.signIn')}
+              {t('register.alreadyHaveAccount')} {t('register.signIn')}
             </Text>
           </Link>
         </ScrollView>

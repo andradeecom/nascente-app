@@ -1,6 +1,7 @@
 import { type ViewStyle } from 'react-native';
 import { PressableScale, type CustomPressableProps } from 'pressto';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, UnistylesRuntime } from 'react-native-unistyles';
+import { useThemeStore } from '@/stores/theme';
 import { Text, TEXT_VARIANTS } from './Text';
 
 export enum BUTTON_VARIANTS {
@@ -39,19 +40,49 @@ export function Button({
   disabled,
   ...rest
 }: ButtonProps) {
+  // Not wrapped with withUnistyles: PressableScale (pressto) is Reanimated-based,
+  // and forcing it to re-render on every theme tick would trip Reanimated's strict-mode
+  // "reading value during render" warning. Read theme name reactively and derive plain styles instead.
+  const themeName = useThemeStore((s) => s.theme);
+  const theme = UnistylesRuntime.getTheme(themeName);
+
+  const variantStyle: ViewStyle = {
+    primary: { backgroundColor: theme.colors.semantic.accent },
+    secondary: {
+      backgroundColor: theme.colors.semantic.bgSecondary,
+      borderWidth: 1,
+      borderColor: theme.colors.semantic.accent,
+    },
+    ghost: { backgroundColor: 'transparent' },
+    destructive: { backgroundColor: theme.colors.semantic.danger },
+    pro: {
+      backgroundColor: theme.colors.semantic.accentSubtle,
+      borderWidth: 1,
+      borderStyle: 'dashed',
+      borderColor: theme.colors.semantic.accent,
+    },
+  }[variant];
+
+  const sizeStyle: ViewStyle = {
+    sm: { paddingHorizontal: theme.spacing[3], paddingVertical: theme.spacing[1.5], borderRadius: theme.radius.sm },
+    md: { paddingHorizontal: theme.spacing[4], paddingVertical: theme.spacing[3], borderRadius: theme.radius.md },
+    lg: { paddingHorizontal: theme.spacing[6], paddingVertical: theme.spacing[4], borderRadius: theme.radius.lg },
+  }[size];
+
+  const containerStyle: ViewStyle = {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: theme.radius.md,
+    gap: theme.spacing[2],
+    ...sizeStyle,
+    ...variantStyle,
+    ...(fullWidth && { width: '100%' }),
+    ...(disabled && { opacity: 0.5 }),
+  };
+
   return (
-    <PressableScale
-      style={[
-        styles.base,
-        sizeStyles[size],
-        variantStyles[variant],
-        fullWidth && styles.fullWidth,
-        disabled && styles.disabled,
-        style as ViewStyle,
-      ]}
-      disabled={disabled}
-      {...rest}
-    >
+    <PressableScale style={[containerStyle, style as ViewStyle]} disabled={disabled} {...rest}>
       {iconPosition === 'left' && icon}
       <Text
         variant={size === BUTTON_SIZES.Small ? TEXT_VARIANTS.Overline : TEXT_VARIANTS.Label}
@@ -63,63 +94,6 @@ export function Button({
     </PressableScale>
   );
 }
-
-const styles = StyleSheet.create((theme) => ({
-  base: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: theme.radius.md,
-    gap: theme.spacing[2],
-  },
-  fullWidth: {
-    width: '100%',
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-}));
-
-const sizeStyles = StyleSheet.create((theme) => ({
-  sm: {
-    paddingHorizontal: theme.spacing[3],
-    paddingVertical: theme.spacing[1.5],
-    borderRadius: theme.radius.sm,
-  },
-  md: {
-    paddingHorizontal: theme.spacing[4],
-    paddingVertical: theme.spacing[3],
-    borderRadius: theme.radius.md,
-  },
-  lg: {
-    paddingHorizontal: theme.spacing[6],
-    paddingVertical: theme.spacing[4],
-    borderRadius: theme.radius.lg,
-  },
-}));
-
-const variantStyles = StyleSheet.create((theme) => ({
-  primary: {
-    backgroundColor: theme.colors.semantic.accent,
-  },
-  secondary: {
-    backgroundColor: theme.colors.semantic.bgSecondary,
-    borderWidth: 1,
-    borderColor: theme.colors.semantic.accent,
-  },
-  ghost: {
-    backgroundColor: 'transparent',
-  },
-  destructive: {
-    backgroundColor: theme.colors.semantic.danger,
-  },
-  pro: {
-    backgroundColor: theme.colors.semantic.accentSubtle,
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: theme.colors.semantic.accent,
-  },
-}));
 
 const textVariantStyles = StyleSheet.create((theme) => ({
   primary: {

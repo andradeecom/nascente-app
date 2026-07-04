@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
+import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { CloudCheck, Check } from 'lucide-react-native';
 import { Button, Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
 import { OnboardingStepHeader } from '@/components/molecules';
@@ -7,6 +7,9 @@ import { useTranslate } from '@/i18n';
 import { typography } from '@/theme/typography';
 import useOnboardingAccountScreen from './use-onboarding-account-screen';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '@/components/atoms/Button';
+
+const ThemedCloudCheck = withUnistyles(CloudCheck, (theme) => ({ color: theme.colors.semantic.accent }));
+const ThemedCheck = withUnistyles(Check, (theme) => ({ color: theme.colors.semantic.accent }));
 
 const BENEFITS = ['highlights', 'plans', 'backup'] as const;
 
@@ -21,7 +24,7 @@ export default function OnboardingAccountScreen() {
       <View style={styles.content}>
         <View style={styles.hero}>
           <View style={styles.iconBadge}>
-            <CloudCheck size={40} color={styles.heroIcon.color} strokeWidth={2} />
+            <ThemedCloudCheck size={40} strokeWidth={2} />
           </View>
           <Text variant={TEXT_VARIANTS.Title1} style={styles.title}>
             {t('onboarding.account.title')}
@@ -35,7 +38,7 @@ export default function OnboardingAccountScreen() {
           {BENEFITS.map((key) => (
             <View key={key} style={styles.benefitRow}>
               <View style={styles.benefitIcon}>
-                <Check size={16} color={styles.benefitIconColor.color} strokeWidth={3} />
+                <ThemedCheck size={16} strokeWidth={3} />
               </View>
               <Text variant={TEXT_VARIANTS.Body} style={styles.benefitText}>
                 {t(`onboarding.account.benefits.${key}`)}
@@ -90,9 +93,6 @@ const styles = StyleSheet.create((theme) => ({
     justifyContent: 'center',
     marginBottom: theme.spacing[2],
   },
-  heroIcon: {
-    color: theme.colors.semantic.accent,
-  },
   title: {
     textAlign: 'center',
     fontFamily: typography.reader.families.serif,
@@ -116,9 +116,6 @@ const styles = StyleSheet.create((theme) => ({
     backgroundColor: theme.colors.semantic.accentSubtle,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  benefitIconColor: {
-    color: theme.colors.semantic.accent,
   },
   benefitText: {
     flex: 1,

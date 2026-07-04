@@ -390,6 +390,7 @@ const en = {
     daysValue: '{{count}} days',
     dayLabel: 'Day {{day}}',
     quotaNote: 'Generating a plan counts toward your monthly AI usage — even if you don’t save it.',
+    retentionNote: 'AI plans you remove or leave unused are deleted after 30 days.',
     generateButton: 'Generate plan',
     generating: 'Generating…',
     generatingHint: 'This can take a few seconds.',

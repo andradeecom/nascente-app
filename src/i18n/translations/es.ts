@@ -389,6 +389,7 @@ const es = {
     daysValue: '{{count}} días',
     dayLabel: 'Día {{day}}',
     quotaNote: 'Generar un plan cuenta para tu cuota mensual de IA, incluso si no lo guardas.',
+    retentionNote: 'Los planes de IA que elimines o no uses se borran después de 30 días.',
     generateButton: 'Generar plan',
     generating: 'Generando…',
     generatingHint: 'Esto puede tardar unos segundos.',

@@ -108,6 +108,9 @@ export default function CreatePlanScreen() {
             <Text variant={TEXT_VARIANTS.Label} color="textTertiary">
               {translate('aiPlan.quotaNote')}
             </Text>
+            <Text variant={TEXT_VARIANTS.Label} color="textTertiary">
+              {translate('aiPlan.retentionNote')}
+            </Text>
           </View>
         </ScrollView>
       ) : (
@@ -224,6 +227,7 @@ const styles = StyleSheet.create((theme) => ({
   },
   quotaNote: {
     marginTop: 'auto',
+    gap: theme.spacing[2],
   },
   generatingRow: {
     flexDirection: 'row',

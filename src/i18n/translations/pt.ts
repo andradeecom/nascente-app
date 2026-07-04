@@ -390,6 +390,7 @@ const pt = {
     daysValue: '{{count}} dias',
     dayLabel: 'Dia {{day}}',
     quotaNote: 'Gerar um plano conta na sua cota mensal de IA — mesmo que você não salve.',
+    retentionNote: 'Planos de IA removidos ou sem uso são excluídos após 30 dias.',
     generateButton: 'Gerar plano',
     generating: 'Gerando…',
     generatingHint: 'Isso pode levar alguns segundos.',

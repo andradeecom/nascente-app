@@ -107,7 +107,7 @@ const pt = {
       viewLicense: 'Ver licença',
     },
     support: 'Suporte',
-    supportEmail: 'Envie um e-mail para support@nascente.app',
+    supportEmail: 'Por favor, envie um e-mail para support@nascente.app',
     themeOptions: {
       light: 'Claro',
       dark: 'Escuro',

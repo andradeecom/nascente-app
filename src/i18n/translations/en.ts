@@ -107,7 +107,7 @@ const en = {
       viewLicense: 'View license',
     },
     support: 'Support',
-    supportEmail: 'Send us an email to support@nascente.app',
+    supportEmail: 'Please, send us an email to support@nascente.app',
     themeOptions: {
       light: 'Light',
       dark: 'Dark',

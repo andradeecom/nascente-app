@@ -107,7 +107,7 @@ const es = {
       viewLicense: 'Ver licencia',
     },
     support: 'Soporte',
-    supportEmail: 'Envíanos un correo a support@nascente.app',
+    supportEmail: 'Por favor, envíanos un correo a support@nascente.app',
     themeOptions: {
       light: 'Claro',
       dark: 'Oscuro',

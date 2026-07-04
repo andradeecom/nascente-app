@@ -13,15 +13,16 @@
   },
   "scripts": {
     "start": "expo start",
-    "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx}\"",
     "prepare": "husky",
-    "update:deps": "expo install --check",
-    "clean-install": "sh ./scripts/clean-and-reinstall.sh"
+    "pre-build": "expo prebuild --clean",
+    "clean-project": "sh ./scripts/clean-project.sh",
+    "expo:check:deps": "expo install --check",
+    "expo:update:deps": "expo install --fix"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.1.1",
@@ -38,21 +39,21 @@
     "@supabase/supabase-js": "^2.108.2",
     "@tanstack/react-query": "^5.95.2",
     "axios": "^1.14.0",
-    "expo": "~56.0.12",
+    "expo": "~56.0.14",
     "expo-asset": "^56.0.17",
-    "expo-constants": "~56.0.18",
+    "expo-constants": "~56.0.20",
     "expo-crypto": "~56.0.4",
-    "expo-dev-client": "~56.0.20",
+    "expo-dev-client": "~56.0.22",
     "expo-device": "~56.0.4",
     "expo-file-system": "^56.0.8",
     "expo-font": "~56.0.7",
     "expo-glass-effect": "~56.0.4",
     "expo-image": "~56.0.11",
-    "expo-linking": "~56.0.14",
+    "expo-linking": "~56.0.15",
     "expo-localization": "~56.0.6",
-    "expo-router": "~56.2.11",
+    "expo-router": "~56.2.13",
     "expo-secure-store": "~56.0.4",
-    "expo-splash-screen": "~56.0.10",
+    "expo-splash-screen": "~56.0.12",
     "expo-sqlite": "^56.0.5",
     "expo-status-bar": "~56.0.4",
     "expo-symbols": "~56.0.6",
@@ -94,5 +95,11 @@
     "prettier": "^3.8.1",
     "typescript": "~6.0.3"
   },
-  "packageManager": "pnpm@11.9.0+sha512.bd682d5d03fe525ef7c9fd6780c6884d1e756ac4c9c9fe00c538782824310dcf90e3ddc4f53835f06dfaebd5085e41855e0bcbb3b60de2ac5bbab89e5036f03b"
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "11.9.0",
+      "onFail": "download"
+    }
+  }
 }

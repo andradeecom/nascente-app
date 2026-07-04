@@ -39,7 +39,7 @@ export async function syncAll(userId: string): Promise<SyncResult> {
       await syncReadingProgress(userId).catch(safe),
       // Reading plans, in dependency order: catalog (pull-only) → enrollments →
       // completions (FK-references the enrollment, so it must land server-side first).
-      await syncPlanCatalog().catch(safe),
+      await syncPlanCatalog(userId).catch(safe),
       await syncEnrollments(userId).catch(safe),
       await syncPlanCompletions(userId).catch(safe),
     ];

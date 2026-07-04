@@ -20,14 +20,21 @@ const ENROLLMENTS_CURSOR = 'plan-enrollments';
  * row FK-references its enrollment, which must exist server-side first.
  */
 
-/** One-way pull of the curated catalog (owner_id null) into the device-global store. */
-export async function syncPlanCatalog(): Promise<SyncResult> {
+/**
+ * One-way pull of the plan catalog into the device-global store: the curated
+ * public plans (owner_id null) **and** the signed-in user's own AI-generated
+ * plans (owner_id = uid), so a user's private plans survive a reinstall. RLS
+ * already restricts the own-plans set to the caller. Passing both to
+ * `replaceCatalog` refreshes curated + own together (own-plans not returned are
+ * still preserved by the store, e.g. an offline-generated one not yet pushed —
+ * though today generation is online-only). `userId` null = curated only.
+ */
+export async function syncPlanCatalog(userId?: string): Promise<SyncResult> {
   try {
-    const { data: plans, error: plansError } = await supabase
-      .from('reading_plans')
-      .select('*')
-      .is('owner_id', null)
-      .order('created_at', { ascending: true });
+    let query = supabase.from('reading_plans').select('*').order('created_at', { ascending: true });
+    // Public plans, plus the user's own if signed in.
+    query = userId ? query.or(`owner_id.is.null,owner_id.eq.${userId}`) : query.is('owner_id', null);
+    const { data: plans, error: plansError } = await query;
     if (plansError) throw plansError;
 
     const planIds = (plans ?? []).map((p) => p.id);

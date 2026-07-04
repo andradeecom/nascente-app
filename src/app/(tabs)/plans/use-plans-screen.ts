@@ -99,6 +99,11 @@ export default function usePlansScreen() {
     [router]
   );
 
+  // "Criar com IA" → the AI plan generator (Pro-only; the tab is already Pro-gated).
+  const handleCreateWithAi = useCallback(() => {
+    router.push('/(tabs)/plans/create');
+  }, [router]);
+
   return {
     translate,
     isAuthenticated,
@@ -110,6 +115,7 @@ export default function usePlansScreen() {
     handleSignIn,
     handleUpgrade,
     handleOpenPlan,
+    handleCreateWithAi,
     atActiveLimit,
     activeLimit,
     limitModalVisible,

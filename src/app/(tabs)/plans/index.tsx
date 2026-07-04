@@ -1,13 +1,16 @@
 import { useMemo } from 'react';
 import { View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
-import { StyleSheet } from 'react-native-unistyles';
-import { CalendarCheck } from 'lucide-react-native';
-import { SafeAreaView, Text, TEXT_VARIANTS } from '@/components/atoms';
+import { StyleSheet, withUnistyles } from 'react-native-unistyles';
+import { CalendarCheck, Sparkles } from 'lucide-react-native';
+import { Button, SafeAreaView, Text, TEXT_VARIANTS } from '@/components/atoms';
+import { BUTTON_SIZES, BUTTON_VARIANTS } from '@/components/atoms/Button';
 import { SectionHeader } from '@/components/molecules';
 import { ActivePlanCard, ProLockCard, SuggestedPlanCard, UpsellModal } from '@/components/organisms';
 import type { ActiveReadingPlan, SuggestedReadingPlan } from '@/types/reading-plans';
 import usePlansScreen from './use-plans-screen';
+
+const UniSparkles = withUnistyles(Sparkles, (theme) => ({ color: theme.colors.semantic.accent }));
 
 type ListItem =
   | { type: 'header'; key: string; title: string }
@@ -25,6 +28,7 @@ export default function PlansScreen() {
     handleStart,
     handleUpgrade,
     handleOpenPlan,
+    handleCreateWithAi,
     startingPlanId,
     activeLimit,
     limitModalVisible,
@@ -79,9 +83,18 @@ export default function PlansScreen() {
   }
 
   const listHeader = (
-    <Text variant={TEXT_VARIANTS.Title1} style={styles.heading}>
-      {translate('plans.title')}
-    </Text>
+    <View style={styles.listHeader}>
+      <Text variant={TEXT_VARIANTS.Title1} style={styles.heading}>
+        {translate('plans.title')}
+      </Text>
+      <Button
+        variant={BUTTON_VARIANTS.Pro}
+        size={BUTTON_SIZES.Medium}
+        label={translate('aiPlan.createButton')}
+        icon={<UniSparkles size={18} strokeWidth={2} />}
+        onPress={handleCreateWithAi}
+      />
+    </View>
   );
 
   return (
@@ -152,6 +165,10 @@ const styles = StyleSheet.create((theme) => ({
   },
   heading: {
     marginBottom: theme.spacing[2],
+  },
+  listHeader: {
+    gap: theme.spacing[3],
+    marginBottom: theme.spacing[4],
   },
   listContent: {
     paddingHorizontal: theme.spacing[5],

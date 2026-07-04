@@ -6,6 +6,7 @@ const en = {
     cancel: 'Cancel',
     close: 'Close',
     retry: 'Try again',
+    ok: 'OK',
   },
   login: {
     title: 'Welcome Back',
@@ -369,6 +370,43 @@ const en = {
       subtitle: 'Prayer prompt',
       loading: 'Preparing your prayer…',
       error: 'Could not load the prayer prompt. Please try again.',
+    },
+  },
+  aiPlan: {
+    title: 'Create with AI',
+    createButton: 'Create with AI',
+    inputSubtitle:
+      'Tell us a topic, feeling, or something you want to learn, and AI will build a reading plan for you.',
+    inputPlaceholder: 'e.g. overcoming anxiety, growing in gratitude…',
+    examplesLabel: 'Try one of these',
+    examples: {
+      anxiety: 'Overcoming anxiety',
+      gratitude: 'Gratitude',
+      forgiveness: 'Forgiveness',
+      hope: 'Finding hope',
+      grief: 'Walking through grief',
+    },
+    durationLabel: 'Plan length',
+    daysValue: '{{count}} days',
+    dayLabel: 'Day {{day}}',
+    quotaNote: 'Generating a plan counts toward your monthly AI usage — even if you don’t save it.',
+    generateButton: 'Generate plan',
+    generating: 'Generating…',
+    generatingHint: 'This can take a few seconds.',
+    saveButton: 'Save & start plan',
+    retryButton: 'Try a different topic',
+    saved: 'Plan created!',
+    quota: {
+      title: 'Out of AI credits',
+      message: 'You’ve used all your AI generations for this cycle. Your credits reset in {{count}} days.',
+    },
+    planCap: {
+      title: 'Active plan limit reached',
+      message: 'You already have {{count}} active plans. Finish or remove one to add another.',
+    },
+    errors: {
+      generateFailed: 'Could not generate the plan. Please try again.',
+      saveFailed: 'Could not save the plan. Please try again.',
     },
   },
   errors: {

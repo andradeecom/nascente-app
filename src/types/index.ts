@@ -1,5 +1,6 @@
 export * from './locales';
 export * from './ai';
+export * from './ai-plan';
 export * from './auth';
 export * from './reading-plans';
 export * from './study';

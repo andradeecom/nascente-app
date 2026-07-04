@@ -6,6 +6,7 @@ const pt = {
     cancel: 'Cancelar',
     close: 'Fechar',
     retry: 'Tentar novamente',
+    ok: 'OK',
   },
   login: {
     title: 'Bem-vindo de volta',
@@ -369,6 +370,43 @@ const pt = {
       subtitle: 'Oração',
       loading: 'Preparando sua oração…',
       error: 'Não foi possível carregar a oração. Tente novamente.',
+    },
+  },
+  aiPlan: {
+    title: 'Criar com IA',
+    createButton: 'Criar com IA',
+    inputSubtitle:
+      'Diga um tema, sentimento ou algo que você quer aprender, e a IA cria um plano de leitura para você.',
+    inputPlaceholder: 'ex.: vencer a ansiedade, crescer em gratidão…',
+    examplesLabel: 'Experimente um destes',
+    examples: {
+      anxiety: 'Vencer a ansiedade',
+      gratitude: 'Gratidão',
+      forgiveness: 'Perdão',
+      hope: 'Encontrar esperança',
+      grief: 'Atravessar o luto',
+    },
+    durationLabel: 'Duração do plano',
+    daysValue: '{{count}} dias',
+    dayLabel: 'Dia {{day}}',
+    quotaNote: 'Gerar um plano conta na sua cota mensal de IA — mesmo que você não salve.',
+    generateButton: 'Gerar plano',
+    generating: 'Gerando…',
+    generatingHint: 'Isso pode levar alguns segundos.',
+    saveButton: 'Salvar e começar plano',
+    retryButton: 'Tentar outro tema',
+    saved: 'Plano criado!',
+    quota: {
+      title: 'Sem créditos de IA',
+      message: 'Você usou todas as suas gerações de IA deste ciclo. Seus créditos são renovados em {{count}} dias.',
+    },
+    planCap: {
+      title: 'Limite de planos ativos atingido',
+      message: 'Você já tem {{count}} planos ativos. Conclua ou remova um para adicionar outro.',
+    },
+    errors: {
+      generateFailed: 'Não foi possível gerar o plano. Tente novamente.',
+      saveFailed: 'Não foi possível salvar o plano. Tente novamente.',
     },
   },
   errors: {

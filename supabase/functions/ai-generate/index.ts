@@ -32,8 +32,8 @@ import { createClient } from 'jsr:@supabase/supabase-js@2';
 const GEMINI_MODEL = 'gemini-2.5-flash';
 const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
-const PROMPT_TYPES = ['explain', 'explain_simple', 'chapter_summary', 'devotional'];
-const PROMPT_VERSION = 5;
+const PROMPT_TYPES = ['explain', 'explain_simple', 'chapter_summary', 'devotional', 'prayer_prompt'];
+const PROMPT_VERSION = 6;
 const LOCALES = ['en', 'es', 'pt'];
 const MAX_PASSAGE_TEXT_LENGTH = 20000; // generous cap for a full chapter; blocks abuse/oversized payloads
 const MAX_TRANSLATION_ID_LENGTH = 64;
@@ -65,12 +65,16 @@ function systemPrompt(promptType, locale) {
     case 'devotional':
       return `You are a devotional writer helping readers connect Scripture to daily life. When given a Bible verse, write a personal reflection of 4–5 sentences on its meaning and relevance today, followed by a single journaling question that invites honest self-reflection. Separate them with a line containing only "---". ${suffix}`;
 
+    case 'prayer_prompt':
+      return `You are a prayer guide helping readers turn a Bible passage into prayer. When given a passage, write a short, warm prayer prompt of 3–4 sentences in the second person ("you" addressing God or reflecting on the reader's own words), rooted in the specific themes of the passage — not generic. Do not include a title or introduction, just the prayer text itself. ${suffix}`;
+
     default:
       return `You are a helpful Bible study assistant. ${suffix}`;
   }
 }
 
 function maxOutputTokens(promptType) {
+  if (promptType === 'prayer_prompt') return 350;
   if (promptType === 'devotional') return 700;
   if (promptType === 'chapter_summary') return 1600;
   return 1300; // explain + explain_simple: 3 full paragraphs in Portuguese, thinking disabled

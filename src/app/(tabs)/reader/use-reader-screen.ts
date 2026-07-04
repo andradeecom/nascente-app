@@ -52,6 +52,7 @@ export default function useReaderScreen() {
   const [explainVerse, setExplainVerse] = useState<number | null>(null);
   const [explainMode, setExplainMode] = useState<'explain' | 'explain_simple'>('explain');
   const [summaryVisible, setSummaryVisible] = useState(false);
+  const [prayerVerse, setPrayerVerse] = useState<number | null>(null);
 
   const [bookPickerVisible, setBookPickerVisible] = useState(false);
   const [translationPickerVisible, setTranslationPickerVisible] = useState(false);
@@ -68,6 +69,11 @@ export default function useReaderScreen() {
     if (!verses) return '';
     return verses.map((v) => `${v.verse}. ${v.text}`).join(' ');
   }, [verses]);
+
+  const prayerPassageText = useMemo(() => {
+    if (prayerVerse == null || !verses) return '';
+    return verses.find((v) => v.verse === prayerVerse)?.text ?? '';
+  }, [prayerVerse, verses]);
 
   const explainQuery = useAiGenerate({
     translationId,
@@ -91,6 +97,18 @@ export default function useReaderScreen() {
     passageText: chapterPassageText,
     locale: locale as 'en' | 'es' | 'pt',
     enabled: summaryVisible && isPro,
+  });
+
+  const prayerQuery = useAiGenerate({
+    translationId,
+    bookId,
+    chapter,
+    verseStart: prayerVerse ?? 0,
+    verseEnd: prayerVerse ?? 0,
+    promptType: 'prayer_prompt',
+    passageText: prayerPassageText,
+    locale: locale as 'en' | 'es' | 'pt',
+    enabled: prayerVerse != null && isPro,
   });
 
   // Local-first reading tracking: a chapter counts as read once its verses are on
@@ -199,6 +217,14 @@ export default function useReaderScreen() {
   }, []);
 
   const closeExplainSheet = useCallback(() => setExplainVerse(null), []);
+
+  const handleOpenPray = useCallback(() => {
+    if (selectedVerse == null) return;
+    setPrayerVerse(selectedVerse);
+    setSelectedVerse(null);
+  }, [selectedVerse]);
+
+  const closePrayerSheet = useCallback(() => setPrayerVerse(null), []);
 
   const handleOpenSummary = useCallback(() => {
     if (!isPro) {
@@ -312,5 +338,13 @@ export default function useReaderScreen() {
     handleOpenSummary,
     closeSummarySheet,
     retrySummary: summaryQuery.refetch,
+    // AI — Prayer prompt
+    prayerVerse,
+    prayerContent: prayerQuery.data?.content ?? null,
+    prayerLoading: prayerQuery.isFetching,
+    prayerError: prayerQuery.error as AiGenerateError | null,
+    handleOpenPray,
+    closePrayerSheet,
+    retryPrayer: prayerQuery.refetch,
   };
 }

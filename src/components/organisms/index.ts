@@ -28,3 +28,4 @@ export { Paywall, type PaywallOffer } from './Paywall';
 export { AiExplainSheet } from './AiExplainSheet';
 export { ChapterSummarySheet } from './ChapterSummarySheet';
 export { AiDevotionalSheet } from './AiDevotionalSheet';
+export { AiPrayerSheet } from './AiPrayerSheet';

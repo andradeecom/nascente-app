@@ -364,6 +364,12 @@ const en = {
       loading: 'Preparing your reflection…',
       error: 'Could not load the reflection. Please try again.',
     },
+    prayer: {
+      action: 'Pray this verse',
+      subtitle: 'Prayer prompt',
+      loading: 'Preparing your prayer…',
+      error: 'Could not load the prayer prompt. Please try again.',
+    },
   },
   errors: {
     loginFailed: 'Login failed',

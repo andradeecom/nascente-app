@@ -364,6 +364,12 @@ const pt = {
       loading: 'Preparando sua reflexão…',
       error: 'Não foi possível carregar a reflexão. Tente novamente.',
     },
+    prayer: {
+      action: 'Orar este versículo',
+      subtitle: 'Oração',
+      loading: 'Preparando sua oração…',
+      error: 'Não foi possível carregar a oração. Tente novamente.',
+    },
   },
   errors: {
     loginFailed: 'Falha ao entrar',

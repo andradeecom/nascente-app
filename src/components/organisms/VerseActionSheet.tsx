@@ -3,7 +3,7 @@ import { Pressable, View } from 'react-native';
 import { StyleSheet, UnistylesRuntime, withUnistyles } from 'react-native-unistyles';
 import { useFocusEffect } from 'expo-router';
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView, type BottomSheetBackdropProps } from '@gorhom/bottom-sheet';
-import { Bookmark, BookmarkCheck, Check, NotebookPen, Sparkles, Trash2 } from 'lucide-react-native';
+import { Bookmark, BookmarkCheck, Check, HandHeart, NotebookPen, Sparkles, Trash2 } from 'lucide-react-native';
 import { Button, Text, TEXT_VARIANTS } from '@/components/atoms';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '@/components/atoms/Button';
 import { useTranslate } from '@/i18n';
@@ -15,6 +15,7 @@ const UniBookmark = withUnistyles(Bookmark, (theme) => ({ color: theme.colors.se
 const UniBookmarkCheck = withUnistyles(BookmarkCheck, (theme) => ({ color: theme.colors.semantic.accent }));
 const UniNotebookPen = withUnistyles(NotebookPen, (theme) => ({ color: theme.colors.semantic.textPrimary }));
 const UniSparkles = withUnistyles(Sparkles, (theme) => ({ color: theme.colors.semantic.textPrimary }));
+const UniHandHeart = withUnistyles(HandHeart, (theme) => ({ color: theme.colors.semantic.textPrimary }));
 const UniTrash2 = withUnistyles(Trash2, (theme) => ({ color: theme.colors.semantic.danger }));
 
 type Props = {
@@ -33,6 +34,7 @@ type Props = {
   hasNote: boolean;
   onOpenNote: () => void;
   onExplain: () => void;
+  onPray: () => void;
 };
 
 export function VerseActionSheet({
@@ -47,6 +49,7 @@ export function VerseActionSheet({
   hasNote,
   onOpenNote,
   onExplain,
+  onPray,
 }: Props) {
   const translate = useTranslate();
   const sheetRef = useRef<BottomSheet>(null);
@@ -132,6 +135,12 @@ export function VerseActionSheet({
       label: translate('ai.explain.action'),
       icon: <UniSparkles size={20} strokeWidth={1.5} />,
     },
+    {
+      key: 'prayer',
+      onPress: onPray,
+      label: translate('ai.prayer.action'),
+      icon: <UniHandHeart size={20} strokeWidth={1.5} />,
+    },
   ];
 
   return (
@@ -185,7 +194,7 @@ export function VerseActionSheet({
               onPress={action.onPress}
               label={action.label}
               icon={action.icon}
-              variant={BUTTON_VARIANTS.Ghost}
+              variant={BUTTON_VARIANTS.Pro}
               size={BUTTON_SIZES.Small}
               style={styles.action}
             />
@@ -236,14 +245,15 @@ const styles = StyleSheet.create((theme) => ({
     marginVertical: theme.spacing[2],
   },
   actions: {
+    flex: 1,
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
-    gap: theme.spacing[1],
+    gap: theme.spacing[4],
   },
   action: {
-    flex: 1,
-    paddingHorizontal: theme.spacing[3],
-    borderRadius: theme.radius.lg,
+    width: '46%',
+    height: 48,
   },
   pressed: {
     opacity: 0.6,

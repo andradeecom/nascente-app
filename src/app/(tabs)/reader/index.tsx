@@ -7,6 +7,7 @@ import { Button, Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
 import { ReaderHeader, ChapterNavBar } from '@/components/molecules';
 import {
   AiExplainSheet,
+  AiPrayerSheet,
   ChapterSummarySheet,
   BookChapterPicker,
   NoteEditorModal,
@@ -76,6 +77,13 @@ export default function ReaderScreen() {
     handleOpenSummary,
     closeSummarySheet,
     retrySummary,
+    prayerVerse,
+    prayerContent,
+    prayerLoading,
+    prayerError,
+    handleOpenPray,
+    closePrayerSheet,
+    retryPrayer,
   } = useReaderScreen();
   const t = useTranslate();
 
@@ -197,6 +205,7 @@ export default function ReaderScreen() {
         hasNote={selectedVerseHasNote}
         onOpenNote={handleOpenNote}
         onExplain={handleOpenExplain}
+        onPray={handleOpenPray}
       />
 
       <NoteEditorModal
@@ -230,6 +239,16 @@ export default function ReaderScreen() {
         error={summaryError}
         onClose={closeSummarySheet}
         onRetry={retrySummary}
+      />
+
+      <AiPrayerSheet
+        visible={prayerVerse != null}
+        reference={`${bookName ?? ''} ${chapter}:${prayerVerse ?? ''}`}
+        content={prayerContent}
+        isLoading={prayerLoading}
+        error={prayerError}
+        onClose={closePrayerSheet}
+        onRetry={retryPrayer}
       />
     </SafeAreaView>
   );

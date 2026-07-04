@@ -364,6 +364,12 @@ const es = {
       loading: 'Preparando tu reflexión…',
       error: 'No se pudo cargar la reflexión. Inténtalo de nuevo.',
     },
+    prayer: {
+      action: 'Orar este versículo',
+      subtitle: 'Oración',
+      loading: 'Preparando tu oración…',
+      error: 'No se pudo cargar la oración. Inténtalo de nuevo.',
+    },
   },
   errors: {
     loginFailed: 'Error al iniciar sesión',

@@ -1,6 +1,6 @@
-export const AI_PROMPT_TYPES = ['explain', 'explain_simple', 'chapter_summary', 'devotional'] as const;
+export const AI_PROMPT_TYPES = ['explain', 'explain_simple', 'chapter_summary', 'devotional', 'prayer_prompt'] as const;
 export type AiPromptType = (typeof AI_PROMPT_TYPES)[number];
-export const AI_PROMPT_VERSION = 5;
+export const AI_PROMPT_VERSION = 6;
 
 export type AiGenerateRequest = {
   translationId: string;
@@ -18,7 +18,13 @@ export type AiGenerateResponse = {
   fromCache: boolean;
 };
 
-export type AiGenerateErrorCode = 'NOT_AUTHENTICATED' | 'NOT_PRO' | 'BAD_REQUEST' | 'GEMINI_ERROR' | 'INTERNAL_ERROR';
+export type AiGenerateErrorCode =
+  | 'NOT_AUTHENTICATED'
+  | 'NOT_PRO'
+  | 'BAD_REQUEST'
+  | 'GEMINI_ERROR'
+  | 'COST_CEILING_REACHED'
+  | 'INTERNAL_ERROR';
 
 export class AiGenerateError extends Error {
   readonly code: AiGenerateErrorCode;

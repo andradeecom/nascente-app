@@ -424,7 +424,7 @@ export type Database = {
     };
     Enums: {
       account_tier: 'free' | 'pro';
-      ai_prompt_type: 'explain' | 'explain_simple' | 'chapter_summary' | 'devotional';
+      ai_prompt_type: 'explain' | 'explain_simple' | 'chapter_summary' | 'devotional' | 'prayer_prompt';
       plan_cadence: 'daily';
       user_plan_status: 'active' | 'completed' | 'archived';
     };
@@ -547,7 +547,7 @@ export const Constants = {
   public: {
     Enums: {
       account_tier: ['free', 'pro'],
-      ai_prompt_type: ['explain', 'explain_simple', 'chapter_summary', 'devotional'],
+      ai_prompt_type: ['explain', 'explain_simple', 'chapter_summary', 'devotional', 'prayer_prompt'],
       plan_cadence: ['daily'],
       user_plan_status: ['active', 'completed', 'archived'],
     },

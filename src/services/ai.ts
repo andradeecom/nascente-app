@@ -15,7 +15,13 @@ export async function callAiGenerate(request: AiGenerateRequest): Promise<AiGene
       try {
         const body = await raw.json();
         const code = body?.error;
-        if (code === 'NOT_AUTHENTICATED' || code === 'NOT_PRO' || code === 'BAD_REQUEST' || code === 'GEMINI_ERROR') {
+        if (
+          code === 'NOT_AUTHENTICATED' ||
+          code === 'NOT_PRO' ||
+          code === 'BAD_REQUEST' ||
+          code === 'GEMINI_ERROR' ||
+          code === 'COST_CEILING_REACHED'
+        ) {
           throw new AiGenerateError(code, body.message);
         }
       } catch (inner) {

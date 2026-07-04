@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { StyleSheet, UnistylesRuntime } from 'react-native-unistyles';
-import { House, BookOpen, Calendar, Highlighter, SlidersHorizontal } from 'lucide-react-native';
+import { HomeTabIcon, ReaderTabIcon, PlansTabIcon, StudyTabIcon, SettingsTabIcon } from '@/components/atoms';
 import { useTranslate } from '@/i18n';
 import { useThemeStore } from '@/stores/theme';
 
@@ -32,7 +32,9 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: translate('tabs.home'),
-          tabBarIcon: ({ color, size, focused }) => <House size={size} color={color} strokeWidth={focused ? 2.5 : 2} />,
+          tabBarIcon: ({ color, size, focused }) => (
+            <HomeTabIcon size={size} color={color} focused={focused} bg={colors.semantic.bgPrimary} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -40,7 +42,7 @@ export default function TabsLayout() {
         options={{
           title: translate('tabs.reader'),
           tabBarIcon: ({ color, size, focused }) => (
-            <BookOpen size={size} color={color} strokeWidth={focused ? 2.5 : 2} />
+            <ReaderTabIcon size={size} color={color} focused={focused} bg={colors.semantic.bgPrimary} />
           ),
         }}
       />
@@ -49,7 +51,7 @@ export default function TabsLayout() {
         options={{
           title: translate('tabs.plans'),
           tabBarIcon: ({ color, size, focused }) => (
-            <Calendar size={size} color={color} strokeWidth={focused ? 2.5 : 2} />
+            <PlansTabIcon size={size} color={color} focused={focused} bg={colors.semantic.bgPrimary} />
           ),
         }}
       />
@@ -58,7 +60,7 @@ export default function TabsLayout() {
         options={{
           title: translate('tabs.study'),
           tabBarIcon: ({ color, size, focused }) => (
-            <Highlighter size={size} color={color} strokeWidth={focused ? 2.5 : 2} />
+            <StudyTabIcon size={size} color={color} focused={focused} bg={colors.semantic.bgPrimary} />
           ),
         }}
       />
@@ -67,7 +69,7 @@ export default function TabsLayout() {
         options={{
           title: translate('tabs.settings'),
           tabBarIcon: ({ color, size, focused }) => (
-            <SlidersHorizontal size={size} color={color} strokeWidth={focused ? 2.5 : 2} />
+            <SettingsTabIcon size={size} color={color} focused={focused} bg={colors.semantic.bgPrimary} />
           ),
         }}
       />

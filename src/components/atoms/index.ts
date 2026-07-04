@@ -6,3 +6,4 @@ export { Slider } from './Slider';
 export { Avatar } from './Avatar';
 export { SafeAreaView } from './SafeAreaView';
 export { GoogleIcon, AppleIcon } from './BrandIcons';
+export { HomeTabIcon, ReaderTabIcon, PlansTabIcon, StudyTabIcon, SettingsTabIcon } from './TabIcons';

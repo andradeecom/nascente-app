@@ -66,8 +66,6 @@ export default function usePaywallScreen() {
       translate('paywall.features.notes'),
       translate('paywall.features.plans'),
       translate('paywall.features.translations'),
-      translate('paywall.features.audio'),
-      translate('paywall.features.crossReferences'),
       translate('paywall.features.ai'),
       translate('paywall.features.sync'),
     ],

@@ -19,7 +19,7 @@ export default function CreditsScreen() {
   const translate = useTranslate();
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
       <ScreenHeader title={translate('settings.credits.title')} />
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" style={styles.intro}>

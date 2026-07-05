@@ -22,7 +22,7 @@ export default function ThemeScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
       <ScreenHeader title={translate('settings.themeTitle')} />
       <View style={styles.container}>
         <SettingsList>

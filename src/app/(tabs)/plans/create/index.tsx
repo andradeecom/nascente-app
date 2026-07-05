@@ -1,6 +1,6 @@
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Button, Input, Slider, Text, TEXT_VARIANTS } from '@/components/atoms';
+import { Button, Input, SafeAreaView, Slider, Text, TEXT_VARIANTS } from '@/components/atoms';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '@/components/atoms/Button';
 import { AppModal } from '@/components/molecules';
 import { ScreenHeader } from '@/components/organisms';
@@ -33,9 +33,8 @@ export default function CreatePlanScreen() {
   } = useCreatePlanScreen();
 
   return (
-    <View style={styles.safe}>
+    <SafeAreaView edges={['top']} style={styles.safe}>
       <ScreenHeader title={translate('aiPlan.title')} onBack={step === 'preview' ? handleBackToInput : undefined} />
-
       {step === 'input' ? (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <Text variant={TEXT_VARIANTS.Body} color="textSecondary">
@@ -178,7 +177,7 @@ export default function CreatePlanScreen() {
           />
         </View>
       </AppModal>
-    </View>
+    </SafeAreaView>
   );
 }
 

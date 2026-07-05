@@ -23,7 +23,7 @@ export default function LanguageScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
       <ScreenHeader title={translate('settings.languageTitle')} />
       <View style={styles.container}>
         <SettingsList>

@@ -21,7 +21,7 @@ export default function TextSizeScreen() {
   const currentLineHeight = currentSize * typography.reader.lineHeightMultipliers[fontSize];
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
       <ScreenHeader title={translate('settings.textSizeTitle')} />
       <View style={styles.container}>
         <View style={styles.preview}>

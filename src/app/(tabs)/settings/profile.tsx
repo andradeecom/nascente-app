@@ -15,7 +15,7 @@ export default function ProfileScreen() {
   const fullName = user ? `${user.firstName} ${user.lastName}` : 'Guest';
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
       <ScreenHeader title={translate('settings.profileTitle')} />
       <View style={styles.container}>
         <Avatar uri={user?.profileImageUrl ?? undefined} fallback={fullName} size="xl" />
@@ -40,7 +40,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create((theme) => ({
   safe: {
     flex: 1,
-    backgroundColor: theme.colors.semantic.bgPrimary,
+    backgroundColor: theme.colors.semantic.bgSecondary,
   },
   container: {
     flex: 1,

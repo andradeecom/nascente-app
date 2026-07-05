@@ -47,7 +47,7 @@ const styles = StyleSheet.create((theme) => ({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.colors.semantic.bgSecondary,
+    backgroundColor: theme.colors.semantic.bgPrimary,
     overflow: 'hidden',
   },
   image: {

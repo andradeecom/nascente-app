@@ -322,11 +322,11 @@ const pt = {
     featuresTitle: 'TUDO O QUE VEM NO PRO',
     features: {
       highlights: 'Destaques ilimitados — todas as cores e etiquetas personalizadas',
-      notes: 'Notas ilimitadas com texto rico (markdown)',
+      notes: 'Notas ilimitadas',
       plans: 'Até 50 planos ativos + criador de planos personalizado',
       translations: 'Mais traduções da Bíblia — todas offline e prontas para uso',
       ai: 'Ferramentas de estudo com IA — explicações de passagens, resumos de capítulos, devocionais, planos gerados',
-      sync: 'Sincronização prioritária + exportação de backup (PDF, JSON)',
+      sync: 'Sincronização prioritária entre dispositivos',
     },
     cta: 'Assinar · {{price}}{{period}}',
     finePrint: 'Renovação automática. Cancele quando quiser.',

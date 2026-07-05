@@ -62,12 +62,12 @@ export default function usePaywallScreen() {
 
   const features = useMemo(
     () => [
-      translate('paywall.features.highlights'),
-      translate('paywall.features.notes'),
+      translate('paywall.features.ai'),
       translate('paywall.features.plans'),
       translate('paywall.features.translations'),
-      translate('paywall.features.ai'),
       translate('paywall.features.sync'),
+      translate('paywall.features.highlights'),
+      translate('paywall.features.notes'),
     ],
     [translate]
   );

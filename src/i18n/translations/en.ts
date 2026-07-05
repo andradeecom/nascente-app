@@ -322,11 +322,11 @@ const en = {
     featuresTitle: 'EVERYTHING IN PRO',
     features: {
       highlights: 'Unlimited highlights — all colors and custom labels',
-      notes: 'Unlimited notes with rich text (markdown)',
+      notes: 'Unlimited notes',
       plans: 'Up to 50 active plans + custom plan builder',
       translations: 'More Bible translations — all offline and ready to read',
       ai: 'AI study tools — explain passages, chapter summaries, devotionals, generated plans',
-      sync: 'Priority sync + backup export (PDF, JSON)',
+      sync: 'Priority sync across devices',
     },
     cta: 'Subscribe · {{price}}{{period}}',
     finePrint: 'Auto-renews. Cancel anytime.',

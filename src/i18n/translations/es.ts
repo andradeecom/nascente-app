@@ -322,11 +322,11 @@ const es = {
     featuresTitle: 'TODO LO QUE INCLUYE PRO',
     features: {
       highlights: 'Destacados ilimitados — todos los colores y etiquetas personalizadas',
-      notes: 'Notas ilimitadas con texto enriquecido (markdown)',
+      notes: 'Notas ilimitadas',
       plans: 'Hasta 50 planes activos + creador de planes personalizado',
       translations: 'Más traducciones de la Biblia — todas offline y listas para usar',
       ai: 'Herramientas de estudio con IA — explicaciones de pasajes, resúmenes de capítulos, devocionales, planes generados',
-      sync: 'Sincronización prioritaria + exportación de respaldo (PDF, JSON)',
+      sync: 'Sincronización prioritaria entre dispositivos',
     },
     cta: 'Suscribirse · {{price}}{{period}}',
     finePrint: 'Renovación automática. Cancela cuando quieras.',

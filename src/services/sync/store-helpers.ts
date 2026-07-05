@@ -71,6 +71,28 @@ export function migrateSyncMeta<T extends SyncableRecord>(byKey: Record<string, 
   return changed ? next : byKey;
 }
 
+/**
+ * Soft-delete every live (non-tombstoned) row belonging to `userId` in one pass —
+ * the batch analogue of a single `remove*`. Stamps each with the same
+ * `deletedAt`/`updatedAt`/`dirty` tombstone so the bulk delete syncs across
+ * devices (never a hard wipe). Rows for other users and existing tombstones are
+ * left untouched. Returns the same reference when nothing was live.
+ */
+export function softDeleteAllForUser<T extends SyncableRecord>(
+  byKey: Record<string, T>,
+  userId: string
+): Record<string, T> {
+  const now = new Date().toISOString();
+  let changed = false;
+  const next: Record<string, T> = { ...byKey };
+  for (const [key, row] of Object.entries(byKey)) {
+    if (row.userId !== userId || row.deletedAt) continue; // other user / already gone
+    next[key] = { ...row, deletedAt: now, updatedAt: now, dirty: true };
+    changed = true;
+  }
+  return changed ? next : byKey;
+}
+
 /** Default tombstone retention — mirrors the server `purge_study_tombstones` cron (90 days). */
 export const TOMBSTONE_TTL_DAYS = 90;
 

@@ -162,6 +162,25 @@ const pt = {
       notes: 'Você ainda não escreveu nenhuma nota.',
       bookmarks: 'Você ainda não salvou nenhum marcador.',
     },
+    clearAll: {
+      action: {
+        highlights: 'Apagar todos os destaques',
+        notes: 'Apagar todas as notas',
+        bookmarks: 'Apagar todos os marcadores',
+      },
+      title: {
+        highlights: 'Apagar todos os destaques?',
+        notes: 'Apagar todas as notas?',
+        bookmarks: 'Apagar todos os marcadores?',
+      },
+      message: {
+        highlights: 'Isso remove todos os seus destaques em todos os dispositivos. Não é possível desfazer.',
+        notes: 'Isso remove todas as suas notas em todos os dispositivos. Não é possível desfazer.',
+        bookmarks: 'Isso remove todos os seus marcadores em todos os dispositivos. Não é possível desfazer.',
+      },
+      confirm: 'Apagar tudo',
+      cancel: 'Cancelar',
+    },
     note: {
       title: 'Nota',
       placeholder: 'Escreva sua nota…',

@@ -16,7 +16,7 @@ export const font = {
   },
   lineHeights: {
     display: 40,
-    title1: 34,
+    title1: 38,
     title2: 28,
     title3: 24,
     body: 24,

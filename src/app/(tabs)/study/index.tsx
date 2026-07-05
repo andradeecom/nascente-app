@@ -2,11 +2,14 @@ import { useEffect, useRef } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { FlashList, type FlashListRef } from '@shopify/flash-list';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
-import { Highlighter } from 'lucide-react-native';
-import { SafeAreaView, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
-import { SegmentedControl, type Segment } from '@/components/molecules';
+import { Highlighter, Trash2 } from 'lucide-react-native';
+import { Button, SafeAreaView, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
+import { BUTTON_SIZES, BUTTON_VARIANTS } from '@/components/atoms/Button';
+import { AppModal, SegmentedControl, type Segment } from '@/components/molecules';
 import { ProLockCard, StudyCard } from '@/components/organisms';
 import useStudyScreen, { type StudyFilter, type StudyItem } from './use-study-screen';
+
+const ThemedTrash = withUnistyles(Trash2, (theme) => ({ color: theme.colors.semantic.danger }));
 
 const ThemedActivityIndicator = withUnistyles(ActivityIndicator, (theme) => ({ color: theme.colors.semantic.accent }));
 
@@ -21,6 +24,11 @@ export default function StudyScreen() {
     isError,
     isRefetching,
     refresh,
+    clearFilter,
+    clearConfirmOpen,
+    requestClearAll,
+    cancelClearAll,
+    confirmClearAll,
     handleUpgrade,
     handleOpenItem,
   } = useStudyScreen();
@@ -42,9 +50,7 @@ export default function StudyScreen() {
     return (
       <SafeAreaView edges={['top']} style={styles.safe}>
         <View style={styles.content}>
-          <Text variant={TEXT_VARIANTS.Title1} style={styles.heading}>
-            {translate('study.title')}
-          </Text>
+          <Text variant={TEXT_VARIANTS.Title1}>{translate('study.title')}</Text>
           <ProLockCard
             icon={Highlighter}
             title={translate('study.proLock.title')}
@@ -74,9 +80,7 @@ export default function StudyScreen() {
   return (
     <SafeAreaView edges={['top']} style={styles.safe}>
       <View style={styles.header}>
-        <Text variant={TEXT_VARIANTS.Title1} style={styles.heading}>
-          {translate('study.title')}
-        </Text>
+        <Text variant={TEXT_VARIANTS.Title1}>{translate('study.title')}</Text>
         <SegmentedControl segments={segments} value={filter} onChange={setFilter} />
       </View>
       <FlashList<StudyItem>
@@ -86,11 +90,50 @@ export default function StudyScreen() {
         renderItem={({ item }) => <StudyCard item={item} onPress={() => handleOpenItem(item)} />}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListEmptyComponent={listEmpty}
+        ListFooterComponent={
+          clearFilter ? (
+            <View style={styles.footer}>
+              <Button
+                variant={BUTTON_VARIANTS.Ghost}
+                size={BUTTON_SIZES.Small}
+                label={translate(`study.clearAll.action.${clearFilter}`)}
+                icon={<ThemedTrash size={16} strokeWidth={2} />}
+                onPress={requestClearAll}
+              />
+            </View>
+          ) : null
+        }
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         onRefresh={refresh}
         refreshing={isRefetching}
       />
+
+      <AppModal visible={clearConfirmOpen && clearFilter != null} onClose={cancelClearAll}>
+        {clearFilter ? (
+          <View style={styles.confirm}>
+            <Text variant={TEXT_VARIANTS.Title3} style={styles.confirmText}>
+              {translate(`study.clearAll.title.${clearFilter}`)}
+            </Text>
+            <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary} style={styles.confirmText}>
+              {translate(`study.clearAll.message.${clearFilter}`)}
+            </Text>
+            <Button
+              variant={BUTTON_VARIANTS.Destructive}
+              label={translate('study.clearAll.confirm')}
+              onPress={confirmClearAll}
+              fullWidth
+              style={styles.confirmButton}
+            />
+            <Button
+              variant={BUTTON_VARIANTS.Ghost}
+              label={translate('study.clearAll.cancel')}
+              onPress={cancelClearAll}
+              fullWidth
+            />
+          </View>
+        ) : null}
+      </AppModal>
     </SafeAreaView>
   );
 }
@@ -99,24 +142,24 @@ const styles = StyleSheet.create((theme) => ({
   safe: {
     flex: 1,
     backgroundColor: theme.colors.semantic.bgSecondary,
+    paddingHorizontal: theme.spacing[5],
+    gap: theme.spacing[3],
   },
   header: {
-    paddingHorizontal: theme.spacing[5],
     paddingTop: theme.spacing[3],
-    paddingBottom: theme.spacing[2],
+    gap: theme.spacing[3],
+  },
+  footer: {
+    marginTop: theme.spacing[6],
+    alignItems: 'center',
   },
   content: {
-    paddingHorizontal: theme.spacing[5],
     paddingTop: theme.spacing[3],
     gap: theme.spacing[6],
   },
   listContent: {
-    paddingHorizontal: theme.spacing[5],
     paddingTop: theme.spacing[3],
     paddingBottom: theme.spacing[8],
-  },
-  heading: {
-    marginBottom: theme.spacing[2],
   },
   centered: {
     paddingTop: theme.spacing[10],
@@ -127,5 +170,14 @@ const styles = StyleSheet.create((theme) => ({
   },
   separator: {
     height: theme.spacing[3],
+  },
+  confirm: {
+    gap: theme.spacing[3],
+  },
+  confirmText: {
+    textAlign: 'center',
+  },
+  confirmButton: {
+    marginTop: theme.spacing[2],
   },
 }));

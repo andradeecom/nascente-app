@@ -4,7 +4,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { highlightKey, type Highlight, type HighlightColor } from '@/types/study';
 import type { TranslationId } from '@/types/bible';
 
-import { applyPulledRow, markRowSynced, migrateSyncMeta, pruneTombstones } from '@/services/sync/store-helpers';
+import {
+  applyPulledRow,
+  markRowSynced,
+  migrateSyncMeta,
+  pruneTombstones,
+  softDeleteAllForUser,
+} from '@/services/sync/store-helpers';
 
 type HighlightInput = {
   userId: string;
@@ -20,6 +26,8 @@ type HighlightsState = {
   hasHydrated: boolean;
   setHighlight: (input: HighlightInput) => void;
   removeHighlight: (userId: string, bookId: number, chapter: number, verse: number) => void;
+  /** Soft-delete every highlight for the user (bulk tombstone; the delete syncs). */
+  clearAllHighlights: (userId: string) => void;
   setHasHydrated: (value: boolean) => void;
   // Sync engine seams (src/services/sync). Never set `dirty`.
   applyPulled: (key: string, incoming: Highlight) => void;
@@ -62,6 +70,7 @@ export const useHighlightsStore = create<HighlightsState>()(
           const next: Highlight = { ...existing, deletedAt: now, updatedAt: now, dirty: true };
           return { byKey: { ...state.byKey, [key]: next } };
         }),
+      clearAllHighlights: (userId) => set((state) => ({ byKey: softDeleteAllForUser(state.byKey, userId) })),
       setHasHydrated: (value) => set({ hasHydrated: value }),
       applyPulled: (key, incoming) => set((state) => ({ byKey: applyPulledRow(state.byKey, key, incoming) })),
       applyPulledMany: (rows) =>

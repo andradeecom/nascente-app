@@ -31,6 +31,7 @@ export function useNoteActions(translationId: TranslationId) {
   const userId = useAuthStore((s) => s.user?.id);
   const set = useNotesStore((s) => s.setNote);
   const remove = useNotesStore((s) => s.removeNote);
+  const clearAll = useNotesStore((s) => s.clearAllNotes);
 
   const setNote = useCallback(
     (bookId: number, chapter: number, verse: number, body: string) => {
@@ -48,5 +49,10 @@ export function useNoteActions(translationId: TranslationId) {
     [userId, remove]
   );
 
-  return { setNote, removeNote, canNote: userId != null };
+  const clearAllNotes = useCallback(() => {
+    if (!userId) return;
+    clearAll(userId);
+  }, [userId, clearAll]);
+
+  return { setNote, removeNote, clearAllNotes, canNote: userId != null };
 }

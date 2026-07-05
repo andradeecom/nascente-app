@@ -162,6 +162,25 @@ const es = {
       notes: 'Aún no has escrito ninguna nota.',
       bookmarks: 'Aún no has guardado ningún marcador.',
     },
+    clearAll: {
+      action: {
+        highlights: 'Borrar todos los resaltados',
+        notes: 'Borrar todas las notas',
+        bookmarks: 'Borrar todos los marcadores',
+      },
+      title: {
+        highlights: '¿Borrar todos los resaltados?',
+        notes: '¿Borrar todas las notas?',
+        bookmarks: '¿Borrar todos los marcadores?',
+      },
+      message: {
+        highlights: 'Esto elimina todos tus resaltados en todos los dispositivos. No se puede deshacer.',
+        notes: 'Esto elimina todas tus notas en todos los dispositivos. No se puede deshacer.',
+        bookmarks: 'Esto elimina todos tus marcadores en todos los dispositivos. No se puede deshacer.',
+      },
+      confirm: 'Borrar todo',
+      cancel: 'Cancelar',
+    },
     note: {
       title: 'Nota',
       placeholder: 'Escribe tu nota…',

@@ -162,6 +162,25 @@ const en = {
       notes: "You haven't written any notes yet.",
       bookmarks: "You haven't saved any bookmarks yet.",
     },
+    clearAll: {
+      action: {
+        highlights: 'Clear all highlights',
+        notes: 'Clear all notes',
+        bookmarks: 'Clear all bookmarks',
+      },
+      title: {
+        highlights: 'Clear all highlights?',
+        notes: 'Clear all notes?',
+        bookmarks: 'Clear all bookmarks?',
+      },
+      message: {
+        highlights: 'This removes all your highlights on every device. This cannot be undone.',
+        notes: 'This removes all your notes on every device. This cannot be undone.',
+        bookmarks: 'This removes all your bookmarks on every device. This cannot be undone.',
+      },
+      confirm: 'Delete all',
+      cancel: 'Cancel',
+    },
     note: {
       title: 'Note',
       placeholder: 'Write your note…',

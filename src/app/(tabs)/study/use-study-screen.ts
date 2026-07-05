@@ -1,9 +1,9 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
-import { useCurrentUserHighlights } from '@/hooks/use-highlights';
-import { useCurrentUserBookmarks } from '@/hooks/use-bookmarks';
-import { useCurrentUserNotes } from '@/hooks/use-notes';
+import { useCurrentUserHighlights, useHighlightActions } from '@/hooks/use-highlights';
+import { useCurrentUserBookmarks, useBookmarkActions } from '@/hooks/use-bookmarks';
+import { useCurrentUserNotes, useNoteActions } from '@/hooks/use-notes';
 import { useSyncOnFocus } from '@/hooks/use-sync';
 import { useIsPro } from '@/hooks/use-profile';
 import { useAuthStore } from '@/stores/auth';
@@ -15,6 +15,9 @@ import type { Bookmark, Highlight, HighlightColor, Note } from '@/types/study';
 import type { TranslationId } from '@/types/bible';
 
 export type StudyFilter = 'all' | 'highlights' | 'notes' | 'bookmarks';
+
+/** The clearable study types — every filter except the mixed "all" list. */
+export type ClearableFilter = Exclude<StudyFilter, 'all'>;
 
 export const studyKeys = {
   items: (ids: string[]) => ['study', 'items', ids] as const,
@@ -135,10 +138,19 @@ export default function useStudyScreen() {
   useSyncOnFocus();
 
   const [filter, setFilter] = useState<StudyFilter>('all');
+  // Confirmation dialog for the bulk "clear all (current filter)" action.
+  const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
 
   const highlights = useCurrentUserHighlights();
   const bookmarks = useCurrentUserBookmarks();
   const notes = useCurrentUserNotes();
+
+  // translationId is required by the action-hook signatures but unused by the
+  // clear-all actions (they key off userId only); pass the reader's current one.
+  const translationId = useReaderStore((s) => s.translationId);
+  const { clearAllHighlights } = useHighlightActions(translationId);
+  const { clearAllBookmarks } = useBookmarkActions(translationId);
+  const { clearAllNotes } = useNoteActions(translationId);
 
   const refs = useMemo(
     () => [...highlights.map(highlightToRef), ...bookmarks.map(bookmarkToRef), ...notes.map(noteToRef)],
@@ -175,6 +187,38 @@ export default function useStudyScreen() {
     await itemsQuery.refetch();
   }, [userId, itemsQuery]);
 
+  // Clear-all is a per-type action: only the three specific tabs offer it (the
+  // "All" tab is a mixed list, so a single "clear all" there would be ambiguous).
+  // `clearFilter` is the active clearable type when its list is non-empty, else
+  // null — it drives the footer button's visibility AND narrows the type off
+  // `'all'` so the per-type i18n keys (`clearAll.*.${clearFilter}`) type-check.
+  const clearFilter = useMemo<ClearableFilter | null>(() => {
+    switch (filter) {
+      case 'highlights':
+        return highlights.length > 0 ? 'highlights' : null;
+      case 'notes':
+        return notes.length > 0 ? 'notes' : null;
+      case 'bookmarks':
+        return bookmarks.length > 0 ? 'bookmarks' : null;
+      case 'all':
+        return null;
+    }
+  }, [filter, highlights.length, notes.length, bookmarks.length]);
+
+  const requestClearAll = useCallback(() => setClearConfirmOpen(true), []);
+  const cancelClearAll = useCallback(() => setClearConfirmOpen(false), []);
+
+  // Bulk-delete every entry for the active tab's type (soft-delete tombstones, so
+  // it syncs), then push. The store writes are reactive, so the list re-derives on
+  // its own; we just kick a sync to propagate the tombstones. No-op on "All".
+  const confirmClearAll = useCallback(() => {
+    if (clearFilter === 'highlights') clearAllHighlights();
+    else if (clearFilter === 'notes') clearAllNotes();
+    else if (clearFilter === 'bookmarks') clearAllBookmarks();
+    setClearConfirmOpen(false);
+    if (userId != null) void syncAll(userId);
+  }, [clearFilter, clearAllHighlights, clearAllNotes, clearAllBookmarks, userId]);
+
   const handleSignIn = useCallback(() => {
     router.push('/register');
   }, [router]);
@@ -204,6 +248,11 @@ export default function useStudyScreen() {
     isError: itemsQuery.isError,
     isRefetching: itemsQuery.isRefetching,
     refresh,
+    clearFilter,
+    clearConfirmOpen,
+    requestClearAll,
+    cancelClearAll,
+    confirmClearAll,
     handleSignIn,
     handleUpgrade,
     handleOpenItem,

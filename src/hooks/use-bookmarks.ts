@@ -31,6 +31,7 @@ export function useBookmarkActions(translationId: TranslationId) {
   const userId = useAuthStore((s) => s.user?.id);
   const add = useBookmarksStore((s) => s.addBookmark);
   const remove = useBookmarksStore((s) => s.removeBookmark);
+  const clearAll = useBookmarksStore((s) => s.clearAllBookmarks);
   const byKey = useBookmarksStore((s) => s.byKey);
 
   // A tombstoned row (soft-deleted, pending sync) counts as "not bookmarked".
@@ -56,5 +57,10 @@ export function useBookmarkActions(translationId: TranslationId) {
     [userId, translationId, byKey, add, remove]
   );
 
-  return { toggleBookmark, isBookmarked, canBookmark: userId != null };
+  const clearAllBookmarks = useCallback(() => {
+    if (!userId) return;
+    clearAll(userId);
+  }, [userId, clearAll]);
+
+  return { toggleBookmark, isBookmarked, clearAllBookmarks, canBookmark: userId != null };
 }

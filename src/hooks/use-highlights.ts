@@ -31,6 +31,7 @@ export function useHighlightActions(translationId: TranslationId) {
   const userId = useAuthStore((s) => s.user?.id);
   const setHL = useHighlightsStore((s) => s.setHighlight);
   const removeHL = useHighlightsStore((s) => s.removeHighlight);
+  const clearHL = useHighlightsStore((s) => s.clearAllHighlights);
 
   const setHighlight = useCallback(
     (bookId: number, chapter: number, verse: number, color: HighlightColor) => {
@@ -48,5 +49,10 @@ export function useHighlightActions(translationId: TranslationId) {
     [userId, removeHL]
   );
 
-  return { setHighlight, removeHighlight, canHighlight: userId != null };
+  const clearAllHighlights = useCallback(() => {
+    if (!userId) return;
+    clearHL(userId);
+  }, [userId, clearHL]);
+
+  return { setHighlight, removeHighlight, clearAllHighlights, canHighlight: userId != null };
 }

@@ -3,7 +3,13 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { bookmarkKey, type Bookmark } from '@/types/study';
 import type { TranslationId } from '@/types/bible';
-import { applyPulledRow, markRowSynced, migrateSyncMeta, pruneTombstones } from '@/services/sync/store-helpers';
+import {
+  applyPulledRow,
+  markRowSynced,
+  migrateSyncMeta,
+  pruneTombstones,
+  softDeleteAllForUser,
+} from '@/services/sync/store-helpers';
 
 /**
  * Local-first bookmark storage, persisted on-device and keyed per user+verse so
@@ -26,6 +32,8 @@ type BookmarksState = {
   hasHydrated: boolean;
   addBookmark: (input: BookmarkInput) => void;
   removeBookmark: (userId: string, bookId: number, chapter: number, verse: number) => void;
+  /** Soft-delete every bookmark for the user (bulk tombstone; the delete syncs). */
+  clearAllBookmarks: (userId: string) => void;
   setHasHydrated: (value: boolean) => void;
   // Sync engine seams (src/services/sync). Never set `dirty`.
   applyPulled: (key: string, incoming: Bookmark) => void;
@@ -68,6 +76,7 @@ export const useBookmarksStore = create<BookmarksState>()(
           const next: Bookmark = { ...existing, deletedAt: now, updatedAt: now, dirty: true };
           return { byKey: { ...state.byKey, [key]: next } };
         }),
+      clearAllBookmarks: (userId) => set((state) => ({ byKey: softDeleteAllForUser(state.byKey, userId) })),
       setHasHydrated: (value) => set({ hasHydrated: value }),
       applyPulled: (key, incoming) => set((state) => ({ byKey: applyPulledRow(state.byKey, key, incoming) })),
       applyPulledMany: (rows) =>

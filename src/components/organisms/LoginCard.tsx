@@ -4,7 +4,7 @@ import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { useForm, Controller } from 'react-hook-form';
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema';
 import { Eye, EyeOff } from 'lucide-react-native';
-import { Text, TEXT_VARIANTS, Button, Divider } from '@/components/atoms';
+import { Button, Divider, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { InputField, SocialButton } from '@/components/molecules';
 import { createLoginSchema, type LoginFormData } from '@/schemas/login';
 import { useTranslate } from '@/i18n';
@@ -65,7 +65,7 @@ export function LoginCard({
         <Text variant={TEXT_VARIANTS.Title1} style={styles.title}>
           {t('login.title')}
         </Text>
-        <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
+        <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary}>
           {t('login.subtitle')}
         </Text>
       </View>

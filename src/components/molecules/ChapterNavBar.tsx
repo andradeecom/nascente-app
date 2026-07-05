@@ -1,7 +1,7 @@
 import { Pressable, View } from 'react-native';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react-native';
-import { Button, Text, TEXT_VARIANTS } from '@/components/atoms';
+import { Button, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '@/components/atoms/Button';
 import { useTranslate } from '@/i18n';
 
@@ -24,7 +24,7 @@ export function ChapterNavBar({ bookName, chapter, onPrev, onNext, onSummary }: 
     <View style={styles.navBar}>
       <Pressable onPress={onPrev} style={styles.navButton} hitSlop={8}>
         <ThemedChevronLeft size={22} />
-        <Text variant={TEXT_VARIANTS.Label} color="accent">
+        <Text variant={TEXT_VARIANTS.Label} color={TEXT_COLORS.Accent}>
           {translate('reader.prev')}
         </Text>
       </Pressable>
@@ -39,13 +39,13 @@ export function ChapterNavBar({ bookName, chapter, onPrev, onNext, onSummary }: 
           size={BUTTON_SIZES.Medium}
         />
       ) : (
-        <Text variant={TEXT_VARIANTS.Label} color="textSecondary">
+        <Text variant={TEXT_VARIANTS.Label} color={TEXT_COLORS.TextSecondary}>
           {bookName} {chapter}
         </Text>
       )}
 
       <Pressable onPress={onNext} style={styles.navButton} hitSlop={8}>
-        <Text variant={TEXT_VARIANTS.Label} color="accent">
+        <Text variant={TEXT_VARIANTS.Label} color={TEXT_COLORS.Accent}>
           {translate('reader.next')}
         </Text>
         <ThemedChevronRight size={22} strokeWidth={1.5} />

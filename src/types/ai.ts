@@ -19,12 +19,7 @@ export type AiGenerateResponse = {
 };
 
 export type AiGenerateErrorCode =
-  | 'NOT_AUTHENTICATED'
-  | 'NOT_PRO'
-  | 'BAD_REQUEST'
-  | 'GEMINI_ERROR'
-  | 'COST_CEILING_REACHED'
-  | 'INTERNAL_ERROR';
+  'NOT_AUTHENTICATED' | 'NOT_PRO' | 'BAD_REQUEST' | 'GEMINI_ERROR' | 'COST_CEILING_REACHED' | 'INTERNAL_ERROR';
 
 export class AiGenerateError extends Error {
   readonly code: AiGenerateErrorCode;

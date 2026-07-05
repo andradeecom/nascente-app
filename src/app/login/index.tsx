@@ -1,4 +1,4 @@
-import { Button, Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
+import { Button, SafeAreaView, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { BackButton } from '@/components/molecules';
 import { LoginCard, LoginFooter } from '@/components/organisms';
 import { translate } from '@/i18n';
@@ -25,7 +25,7 @@ export default function LoginScreen() {
             isLoading={isLoading}
           />
           <Link href="/register" style={styles.footerLink}>
-            <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
+            <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary}>
               {translate('login.noAccount')} {translate('login.signUp')}
             </Text>
           </Link>

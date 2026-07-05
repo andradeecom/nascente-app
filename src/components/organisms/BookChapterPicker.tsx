@@ -3,7 +3,7 @@ import { Modal, Pressable, View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { X } from 'lucide-react-native';
-import { Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
+import { SafeAreaView, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { useBooks, useChapters } from '@/hooks/use-bible';
 import { useTranslate } from '@/i18n';
 import type { TranslationId, Book } from '@/types/bible';
@@ -50,7 +50,7 @@ export function BookChapterPicker({ visible, translationId, currentBookId, curre
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <Pressable onPress={selectedBook ? handleBack : handleClose} hitSlop={8}>
-            <Text variant={TEXT_VARIANTS.Callout} color="accent">
+            <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.Accent}>
               {selectedBook ? translate('reader.back') : translate('reader.close')}
             </Text>
           </Pressable>

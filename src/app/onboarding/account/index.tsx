@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { CloudCheck, Check } from 'lucide-react-native';
-import { Button, Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
+import { Button, SafeAreaView, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { OnboardingStepHeader } from '@/components/molecules';
 import { useTranslate } from '@/i18n';
 import { typography } from '@/theme/typography';
@@ -29,7 +29,7 @@ export default function OnboardingAccountScreen() {
           <Text variant={TEXT_VARIANTS.Title1} style={styles.title}>
             {t('onboarding.account.title')}
           </Text>
-          <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" style={styles.subtitle}>
+          <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary} style={styles.subtitle}>
             {t('onboarding.account.subtitle')}
           </Text>
         </View>
@@ -62,7 +62,7 @@ export default function OnboardingAccountScreen() {
           fullWidth
           onPress={handleSkip}
         />
-        <Text variant={TEXT_VARIANTS.Caption} color="textTertiary" style={styles.footerNote}>
+        <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextTertiary} style={styles.footerNote}>
           {t('onboarding.account.footer')}
         </Text>
       </View>

@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { Check } from 'lucide-react-native';
-import { SafeAreaView, Text, TEXT_VARIANTS } from '@/components/atoms';
+import { SafeAreaView, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { SettingsRow } from '@/components/molecules';
 import { SettingsList, ScreenHeader } from '@/components/organisms';
 import { useReaderStore, type ReaderFontSize } from '@/stores/reader';
@@ -35,7 +35,7 @@ export default function TextSizeScreen() {
           >
             {translate('settings.textSizePreview')}
           </Text>
-          <Text variant={TEXT_VARIANTS.Caption} color="textSecondary" style={styles.previewLabel}>
+          <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextSecondary} style={styles.previewLabel}>
             {currentSize} pt
           </Text>
         </View>

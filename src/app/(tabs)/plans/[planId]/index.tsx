@@ -1,7 +1,7 @@
 import { ActivityIndicator, View, type ViewStyle } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
-import { Button, SafeAreaView, Text, TEXT_VARIANTS } from '@/components/atoms';
+import { Button, SafeAreaView, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { PlanDayRow, ScreenHeader, UpsellModal } from '@/components/organisms';
 import type { PlanDayGroup } from '@/types/reading-plans';
 import usePlanDetailScreen from './use-plan-detail-screen';
@@ -36,11 +36,11 @@ export default function PlanDetailScreen() {
     <View style={styles.header}>
       <View style={styles.head}>
         <Text variant={TEXT_VARIANTS.Title2}>{plan.title}</Text>
-        <Text variant={TEXT_VARIANTS.Caption} color="textTertiary">
+        <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextTertiary}>
           {formatMeta(plan)}
         </Text>
         {plan.description ? (
-          <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" style={styles.description}>
+          <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary} style={styles.description}>
             {plan.description}
           </Text>
         ) : null}
@@ -51,7 +51,7 @@ export default function PlanDetailScreen() {
           <View style={styles.track}>
             <View style={[styles.fill, { width: `${progressPercent}%` } as ViewStyle]} />
           </View>
-          <Text variant={TEXT_VARIANTS.Caption} color="textSecondary">
+          <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextSecondary}>
             {progressPercent}%
           </Text>
         </View>
@@ -102,7 +102,7 @@ export default function PlanDetailScreen() {
         </View>
       ) : isError || !plan ? (
         <View style={styles.center}>
-          <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
+          <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary}>
             {translate('plans.loadError')}
           </Text>
         </View>

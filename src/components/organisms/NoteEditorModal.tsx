@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { TextInput, View } from 'react-native';
 import { StyleSheet, UnistylesRuntime } from 'react-native-unistyles';
 import { Trash2 } from 'lucide-react-native';
-import { Button, Text, TEXT_VARIANTS } from '@/components/atoms';
+import { Button, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { AppModal } from '@/components/molecules';
 import { useTranslate } from '@/i18n';
 import { useThemeStore } from '@/stores/theme';
@@ -50,7 +50,7 @@ export function NoteEditorModal({
   return (
     <AppModal visible={visible} onClose={onClose}>
       <View style={styles.content}>
-        <Text variant={TEXT_VARIANTS.Overline} color="textTertiary" style={styles.label}>
+        <Text variant={TEXT_VARIANTS.Overline} color={TEXT_COLORS.TextTertiary} style={styles.label}>
           {translate('study.note.title')}
         </Text>
         <Text variant={TEXT_VARIANTS.Title3} style={styles.reference}>

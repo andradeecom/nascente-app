@@ -1,6 +1,6 @@
 import { ScrollView, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Button, Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
+import { Button, SafeAreaView, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { OnboardingStepHeader, ThemePreviewCard, FontSizeSlider, ReaderPreviewCard } from '@/components/molecules';
 import { useTranslate } from '@/i18n';
 import useOnboardingPreferencesScreen from './use-onboarding-preferences-screen';
@@ -28,17 +28,17 @@ export default function OnboardingPreferencesScreen() {
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <Text variant={TEXT_VARIANTS.Title2}>{t('onboarding.preferences.title')}</Text>
-          <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" style={styles.subtitle}>
+          <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary} style={styles.subtitle}>
             {t('onboarding.preferences.subtitle')}
           </Text>
         </View>
 
         <View style={styles.section}>
           <View style={styles.sectionHeading}>
-            <Text variant={TEXT_VARIANTS.Overline} color="textTertiary">
+            <Text variant={TEXT_VARIANTS.Overline} color={TEXT_COLORS.TextTertiary}>
               {t('onboarding.preferences.themeLabel')}
             </Text>
-            <Text variant={TEXT_VARIANTS.Caption} color="textTertiary">
+            <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextTertiary}>
               {t('onboarding.preferences.themeHint')}
             </Text>
           </View>

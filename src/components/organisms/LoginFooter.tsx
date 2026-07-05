@@ -1,18 +1,18 @@
 import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text, TEXT_VARIANTS } from '@/components/atoms';
+import { TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { translate } from '@/i18n';
 
 export function LoginFooter() {
   return (
     <View style={styles.container}>
-      <Text variant={TEXT_VARIANTS.Caption} color="textSecondary">
+      <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextSecondary}>
         {translate('login.privacyPolicy')}
       </Text>
-      <Text variant={TEXT_VARIANTS.Caption} color="textSecondary">
+      <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextSecondary}>
         {translate('login.termsOfService')}
       </Text>
-      <Text variant={TEXT_VARIANTS.Caption} color="textSecondary">
+      <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextSecondary}>
         {translate('login.support')}
       </Text>
     </View>

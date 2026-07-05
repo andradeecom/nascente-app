@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text, TEXT_VARIANTS } from '@/components/atoms';
+import { TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { PressableCard } from '../molecules';
 
 type ProCtaCardProps = {
@@ -24,7 +24,7 @@ export function ProCtaCard({ title, description, badgeLabel, onPress }: ProCtaCa
         </Text>
       </View>
       <Text variant={TEXT_VARIANTS.BodyEmphasis}>{title}</Text>
-      <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
+      <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary}>
         {description}
       </Text>
     </PressableCard>

@@ -1,7 +1,7 @@
 import { Pressable, View } from 'react-native';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { User, ChevronRight } from 'lucide-react-native';
-import { Text, TEXT_VARIANTS, Avatar } from '@/components/atoms';
+import { Avatar, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 
 const ThemedUser = withUnistyles(User, (theme) => ({ color: theme.colors.semantic.accent }));
 const ThemedChevronRight = withUnistyles(ChevronRight, (theme) => ({ color: theme.colors.semantic.textTertiary }));
@@ -36,7 +36,7 @@ export function SettingsProfileCard({
       )}
       <View style={styles.info}>
         <Text variant={TEXT_VARIANTS.BodyEmphasis}>{isAuthenticated ? name : title}</Text>
-        <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
+        <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary}>
           {isAuthenticated ? email : subtitle}
         </Text>
       </View>

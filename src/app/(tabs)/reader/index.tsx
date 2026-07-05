@@ -3,7 +3,7 @@ import { ActivityIndicator, Pressable, View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { Check } from 'lucide-react-native';
-import { Button, Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
+import { Button, SafeAreaView, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { ReaderHeader, ChapterNavBar } from '@/components/molecules';
 import {
   AiExplainSheet,
@@ -99,7 +99,7 @@ export default function ReaderScreen() {
       const color = chapterHighlights[item.verse];
       const content = (
         <>
-          <Text variant={TEXT_VARIANTS.Caption} color="textTertiary" style={styles.verseNumber}>
+          <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextTertiary} style={styles.verseNumber}>
             {item.verse}
           </Text>
           <Text

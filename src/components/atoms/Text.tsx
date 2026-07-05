@@ -13,14 +13,23 @@ export enum TEXT_VARIANTS {
   Label = 'label',
   Overline = 'overline',
 }
-export type TextVariant = (typeof TEXT_VARIANTS)[keyof typeof TEXT_VARIANTS];
+export type TextVariants = (typeof TEXT_VARIANTS)[keyof typeof TEXT_VARIANTS];
+
+export enum TEXT_COLORS {
+  TextPrimary = 'textPrimary',
+  TextSecondary = 'textSecondary',
+  TextTertiary = 'textTertiary',
+  Accent = 'accent',
+  Danger = 'danger',
+}
+export type TextColors = (typeof TEXT_COLORS)[keyof typeof TEXT_COLORS];
 
 type TextProps = RNTextProps & {
-  variant?: TextVariant;
-  color?: 'textPrimary' | 'textSecondary' | 'textTertiary' | 'accent' | 'danger';
+  variant?: TextVariants;
+  color?: TextColors;
 };
 
-export function Text({ style, variant = TEXT_VARIANTS.Body, color = 'textPrimary', ...rest }: TextProps) {
+export function Text({ style, variant = TEXT_VARIANTS.Body, color = TEXT_COLORS.TextPrimary, ...rest }: TextProps) {
   return <RNText style={[styles.base, variantStyles[variant], colorStyles[color], style]} {...rest} />;
 }
 

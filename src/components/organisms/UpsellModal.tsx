@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { StyleSheet, UnistylesRuntime } from 'react-native-unistyles';
 import { Sparkles, type LucideIcon } from 'lucide-react-native';
-import { Button, Text, TEXT_VARIANTS } from '@/components/atoms';
+import { Button, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { AppModal } from '@/components/molecules';
 import { useThemeStore } from '@/stores/theme';
 import { BUTTON_VARIANTS } from '../atoms/Button';
@@ -46,7 +46,7 @@ export function UpsellModal({
         <Text variant={TEXT_VARIANTS.Title3} style={styles.title}>
           {title}
         </Text>
-        <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" style={styles.description}>
+        <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary} style={styles.description}>
           {description}
         </Text>
         <Button variant={BUTTON_VARIANTS.Pro} label={ctaLabel} onPress={onCta} fullWidth style={styles.cta} />

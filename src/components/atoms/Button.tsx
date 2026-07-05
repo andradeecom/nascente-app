@@ -58,7 +58,7 @@ export function Button({
     pro: {
       backgroundColor: theme.colors.semantic.accentSubtle,
       borderWidth: 1,
-      borderStyle: 'dashed',
+      borderStyle: 'dashed' as const,
       borderColor: theme.colors.semantic.accent,
     },
   }[variant];

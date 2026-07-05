@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { CalendarCheck, Sparkles } from 'lucide-react-native';
-import { Button, SafeAreaView, Text, TEXT_VARIANTS } from '@/components/atoms';
+import { Button, SafeAreaView, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '@/components/atoms/Button';
 import { SectionHeader } from '@/components/molecules';
 import { ActivePlanCard, ProLockCard, SuggestedPlanCard, UpsellModal } from '@/components/organisms';
@@ -108,7 +108,7 @@ export default function PlansScreen() {
               return <SectionHeader title={item.title} />;
             case 'empty':
               return (
-                <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
+                <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary}>
                   {item.message}
                 </Text>
               );

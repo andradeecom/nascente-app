@@ -1,7 +1,7 @@
 import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Link } from 'expo-router';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
+import { SafeAreaView, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { OnboardingStepHeader } from '@/components/molecules';
 import { RegisterCard } from '@/components/organisms';
 import { useTranslate } from '@/i18n';
@@ -24,7 +24,7 @@ export default function OnboardingRegisterScreen() {
             isLoading={isLoading}
           />
           <Link href="/onboarding/account/login" style={styles.footerLink}>
-            <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
+            <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary}>
               {t('register.alreadyHaveAccount')} {t('register.signIn')}
             </Text>
           </Link>

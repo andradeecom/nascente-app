@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text, TEXT_VARIANTS, Avatar, Button, SafeAreaView } from '@/components/atoms';
+import { Avatar, Button, SafeAreaView, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { ScreenHeader } from '@/components/organisms';
 import { useAuthStore } from '@/stores/auth';
 import { useLogout } from '@/hooks/use-auth';
@@ -20,7 +20,7 @@ export default function ProfileScreen() {
       <View style={styles.container}>
         <Avatar uri={user?.profileImageUrl ?? undefined} fallback={fullName} size="xl" />
         <Text variant={TEXT_VARIANTS.Title3}>{fullName}</Text>
-        <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
+        <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary}>
           {user?.email ?? ''}
         </Text>
         {user && (

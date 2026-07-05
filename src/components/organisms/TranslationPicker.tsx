@@ -1,7 +1,7 @@
 import { Modal, Pressable, SectionList, View } from 'react-native';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { Check, Lock, X } from 'lucide-react-native';
-import { Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
+import { SafeAreaView, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { useTranslate } from '@/i18n';
 import { useIsPro } from '@/hooks/use-profile';
 import { FREE_TRANSLATIONS, PRO_TRANSLATIONS, type TranslationId, type TranslationMeta } from '@/types/bible';
@@ -49,7 +49,7 @@ export function TranslationPicker({ visible, currentId, onSelect, onUpsell, onCl
           stickySectionHeadersEnabled={false}
           renderSectionHeader={({ section }) => (
             <View style={styles.sectionHeader}>
-              <Text variant={TEXT_VARIANTS.Overline} color="textTertiary">
+              <Text variant={TEXT_VARIANTS.Overline} color={TEXT_COLORS.TextTertiary}>
                 {translate(section.tier === 'free' ? 'reader.translationPicker.free' : 'reader.translationPicker.pro')}
               </Text>
             </View>
@@ -64,7 +64,7 @@ export function TranslationPicker({ visible, currentId, onSelect, onUpsell, onCl
               >
                 <View style={styles.rowContent}>
                   <Text variant={TEXT_VARIANTS.Body}>{item.label}</Text>
-                  <Text variant={TEXT_VARIANTS.Caption} color="textSecondary">
+                  <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextSecondary}>
                     {item.lang.toUpperCase()}
                   </Text>
                 </View>

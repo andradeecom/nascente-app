@@ -2,7 +2,7 @@ import { Linking, ScrollView, View } from 'react-native';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { PressableScale } from 'pressto';
 import { ExternalLink } from 'lucide-react-native';
-import { SafeAreaView, Text, TEXT_VARIANTS } from '@/components/atoms';
+import { SafeAreaView, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { ScreenHeader } from '@/components/organisms';
 import { TRANSLATION_CREDITS } from '@/types/bible';
 import { useTranslate } from '@/i18n';
@@ -22,18 +22,18 @@ export default function CreditsScreen() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScreenHeader title={translate('settings.credits.title')} />
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" style={styles.intro}>
+        <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary} style={styles.intro}>
           {translate('settings.credits.intro')}
         </Text>
 
         {TRANSLATION_CREDITS.map((credit) => (
           <View key={credit.id} style={styles.card}>
             <Text variant={TEXT_VARIANTS.BodyEmphasis}>{credit.title}</Text>
-            <Text variant={TEXT_VARIANTS.Caption} color="textSecondary" style={styles.license}>
+            <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextSecondary} style={styles.license}>
               {credit.license}
             </Text>
             {credit.copyright && (
-              <Text variant={TEXT_VARIANTS.Caption} color="textTertiary">
+              <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextTertiary}>
                 {credit.copyright}
               </Text>
             )}
@@ -41,7 +41,7 @@ export default function CreditsScreen() {
               style={styles.linkRow}
               onPress={() => Linking.openURL(credit.licenseUrl ?? credit.sourceUrl)}
             >
-              <Text variant={TEXT_VARIANTS.Caption} color="accent">
+              <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.Accent}>
                 {translate('settings.credits.viewLicense')}
               </Text>
               <ThemedExternalLink size={13} />

@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text, TEXT_VARIANTS } from './Text';
+import { Text, TEXT_COLORS, TEXT_VARIANTS } from './Text';
 
 type DividerProps = {
   label?: string;
@@ -11,7 +11,7 @@ export function Divider({ label }: DividerProps) {
     <View style={styles.container}>
       <View style={styles.line} />
       {label && (
-        <Text variant={TEXT_VARIANTS.Overline} color="textSecondary" style={styles.label}>
+        <Text variant={TEXT_VARIANTS.Overline} color={TEXT_COLORS.TextSecondary} style={styles.label}>
           {label}
         </Text>
       )}

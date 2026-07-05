@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { EaseView } from 'react-native-ease';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
+import { SafeAreaView, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { ShineButton } from '@/components/molecules';
 import { AnimatedSun } from '@/components/organisms';
 import { useTranslate } from '@/i18n';
@@ -20,7 +20,7 @@ export default function OnboardingWelcomeScreen() {
         <AnimatedSun />
 
         <View style={styles.copy}>
-          <Text variant={TEXT_VARIANTS.Overline} color="accent" style={styles.overline}>
+          <Text variant={TEXT_VARIANTS.Overline} color={TEXT_COLORS.Accent} style={styles.overline}>
             {t('onboarding.welcome.overline')}
           </Text>
           <Text variant={TEXT_VARIANTS.Display} style={styles.title}>

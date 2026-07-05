@@ -7,7 +7,7 @@ import BottomSheet, {
   BottomSheetScrollView,
   type BottomSheetBackdropProps,
 } from '@gorhom/bottom-sheet';
-import { Text, TEXT_VARIANTS } from '@/components/atoms';
+import { TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { SegmentedControl, type Segment } from '@/components/molecules';
 import { useTranslate } from '@/i18n';
 import { useThemeStore } from '@/stores/theme';
@@ -115,17 +115,17 @@ export function AiExplainSheet({
         {isLoading ? (
           <View style={styles.centered}>
             <UniActivityIndicator size="large" />
-            <Text variant={TEXT_VARIANTS.Body} color="textSecondary" style={styles.loadingText}>
+            <Text variant={TEXT_VARIANTS.Body} color={TEXT_COLORS.TextSecondary} style={styles.loadingText}>
               {translate('ai.explain.loading')}
             </Text>
           </View>
         ) : error ? (
           <View style={styles.centered}>
-            <Text variant={TEXT_VARIANTS.Body} color="danger" style={styles.errorText}>
+            <Text variant={TEXT_VARIANTS.Body} color={TEXT_COLORS.Danger} style={styles.errorText}>
               {translate('ai.explain.error')}
             </Text>
             <Pressable onPress={onRetry} style={({ pressed }) => [styles.retryButton, pressed && styles.pressed]}>
-              <Text variant={TEXT_VARIANTS.Label} color="accent">
+              <Text variant={TEXT_VARIANTS.Label} color={TEXT_COLORS.Accent}>
                 {translate('common.retry')}
               </Text>
             </Pressable>

@@ -1,6 +1,6 @@
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Button, Input, SafeAreaView, Slider, Text, TEXT_VARIANTS } from '@/components/atoms';
+import { Button, Input, SafeAreaView, Slider, Text, TEXT_VARIANTS, TEXT_COLORS } from '@/components/atoms';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '@/components/atoms/Button';
 import { AppModal } from '@/components/molecules';
 import { ScreenHeader } from '@/components/organisms';
@@ -35,9 +35,10 @@ export default function CreatePlanScreen() {
   return (
     <SafeAreaView edges={['top']} style={styles.safe}>
       <ScreenHeader title={translate('aiPlan.title')} onBack={step === 'preview' ? handleBackToInput : undefined} />
+
       {step === 'input' ? (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          <Text variant={TEXT_VARIANTS.Body} color="textSecondary">
+          <Text variant={TEXT_VARIANTS.Body} color={TEXT_COLORS.TextSecondary}>
             {translate('aiPlan.inputSubtitle')}
           </Text>
 
@@ -51,7 +52,7 @@ export default function CreatePlanScreen() {
           />
 
           <View style={styles.examples}>
-            <Text variant={TEXT_VARIANTS.Overline} color="textTertiary" style={styles.exampleLabel}>
+            <Text variant={TEXT_VARIANTS.Overline} color={TEXT_COLORS.TextTertiary} style={styles.exampleLabel}>
               {translate('aiPlan.examplesLabel')}
             </Text>
             <View style={styles.exampleChips}>
@@ -64,7 +65,7 @@ export default function CreatePlanScreen() {
                     style={({ pressed }) => [styles.chip, pressed && styles.chipPressed]}
                     disabled={generating}
                   >
-                    <Text variant={TEXT_VARIANTS.Label} color="accent">
+                    <Text variant={TEXT_VARIANTS.Label} color={TEXT_COLORS.Accent}>
                       {label}
                     </Text>
                   </Pressable>
@@ -76,7 +77,7 @@ export default function CreatePlanScreen() {
           <View style={styles.daysSection}>
             <View style={styles.daysHeader}>
               <Text variant={TEXT_VARIANTS.Label}>{translate('aiPlan.durationLabel')}</Text>
-              <Text variant={TEXT_VARIANTS.Label} color="accent">
+              <Text variant={TEXT_VARIANTS.Label} color={TEXT_COLORS.Accent}>
                 {translate('aiPlan.daysValue', { count: days })}
               </Text>
             </View>
@@ -97,17 +98,17 @@ export default function CreatePlanScreen() {
           {generating ? (
             <View style={styles.generatingRow}>
               <ActivityIndicator color={styles.accent.color} />
-              <Text variant={TEXT_VARIANTS.Caption} color="textSecondary">
+              <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextSecondary}>
                 {translate('aiPlan.generatingHint')}
               </Text>
             </View>
           ) : null}
 
           <View style={styles.quotaNote}>
-            <Text variant={TEXT_VARIANTS.Label} color="textTertiary">
+            <Text variant={TEXT_VARIANTS.Label} color={TEXT_COLORS.TextTertiary}>
               {translate('aiPlan.quotaNote')}
             </Text>
-            <Text variant={TEXT_VARIANTS.Label} color="textTertiary">
+            <Text variant={TEXT_VARIANTS.Label} color={TEXT_COLORS.TextTertiary}>
               {translate('aiPlan.retentionNote')}
             </Text>
           </View>
@@ -118,19 +119,19 @@ export default function CreatePlanScreen() {
             <>
               <Text variant={TEXT_VARIANTS.Title2}>{preview.title}</Text>
               {preview.description ? (
-                <Text variant={TEXT_VARIANTS.Body} color="textSecondary">
+                <Text variant={TEXT_VARIANTS.Body} color={TEXT_COLORS.TextSecondary}>
                   {preview.description}
                 </Text>
               ) : null}
 
-              <Text variant={TEXT_VARIANTS.Overline} color="textTertiary" style={styles.exampleLabel}>
+              <Text variant={TEXT_VARIANTS.Overline} color={TEXT_COLORS.TextTertiary} style={styles.exampleLabel}>
                 {translate('aiPlan.daysValue', { count: preview.totalDays })}
               </Text>
 
               <View style={styles.dayList}>
                 {previewDays.map((d) => (
                   <View key={d.day} style={styles.dayRow}>
-                    <Text variant={TEXT_VARIANTS.Label} color="accent" style={styles.dayNumber}>
+                    <Text variant={TEXT_VARIANTS.Label} color={TEXT_COLORS.Accent} style={styles.dayNumber}>
                       {translate('aiPlan.dayLabel', { day: d.day })}
                     </Text>
                     <Text variant={TEXT_VARIANTS.Body}>{d.label}</Text>
@@ -165,7 +166,7 @@ export default function CreatePlanScreen() {
           <Text variant={TEXT_VARIANTS.Title3} style={styles.noticeText}>
             {notice?.title}
           </Text>
-          <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" style={styles.noticeText}>
+          <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary} style={styles.noticeText}>
             {notice?.message}
           </Text>
           <Button

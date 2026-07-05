@@ -1,4 +1,4 @@
-import { Button, Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
+import { Button, SafeAreaView, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { LanguageOption, OnboardingStepHeader } from '@/components/molecules';
 import { useTranslate } from '@/i18n';
 import { View } from 'react-native';
@@ -16,10 +16,10 @@ export default function OnboardingLanguageScreen() {
       <View style={styles.container}>
         <View style={styles.header}>
           <Text variant={TEXT_VARIANTS.Title2}>{t('onboarding.language.title')}</Text>
-          <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" style={styles.subtitle}>
+          <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary} style={styles.subtitle}>
             {t('onboarding.language.subtitle')}
           </Text>
-          <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" style={styles.description}>
+          <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary} style={styles.description}>
             {t('onboarding.language.description')}
           </Text>
         </View>

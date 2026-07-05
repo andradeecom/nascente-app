@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
-import { Text, TEXT_VARIANTS } from '@/components/atoms';
+import { TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { typography } from '@/theme/typography';
 
 const ThemedView = withUnistyles(View);
@@ -15,7 +15,7 @@ type ReaderPreviewCardProps = {
 export function ReaderPreviewCard({ reference, previewText, fontSize, lineHeight }: ReaderPreviewCardProps) {
   return (
     <ThemedView style={styles.container}>
-      <Text variant={TEXT_VARIANTS.Overline} color="textTertiary">
+      <Text variant={TEXT_VARIANTS.Overline} color={TEXT_COLORS.TextTertiary}>
         {reference}
       </Text>
       <Text style={[styles.text, { fontFamily: typography.reader.families.serif, fontSize, lineHeight }]}>

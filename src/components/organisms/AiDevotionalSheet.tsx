@@ -7,7 +7,7 @@ import BottomSheet, {
   BottomSheetScrollView,
   type BottomSheetBackdropProps,
 } from '@gorhom/bottom-sheet';
-import { Text, TEXT_VARIANTS } from '@/components/atoms';
+import { TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { useTranslate } from '@/i18n';
 import { useThemeStore } from '@/stores/theme';
 import type { AiGenerateError } from '@/types/ai';
@@ -111,7 +111,7 @@ export function AiDevotionalSheet({
         <Text variant={TEXT_VARIANTS.Title3} style={styles.reference}>
           {reference}
         </Text>
-        <Text variant={TEXT_VARIANTS.Overline} color="textTertiary" style={styles.subtitle}>
+        <Text variant={TEXT_VARIANTS.Overline} color={TEXT_COLORS.TextTertiary} style={styles.subtitle}>
           {translate('ai.devotional.subtitle')}
         </Text>
       </View>
@@ -120,17 +120,17 @@ export function AiDevotionalSheet({
         {isLoading ? (
           <View style={styles.centered}>
             <UniActivityIndicator size="large" />
-            <Text variant={TEXT_VARIANTS.Body} color="textSecondary" style={styles.centeredText}>
+            <Text variant={TEXT_VARIANTS.Body} color={TEXT_COLORS.TextSecondary} style={styles.centeredText}>
               {translate('ai.devotional.loading')}
             </Text>
           </View>
         ) : error ? (
           <View style={styles.centered}>
-            <Text variant={TEXT_VARIANTS.Body} color="danger" style={styles.centeredText}>
+            <Text variant={TEXT_VARIANTS.Body} color={TEXT_COLORS.Danger} style={styles.centeredText}>
               {translate('ai.devotional.error')}
             </Text>
             <Pressable onPress={onRetry} style={({ pressed }) => [styles.retryButton, pressed && styles.pressed]}>
-              <Text variant={TEXT_VARIANTS.Label} color="accent">
+              <Text variant={TEXT_VARIANTS.Label} color={TEXT_COLORS.Accent}>
                 {translate('common.retry')}
               </Text>
             </Pressable>
@@ -138,7 +138,7 @@ export function AiDevotionalSheet({
         ) : parsed ? (
           <View style={styles.sections}>
             <View style={styles.section}>
-              <Text variant={TEXT_VARIANTS.Overline} color="textTertiary" style={styles.sectionLabel}>
+              <Text variant={TEXT_VARIANTS.Overline} color={TEXT_COLORS.TextTertiary} style={styles.sectionLabel}>
                 {translate('ai.devotional.reflectionLabel')}
               </Text>
               <Text variant={TEXT_VARIANTS.Body} style={styles.contentText}>
@@ -148,7 +148,7 @@ export function AiDevotionalSheet({
 
             {parsed.journalPrompt ? (
               <View style={[styles.section, styles.journalSection]}>
-                <Text variant={TEXT_VARIANTS.Overline} color="textTertiary" style={styles.sectionLabel}>
+                <Text variant={TEXT_VARIANTS.Overline} color={TEXT_COLORS.TextTertiary} style={styles.sectionLabel}>
                   {translate('ai.devotional.journalLabel')}
                 </Text>
                 <Text variant={TEXT_VARIANTS.Body} style={styles.contentText}>

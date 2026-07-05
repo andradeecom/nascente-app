@@ -1,7 +1,7 @@
 import { Pressable, ScrollView, View } from 'react-native';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { Check, Target, X } from 'lucide-react-native';
-import { Button, Text, TEXT_VARIANTS } from '@/components/atoms';
+import { Button, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { PlanOption } from '@/components/molecules';
 import type { ProBillingCycle } from '@/types/subscription';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '../atoms/Button';
@@ -121,7 +121,7 @@ export function Paywall({
           </View>
 
           {/* ── Feature list ────────────────────────────────────────────── */}
-          <Text variant={TEXT_VARIANTS.Overline} color="textTertiary" style={styles.featuresTitle}>
+          <Text variant={TEXT_VARIANTS.Overline} color={TEXT_COLORS.TextTertiary} style={styles.featuresTitle}>
             {featuresTitle}
           </Text>
           <View style={styles.features}>
@@ -149,28 +149,28 @@ export function Paywall({
           size={BUTTON_SIZES.Large}
           disabled={subscribing}
         />
-        <Text variant={TEXT_VARIANTS.Caption} color="textTertiary" style={styles.finePrint}>
+        <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextTertiary} style={styles.finePrint}>
           {finePrint}
         </Text>
         <View style={styles.legalRow}>
           <Pressable onPress={onRestore} hitSlop={8} accessibilityRole="button" disabled={subscribing}>
-            <Text variant={TEXT_VARIANTS.Caption} color="accent" style={styles.legalEmphasis}>
+            <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.Accent} style={styles.legalEmphasis}>
               {restoreLabel}
             </Text>
           </Pressable>
-          <Text variant={TEXT_VARIANTS.Caption} color="textTertiary">
+          <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextTertiary}>
             {'  ·  '}
           </Text>
           <Pressable onPress={onTerms} hitSlop={8} accessibilityRole="button">
-            <Text variant={TEXT_VARIANTS.Caption} color="textTertiary">
+            <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextTertiary}>
               {termsLabel}
             </Text>
           </Pressable>
-          <Text variant={TEXT_VARIANTS.Caption} color="textTertiary">
+          <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextTertiary}>
             {'  ·  '}
           </Text>
           <Pressable onPress={onPrivacy} hitSlop={8} accessibilityRole="button">
-            <Text variant={TEXT_VARIANTS.Caption} color="textTertiary">
+            <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextTertiary}>
               {privacyLabel}
             </Text>
           </Pressable>

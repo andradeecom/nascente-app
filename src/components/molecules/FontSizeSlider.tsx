@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Slider, Text, TEXT_VARIANTS } from '@/components/atoms';
+import { Slider, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 
 type FontSizeSliderProps = {
   label: string;
@@ -15,25 +15,25 @@ export function FontSizeSlider({ label, valueLabel, hint, steps, value, onChange
   return (
     <View>
       <View style={styles.headingRow}>
-        <Text variant={TEXT_VARIANTS.Overline} color="textTertiary">
+        <Text variant={TEXT_VARIANTS.Overline} color={TEXT_COLORS.TextTertiary}>
           {label}
         </Text>
-        <Text variant={TEXT_VARIANTS.Caption} color="textSecondary">
+        <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextSecondary}>
           {valueLabel}
         </Text>
       </View>
-      <Text variant={TEXT_VARIANTS.Caption} color="textTertiary" style={styles.hint}>
+      <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextTertiary} style={styles.hint}>
         {hint}
       </Text>
 
       <View style={styles.row}>
-        <Text variant={TEXT_VARIANTS.Callout} color="textTertiary">
+        <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextTertiary}>
           A
         </Text>
 
         <Slider steps={steps} value={value} onChange={onChange} />
 
-        <Text variant={TEXT_VARIANTS.Title2} color="textTertiary">
+        <Text variant={TEXT_VARIANTS.Title2} color={TEXT_COLORS.TextTertiary}>
           A
         </Text>
       </View>

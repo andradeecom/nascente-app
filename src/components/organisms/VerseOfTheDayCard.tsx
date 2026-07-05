@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { ChevronRight, Sparkles } from 'lucide-react-native';
-import { Button, Text, TEXT_VARIANTS } from '@/components/atoms';
+import { Button, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { Card } from '../molecules';
 import { useTranslate } from '@/i18n';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '../atoms/Button';
@@ -31,7 +31,7 @@ export function VerseOfTheDayCard({
   return (
     <Card>
       <Card.Header>
-        <Text variant={TEXT_VARIANTS.Overline} color="textSecondary" style={styles.uppercase}>
+        <Text variant={TEXT_VARIANTS.Overline} color={TEXT_COLORS.TextSecondary} style={styles.uppercase}>
           {title}
         </Text>
       </Card.Header>
@@ -39,7 +39,7 @@ export function VerseOfTheDayCard({
         <Text variant={TEXT_VARIANTS.BodyEmphasis}>{verseText}</Text>
       </Card.Body>
       <Card.Footer style={styles.footer}>
-        <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
+        <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary}>
           {reference}
         </Text>
         <Button

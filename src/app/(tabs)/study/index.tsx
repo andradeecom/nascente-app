@@ -3,7 +3,7 @@ import { ActivityIndicator, View } from 'react-native';
 import { FlashList, type FlashListRef } from '@shopify/flash-list';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { Highlighter } from 'lucide-react-native';
-import { SafeAreaView, Text, TEXT_VARIANTS } from '@/components/atoms';
+import { SafeAreaView, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { SegmentedControl, type Segment } from '@/components/molecules';
 import { ProLockCard, StudyCard } from '@/components/organisms';
 import useStudyScreen, { type StudyFilter, type StudyItem } from './use-study-screen';
@@ -62,11 +62,11 @@ export default function StudyScreen() {
       <ThemedActivityIndicator size="large" />
     </View>
   ) : isError ? (
-    <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
+    <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary}>
       {translate('study.loadError')}
     </Text>
   ) : (
-    <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" style={styles.empty}>
+    <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary} style={styles.empty}>
       {translate(`study.empty.${filter}`)}
     </Text>
   );

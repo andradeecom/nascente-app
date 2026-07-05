@@ -4,7 +4,7 @@ import { StyleSheet, UnistylesRuntime, withUnistyles } from 'react-native-unisty
 import { useFocusEffect } from 'expo-router';
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView, type BottomSheetBackdropProps } from '@gorhom/bottom-sheet';
 import { Bookmark, BookmarkCheck, Check, HandHeart, NotebookPen, Sparkles, Trash2 } from 'lucide-react-native';
-import { Button, Text, TEXT_VARIANTS } from '@/components/atoms';
+import { Button, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '@/components/atoms/Button';
 import { useTranslate } from '@/i18n';
 import { useThemeStore } from '@/stores/theme';
@@ -159,7 +159,7 @@ export function VerseActionSheet({
           {reference}
         </Text>
 
-        <Text variant={TEXT_VARIANTS.Overline} color="textTertiary" style={styles.label}>
+        <Text variant={TEXT_VARIANTS.Overline} color={TEXT_COLORS.TextTertiary} style={styles.label}>
           {translate('study.highlightVerse')}
         </Text>
         <View style={styles.swatches}>
@@ -179,7 +179,7 @@ export function VerseActionSheet({
         {currentColor ? (
           <Pressable onPress={onRemove} style={({ pressed }) => [styles.remove, pressed && styles.pressed]}>
             <UniTrash2 size={18} strokeWidth={2} />
-            <Text variant={TEXT_VARIANTS.Label} color="danger">
+            <Text variant={TEXT_VARIANTS.Label} color={TEXT_COLORS.Danger}>
               {translate('study.removeHighlight')}
             </Text>
           </Pressable>

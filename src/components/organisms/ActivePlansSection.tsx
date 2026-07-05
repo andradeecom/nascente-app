@@ -1,6 +1,6 @@
 import { Pressable, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text, TEXT_VARIANTS } from '@/components/atoms';
+import { TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { ActivePlanCard } from '@/components/organisms/ActivePlanCard';
 import type { ActiveReadingPlan } from '@/types/reading-plans';
 
@@ -26,11 +26,11 @@ export function ActivePlansSection({
   return (
     <View style={styles.section}>
       <View style={styles.header}>
-        <Text variant={TEXT_VARIANTS.Overline} color="textSecondary" style={styles.uppercase}>
+        <Text variant={TEXT_VARIANTS.Overline} color={TEXT_COLORS.TextSecondary} style={styles.uppercase}>
           {title}
         </Text>
         <Pressable onPress={onExplore}>
-          <Text variant={TEXT_VARIANTS.Label} color="accent">
+          <Text variant={TEXT_VARIANTS.Label} color={TEXT_COLORS.Accent}>
             {exploreLabel}
           </Text>
         </Pressable>
@@ -49,7 +49,7 @@ export function ActivePlansSection({
           ))
       ) : (
         <View style={styles.empty}>
-          <Text variant={TEXT_VARIANTS.Callout} color="textSecondary">
+          <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary}>
             {emptyLabel}
           </Text>
         </View>

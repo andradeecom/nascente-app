@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { StyleSheet, UnistylesRuntime } from 'react-native-unistyles';
-import { Text, TEXT_VARIANTS } from '@/components/atoms';
+import { TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { PressableScale } from 'pressto';
 import { useThemeStore } from '@/stores/theme';
 import { Locales } from '@/types';
@@ -66,7 +66,7 @@ export function LanguageOption({ code, name, region, selected, onSelect }: Langu
       <Text style={badgeStyle}>{code.toUpperCase()}</Text>
       <View style={styles.text}>
         <Text variant={TEXT_VARIANTS.BodyEmphasis}>{name}</Text>
-        <Text variant={TEXT_VARIANTS.Caption} color="textSecondary">
+        <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextSecondary}>
           {region}
         </Text>
       </View>

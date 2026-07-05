@@ -1,6 +1,6 @@
 import { View, type ViewStyle } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Text, TEXT_VARIANTS } from '@/components/atoms';
+import { TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { PressableCard } from '@/components/molecules';
 import type { ActiveReadingPlan } from '@/types/reading-plans';
 
@@ -19,7 +19,7 @@ export function ActivePlanCard({ plan, nextLabel, onPress }: ActivePlanCardProps
     <PressableCard onPress={onPress} style={styles.card}>
       <View style={styles.header}>
         <View style={styles.badge}>
-          <Text variant={TEXT_VARIANTS.Caption} color="accent" style={styles.badgeText}>
+          <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.Accent} style={styles.badgeText}>
             {progressPercent}%
           </Text>
         </View>
@@ -28,7 +28,7 @@ export function ActivePlanCard({ plan, nextLabel, onPress }: ActivePlanCardProps
             {catalog.title}
           </Text>
           {subtitle ? (
-            <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" numberOfLines={1}>
+            <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary} numberOfLines={1}>
               {subtitle}
             </Text>
           ) : null}

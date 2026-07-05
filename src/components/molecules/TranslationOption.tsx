@@ -2,7 +2,7 @@ import { View } from 'react-native';
 import { StyleSheet, UnistylesRuntime } from 'react-native-unistyles';
 import { Check, Cloud, Lock } from 'lucide-react-native';
 import { PressableScale } from 'pressto';
-import { Text, TEXT_VARIANTS } from '@/components/atoms';
+import { TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { useThemeStore } from '@/stores/theme';
 
 export enum TRANSLATION_TIER {
@@ -74,10 +74,10 @@ export function TranslationOption({
 
       <View style={styles.text}>
         <Text variant={TEXT_VARIANTS.BodyEmphasis}>{title}</Text>
-        <Text variant={TEXT_VARIANTS.Caption} color="textSecondary" style={styles.description}>
+        <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextSecondary} style={styles.description}>
           {description}
         </Text>
-        <Text variant={TEXT_VARIANTS.Caption} color="textTertiary" style={styles.size}>
+        <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextTertiary} style={styles.size}>
           {size}
         </Text>
       </View>
@@ -86,7 +86,7 @@ export function TranslationOption({
         {tier === TRANSLATION_TIER.Available && (
           <View style={styles.offlineBadge}>
             <Cloud size={14} color={theme.colors.semantic.accent} />
-            <Text variant={TEXT_VARIANTS.Caption} color="accent">
+            <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.Accent}>
               {offlineLabel}
             </Text>
           </View>
@@ -94,7 +94,7 @@ export function TranslationOption({
         {tier === TRANSLATION_TIER.Pro && (
           <View style={[styles.proBadge, { borderColor: theme.colors.semantic.accent }]}>
             <Lock size={12} color={theme.colors.semantic.accent} />
-            <Text variant={TEXT_VARIANTS.Caption} color="accent">
+            <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.Accent}>
               {proLabel}
             </Text>
           </View>

@@ -1,6 +1,6 @@
 import { ScrollView, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Button, Text, TEXT_VARIANTS, SafeAreaView } from '@/components/atoms';
+import { Button, SafeAreaView, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { TranslationOption, OnboardingStepHeader } from '@/components/molecules';
 import { useTranslate } from '@/i18n';
 import useOnboardingTranslationScreen from './use-onboarding-translation-screen';
@@ -18,17 +18,17 @@ export default function OnboardingTranslationScreen() {
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <Text variant={TEXT_VARIANTS.Title2}>{t('onboarding.translation.title')}</Text>
-          <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" style={styles.subtitle}>
+          <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary} style={styles.subtitle}>
             {t('onboarding.translation.subtitle')}
           </Text>
         </View>
 
         {sections.map((section) => (
           <View key={section.sectionKey} style={styles.section}>
-            <Text variant={TEXT_VARIANTS.Overline} color="textTertiary">
+            <Text variant={TEXT_VARIANTS.Overline} color={TEXT_COLORS.TextTertiary}>
               {t(`onboarding.translation.sections.${section.sectionKey}.label`)}
             </Text>
-            <Text variant={TEXT_VARIANTS.Caption} color="textSecondary" style={styles.sectionCaption}>
+            <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextSecondary} style={styles.sectionCaption}>
               {t(`onboarding.translation.sections.${section.sectionKey}.caption`)}
             </Text>
 
@@ -52,7 +52,7 @@ export default function OnboardingTranslationScreen() {
       </ScrollView>
 
       <View style={styles.footer}>
-        <Text variant={TEXT_VARIANTS.Caption} color="textTertiary" style={styles.footerNote}>
+        <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextTertiary} style={styles.footerNote}>
           {t('onboarding.translation.footer', { name: selectedName })}
         </Text>
         <Button

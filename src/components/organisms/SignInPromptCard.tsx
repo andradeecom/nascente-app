@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { StyleSheet, UnistylesRuntime } from 'react-native-unistyles';
 import { ChevronRight, type LucideIcon } from 'lucide-react-native';
-import { Text, TEXT_VARIANTS } from '@/components/atoms';
+import { TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { PressableCard } from '@/components/molecules';
 import { useThemeStore } from '@/stores/theme';
 
@@ -32,11 +32,11 @@ export function SignInPromptCard({ icon: Icon, title, description, actionLabel, 
       <Text variant={TEXT_VARIANTS.Title3} style={styles.title}>
         {title}
       </Text>
-      <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" style={styles.description}>
+      <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary} style={styles.description}>
         {description}
       </Text>
       <View style={styles.action}>
-        <Text variant={TEXT_VARIANTS.Label} color="accent">
+        <Text variant={TEXT_VARIANTS.Label} color={TEXT_COLORS.Accent}>
           {actionLabel}
         </Text>
         <ChevronRight size={18} color={theme.colors.semantic.accent} strokeWidth={2.5} />

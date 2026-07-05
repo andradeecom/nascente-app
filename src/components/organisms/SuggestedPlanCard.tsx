@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { CalendarDays } from 'lucide-react-native';
-import { Button, Text, TEXT_VARIANTS } from '@/components/atoms';
+import { Button, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { PressableCard } from '@/components/molecules';
 import type { SuggestedReadingPlan } from '@/types/reading-plans';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '../atoms/Button';
@@ -30,7 +30,7 @@ export function SuggestedPlanCard({ plan, meta, startLabel, onStart, onPress, lo
         <Text variant={TEXT_VARIANTS.BodyEmphasis} numberOfLines={2}>
           {plan.title}
         </Text>
-        <Text variant={TEXT_VARIANTS.Callout} color="textSecondary" numberOfLines={1}>
+        <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary} numberOfLines={1}>
           {meta}
         </Text>
       </View>

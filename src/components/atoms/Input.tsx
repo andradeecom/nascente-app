@@ -26,7 +26,7 @@ const styles = StyleSheet.create((theme) => ({
     borderRadius: theme.radius.lg,
     backgroundColor: theme.colors.semantic.bgSecondary,
     paddingHorizontal: theme.spacing[4],
-    height: 52,
+    minHeight: 52,
   },
   error: {
     borderColor: theme.colors.semantic.danger,
@@ -39,7 +39,7 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: theme.font.sizes.callout,
     fontFamily: theme.font.family,
     color: theme.colors.semantic.textPrimary,
-    height: '100%',
+    alignSelf: 'stretch',
   },
   placeholder: {
     color: theme.colors.semantic.textSecondary,

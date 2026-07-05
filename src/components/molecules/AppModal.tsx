@@ -1,4 +1,5 @@
 import { Modal, Pressable } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { X } from 'lucide-react-native';
 import { useTranslate } from '@/i18n';
@@ -26,27 +27,36 @@ export function AppModal({ visible, onClose, children, showClose = true, dismiss
 
   return (
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
-      <Pressable
-        style={styles.backdrop}
-        onPress={dismissOnBackdrop ? onClose : undefined}
-        accessibilityRole="button"
-        accessibilityLabel={translate('common.close')}
-      >
-        {/* Stop propagation so taps inside the card don't dismiss it. */}
-        <Pressable style={styles.card} onPress={() => {}}>
-          {showClose ? (
-            <Pressable onPress={onClose} hitSlop={8} style={styles.close} accessibilityRole="button">
-              <ThemedX size={20} />
-            </Pressable>
-          ) : null}
-          {children}
+      {/* RN Modal renders in a separate native hierarchy the app-root
+          GestureHandlerRootView doesn't reach, so gesture-handler-based
+          pressables inside (our `Button` → pressto's PressableScale) get no
+          touches without a GHRV of the modal's own. */}
+      <GestureHandlerRootView style={styles.root}>
+        <Pressable
+          style={styles.backdrop}
+          onPress={dismissOnBackdrop ? onClose : undefined}
+          accessibilityRole="button"
+          accessibilityLabel={translate('common.close')}
+        >
+          {/* Stop propagation so taps inside the card don't dismiss it. */}
+          <Pressable style={styles.card} onPress={() => {}}>
+            {showClose ? (
+              <Pressable onPress={onClose} hitSlop={8} style={styles.close} accessibilityRole="button">
+                <ThemedX size={20} />
+              </Pressable>
+            ) : null}
+            {children}
+          </Pressable>
         </Pressable>
-      </Pressable>
+      </GestureHandlerRootView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create((theme) => ({
+  root: {
+    flex: 1,
+  },
   backdrop: {
     flex: 1,
     alignItems: 'center',

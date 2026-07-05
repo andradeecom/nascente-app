@@ -16,6 +16,18 @@ import { isPlanLimitError } from '@/types/subscription';
 
 const DEFAULT_DAYS = 7;
 
+/**
+ * Auto-grow bounds for the topic input. The field starts at ~2 lines and grows
+ * with the typed content up to 4 lines, after which it scrolls internally.
+ * These must stay in sync with the input's `lineHeight` (22) and its vertical
+ * padding (theme.spacing[5] = 20px top + bottom) in the screen's styles, so a
+ * line count of N ≈ 40 + N * 22.
+ */
+const TOPIC_INPUT_LINE_HEIGHT = 22;
+const TOPIC_INPUT_VERTICAL_PADDING = 40;
+const TOPIC_INPUT_MIN_HEIGHT = TOPIC_INPUT_VERTICAL_PADDING + TOPIC_INPUT_LINE_HEIGHT * 2;
+const TOPIC_INPUT_MAX_HEIGHT = TOPIC_INPUT_VERTICAL_PADDING + TOPIC_INPUT_LINE_HEIGHT * 4;
+
 type Step = 'input' | 'preview';
 
 /** A preview day with its display label already resolved for rendering. */
@@ -33,6 +45,7 @@ export default function useCreatePlanScreen() {
 
   const [step, setStep] = useState<Step>('input');
   const [topic, setTopic] = useState('');
+  const [inputHeight, setInputHeight] = useState(TOPIC_INPUT_MIN_HEIGHT);
   const [days, setDays] = useState(DEFAULT_DAYS);
   const [preview, setPreview] = useState<AiPlanPreview | null>(null);
   const [previewDays, setPreviewDays] = useState<PreviewDayVm[]>([]);
@@ -42,6 +55,10 @@ export default function useCreatePlanScreen() {
 
   const handleSelectExample = useCallback((example: string) => {
     setTopic(example);
+  }, []);
+
+  const handleInputContentSize = useCallback((height: number) => {
+    setInputHeight(Math.min(TOPIC_INPUT_MAX_HEIGHT, Math.max(TOPIC_INPUT_MIN_HEIGHT, height)));
   }, []);
 
   const handleGenerate = useCallback(async () => {
@@ -114,6 +131,8 @@ export default function useCreatePlanScreen() {
     step,
     topic,
     setTopic,
+    inputHeight,
+    handleInputContentSize,
     days,
     setDays,
     minDays: AI_PLAN_MIN_DAYS,

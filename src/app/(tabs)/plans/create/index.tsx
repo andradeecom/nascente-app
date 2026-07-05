@@ -15,6 +15,8 @@ export default function CreatePlanScreen() {
     step,
     topic,
     setTopic,
+    inputHeight,
+    handleInputContentSize,
     days,
     setDays,
     minDays,
@@ -47,7 +49,8 @@ export default function CreatePlanScreen() {
             onChangeText={setTopic}
             placeholder={translate('aiPlan.inputPlaceholder')}
             multiline
-            style={styles.input}
+            onContentSizeChange={(e) => handleInputContentSize(e.nativeEvent.contentSize.height)}
+            style={[styles.input, { height: inputHeight }]}
             editable={!generating}
           />
 
@@ -193,9 +196,9 @@ const styles = StyleSheet.create((theme) => ({
     gap: theme.spacing[8],
   },
   input: {
-    minHeight: 80,
     textAlignVertical: 'top',
-    paddingVertical: theme.spacing[5],
+    paddingVertical: theme.spacing[3],
+    lineHeight: 22,
   },
   examples: {
     gap: theme.spacing[4],

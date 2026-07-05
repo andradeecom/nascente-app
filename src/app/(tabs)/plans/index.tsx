@@ -160,7 +160,6 @@ const styles = StyleSheet.create((theme) => ({
   content: {
     paddingHorizontal: theme.spacing[5],
     paddingTop: theme.spacing[3],
-    paddingBottom: theme.spacing[8],
     gap: theme.spacing[6],
   },
   heading: {

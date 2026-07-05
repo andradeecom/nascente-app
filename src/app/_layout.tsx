@@ -7,7 +7,7 @@ import Toast from 'react-native-toast-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { PressablesConfig } from 'pressto';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { queryClient } from '@/lib/query-client';
 import { useAuthStore } from '@/stores/auth';
 import { useThemeStore } from '@/stores/theme';
@@ -85,19 +85,29 @@ function RootNavigator() {
   );
 }
 
-export default function RootLayout() {
+// Toast reads safe-area insets, which resolve asynchronously after native
+// measurement. Kept as its own component *inside* SafeAreaProvider so that
+// async inset update re-renders only this, not the whole root tree — a state
+// update on the root during its initial mount is what triggered React's
+// "state update on a component that hasn't mounted yet" warning on device.
+function ToastWithInsets() {
   const insets = useSafeAreaInsets();
+  return <Toast topOffset={insets.top} />;
+}
 
+export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <KeyboardProvider>
-        <PressablesConfig animationType="spring" config={{ minScale: 0.97 }}>
-          <QueryClientProvider client={queryClient}>
-            <RootNavigator />
-            <Toast topOffset={insets.top} />
-          </QueryClientProvider>
-        </PressablesConfig>
-      </KeyboardProvider>
+      <SafeAreaProvider>
+        <KeyboardProvider>
+          <PressablesConfig animationType="spring" config={{ minScale: 0.97 }}>
+            <QueryClientProvider client={queryClient}>
+              <RootNavigator />
+              <ToastWithInsets />
+            </QueryClientProvider>
+          </PressablesConfig>
+        </KeyboardProvider>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }

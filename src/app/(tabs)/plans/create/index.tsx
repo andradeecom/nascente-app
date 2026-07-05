@@ -2,7 +2,7 @@ import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { Button, Input, SafeAreaView, Slider, Text, TEXT_VARIANTS, TEXT_COLORS } from '@/components/atoms';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '@/components/atoms/Button';
-import { AppModal } from '@/components/molecules';
+import { AppModal, KeyboardAwareScreen } from '@/components/molecules';
 import { ScreenHeader } from '@/components/organisms';
 import useCreatePlanScreen from './use-create-plan-screen';
 
@@ -39,7 +39,7 @@ export default function CreatePlanScreen() {
       <ScreenHeader title={translate('aiPlan.title')} onBack={step === 'preview' ? handleBackToInput : undefined} />
 
       {step === 'input' ? (
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <KeyboardAwareScreen contentContainerStyle={styles.content}>
           <Text variant={TEXT_VARIANTS.Body} color={TEXT_COLORS.TextSecondary}>
             {translate('aiPlan.inputSubtitle')}
           </Text>
@@ -115,7 +115,7 @@ export default function CreatePlanScreen() {
               {translate('aiPlan.retentionNote')}
             </Text>
           </View>
-        </ScrollView>
+        </KeyboardAwareScreen>
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           {preview ? (

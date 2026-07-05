@@ -1,8 +1,7 @@
-import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Link, useRouter } from 'expo-router';
 import { StyleSheet } from 'react-native-unistyles';
 import { SafeAreaView, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
-import { OnboardingStepHeader } from '@/components/molecules';
+import { KeyboardAwareScreen, OnboardingStepHeader } from '@/components/molecules';
 import { ForgotPasswordCard } from '@/components/organisms';
 import { useTranslate } from '@/i18n';
 import useOnboardingForgotPasswordScreen from './use-onboarding-forgot-password-screen';
@@ -15,21 +14,19 @@ export default function OnboardingForgotPasswordScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <OnboardingStepHeader step={4} total={4} onBack={() => router.back()} />
-      <KeyboardAvoidingView style={styles.keyboard} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-          <ForgotPasswordCard
-            onSubmit={handleSubmit}
-            isLoading={isLoading}
-            isSubmitted={isSubmitted}
-            submittedEmail={submittedEmail ?? undefined}
-          />
-          <Link href="/onboarding/account/login" style={styles.footerLink}>
-            <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary}>
-              {t('forgotPassword.backToLogin')}
-            </Text>
-          </Link>
-        </ScrollView>
-      </KeyboardAvoidingView>
+      <KeyboardAwareScreen contentContainerStyle={styles.scroll}>
+        <ForgotPasswordCard
+          onSubmit={handleSubmit}
+          isLoading={isLoading}
+          isSubmitted={isSubmitted}
+          submittedEmail={submittedEmail ?? undefined}
+        />
+        <Link href="/onboarding/account/login" style={styles.footerLink}>
+          <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary}>
+            {t('forgotPassword.backToLogin')}
+          </Text>
+        </Link>
+      </KeyboardAwareScreen>
     </SafeAreaView>
   );
 }
@@ -38,9 +35,6 @@ const styles = StyleSheet.create((theme) => ({
   safe: {
     flex: 1,
     backgroundColor: theme.colors.semantic.bgPrimary,
-  },
-  keyboard: {
-    flex: 1,
   },
   scroll: {
     flexGrow: 1,

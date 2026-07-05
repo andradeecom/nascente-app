@@ -14,5 +14,6 @@ export { ShineButton } from './ShineButton';
 export { ReaderPreviewCard } from './ReaderPreviewCard';
 export { BackButton } from './BackButton';
 export { AppModal } from './AppModal';
+export { KeyboardAwareScreen } from './KeyboardAwareScreen';
 export { SegmentedControl, type Segment } from './SegmentedControl';
 export { PlanOption } from './PlanOption';

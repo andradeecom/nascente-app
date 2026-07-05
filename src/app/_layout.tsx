@@ -5,6 +5,7 @@ import { SplashScreen } from '@/components/organisms';
 import { QueryClientProvider } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { PressablesConfig } from 'pressto';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { queryClient } from '@/lib/query-client';
@@ -89,12 +90,14 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <PressablesConfig animationType="spring" config={{ minScale: 0.97 }}>
-        <QueryClientProvider client={queryClient}>
-          <RootNavigator />
-          <Toast topOffset={insets.top} />
-        </QueryClientProvider>
-      </PressablesConfig>
+      <KeyboardProvider>
+        <PressablesConfig animationType="spring" config={{ minScale: 0.97 }}>
+          <QueryClientProvider client={queryClient}>
+            <RootNavigator />
+            <Toast topOffset={insets.top} />
+          </QueryClientProvider>
+        </PressablesConfig>
+      </KeyboardProvider>
     </GestureHandlerRootView>
   );
 }

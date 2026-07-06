@@ -28,6 +28,7 @@ export function useAiGenerate({
   promptType,
   passageText,
   locale,
+  reference,
   enabled,
 }: UseAiGenerateParams) {
   const cacheKey = aiCacheKey(translationId, bookId, chapter, verseStart, verseEnd, promptType, locale);
@@ -55,6 +56,7 @@ export function useAiGenerate({
         promptType,
         passageText,
         locale,
+        reference,
       });
 
       localCacheSet(cacheKey, { content: result.content, fetchedAt: new Date().toISOString() });

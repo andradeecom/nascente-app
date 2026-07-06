@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { FlashList, type FlashListRef } from '@shopify/flash-list';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
-import { Highlighter, Trash2 } from 'lucide-react-native';
+import { NotebookPen, Trash2 } from 'lucide-react-native';
 import { Button, SafeAreaView, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '@/components/atoms/Button';
 import { AppModal, SegmentedControl, type Segment } from '@/components/molecules';
@@ -40,7 +40,7 @@ export default function StudyScreen() {
   }, [filter]);
 
   const segments: Segment<StudyFilter>[] = [
-    { key: 'all', label: translate('study.filters.all') },
+    // { key: 'all', label: translate('study.filters.all') }, // IGNORE --- This filter is not currently used, but we may want to add it back in the future.
     { key: 'highlights', label: translate('study.filters.highlights') },
     { key: 'notes', label: translate('study.filters.notes') },
     { key: 'bookmarks', label: translate('study.filters.bookmarks') },
@@ -52,7 +52,7 @@ export default function StudyScreen() {
         <View style={styles.content}>
           <Text variant={TEXT_VARIANTS.Title1}>{translate('study.title')}</Text>
           <ProLockCard
-            icon={Highlighter}
+            icon={NotebookPen}
             title={translate('study.proLock.title')}
             description={translate('study.proLock.description')}
             ctaLabel={translate('study.proLock.action')}
@@ -68,13 +68,17 @@ export default function StudyScreen() {
       <ThemedActivityIndicator size="large" />
     </View>
   ) : isError ? (
-    <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary}>
-      {translate('study.loadError')}
-    </Text>
+    <View style={styles.centered}>
+      <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary}>
+        {translate('study.loadError')}
+      </Text>
+    </View>
   ) : (
-    <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary} style={styles.empty}>
-      {translate(`study.empty.${filter}`)}
-    </Text>
+    <View style={styles.centered}>
+      <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary}>
+        {translate(`study.empty.${filter}`)}
+      </Text>
+    </View>
   );
 
   return (
@@ -162,11 +166,7 @@ const styles = StyleSheet.create((theme) => ({
     paddingBottom: theme.spacing[8],
   },
   centered: {
-    paddingTop: theme.spacing[10],
     alignItems: 'center',
-  },
-  empty: {
-    marginTop: theme.spacing[2],
   },
   separator: {
     height: theme.spacing[3],

@@ -90,6 +90,24 @@ export async function getVerses(translationId: TranslationId, bookId: number, ch
   }));
 }
 
+export async function getVerse(
+  translationId: TranslationId,
+  bookId: number,
+  chapter: number,
+  verse: number
+): Promise<Verse | null> {
+  const db = await getDb(translationId);
+  const { versesTable } = TRANSLATIONS[translationId];
+
+  const row = await db.getFirstAsync<{ id: number; book_id: number; chapter: number; verse: number; text: string }>(
+    `SELECT id, book_id, chapter, verse, text FROM ${versesTable} WHERE book_id = ? AND chapter = ? AND verse = ?`,
+    [bookId, chapter, verse]
+  );
+
+  if (!row) return null;
+  return { id: row.id, bookId: row.book_id, chapter: row.chapter, verse: row.verse, text: row.text };
+}
+
 export async function searchVerses(translationId: TranslationId, query: string): Promise<SearchResult[]> {
   const db = await getDb(translationId);
   const { booksTable, versesTable } = TRANSLATIONS[translationId];

@@ -257,6 +257,7 @@ const es = {
       dayBody: 'Tómate un momento para orar y meditar en lo que leíste.',
       planTitle: '🙌 ¡Plan completado!',
       planBody: '¡Qué recorrido! Sigue firme en la Palabra.',
+      cta: 'Continuar',
     },
   },
   onboarding: {

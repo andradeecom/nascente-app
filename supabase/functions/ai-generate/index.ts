@@ -33,10 +33,21 @@ const GEMINI_MODEL = 'gemini-2.5-flash';
 const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 const PROMPT_TYPES = ['explain', 'explain_simple', 'chapter_summary', 'devotional', 'prayer_prompt'];
-const PROMPT_VERSION = 6;
+// Cache-invalidation token for the shared `ai_cache` table — part of the cache
+// row key, so bumping it makes every previously cached result unreachable and
+// forces regeneration under the new prompt. Bump whenever a systemPrompt below
+// changes (last: v7, added the passage reference for context).
+//
+// ⚠️ MUST stay in sync with `AI_PROMPT_VERSION` in the app's `src/types/ai.ts`
+// (the client bakes it into its own cache key). The app/Deno split means the
+// value is duplicated by hand — always bump BOTH together. Only THIS function
+// has a version because only this function has a persistent cache; ai-plan-generate
+// persists nothing and revenuecat-webhook isn't an LLM function.
+const PROMPT_VERSION = 7;
 const LOCALES = ['en', 'es', 'pt'];
 const MAX_PASSAGE_TEXT_LENGTH = 20000; // generous cap for a full chapter; blocks abuse/oversized payloads
 const MAX_TRANSLATION_ID_LENGTH = 64;
+const MAX_REFERENCE_LENGTH = 128; // e.g. "1 Coríntios 13:4-7" — a label, not free text
 
 // Gemini 2.5 Flash pricing (per .docs/ai-features.md §4) — used only to estimate
 // spend for the cost-ceiling backstop, not billed anywhere else.
@@ -48,28 +59,36 @@ const MONTHLY_COST_CEILING_USD = 1.5; // .docs/ai-features.md §3 "soft monthly 
 
 const LANGUAGE_NAMES = { pt: 'Português', es: 'Español', en: 'English' };
 
-function systemPrompt(promptType, locale) {
+// The passage's chapter/verse reference (e.g. "John 3:16") is added to the system
+// prompt for context. Sometimes the model has trouble with the "explain" prompt
+// type if it doesn't know what passage it's explaining, even though the passage
+// text is included in the user prompt. `reference` is optional context only — it
+// is NOT part of the cache key (coordinates + translation + locale already
+// identify the passage), so a missing/changed label never affects caching.
+function systemPrompt(promptType, locale, reference) {
   const lang = LANGUAGE_NAMES[locale] ?? 'Português';
-  const suffix = `Always write in ${lang}. Always complete your full response — never cut off mid-sentence or mid-paragraph.`;
+  const passageLine = reference ? ` The passage is ${reference}.` : '';
+  const suffix =
+    `Always write in ${lang}. Always complete your full response — never cut off mid-sentence or mid-paragraph.`;
 
   switch (promptType) {
     case 'explain':
-      return `You are a knowledgeable biblical commentator. When given a Bible passage, write exactly 3 complete paragraphs: (1) historical and literary context, (2) meaning and theology of the passage, (3) its significance within the broader biblical narrative. Each paragraph should be 3–5 sentences. Be accurate, reverent, and substantive. ${suffix}`;
+      return `You are a knowledgeable biblical commentator.${passageLine} When given a Bible passage, write exactly 3 complete paragraphs: (1) historical and literary context, (2) meaning and theology of the passage, (3) its significance within the broader biblical narrative. Each paragraph should be 3–5 sentences. Be accurate, reverent, and substantive. ${suffix}`;
 
     case 'explain_simple':
-      return `You are a patient and warm Bible teacher helping someone who has never read the Bible before. When given a passage, write exactly 3 complete paragraphs explaining what it means in simple, everyday language — no jargon, no assumed knowledge. Use a friendly, encouraging tone. Each paragraph should be 3–4 sentences. ${suffix}`;
+      return `You are a patient and warm Bible teacher helping someone who has never read the Bible before.${passageLine} When given a passage, write exactly 3 complete paragraphs explaining what it means in simple, everyday language — no jargon, no assumed knowledge. Use a friendly, encouraging tone. Each paragraph should be 3–4 sentences. ${suffix}`;
 
     case 'chapter_summary':
-      return `You are a Bible study guide author. When given the text of a Bible chapter, write exactly 3 complete paragraphs: (1) the main events or teachings, (2) the key theological themes, (3) why this chapter matters in its broader biblical context. Each paragraph should be 3–5 sentences. Be clear and substantive. ${suffix}`;
+      return `You are a Bible study guide author.${passageLine} When given the text of a Bible chapter, write exactly 3 complete paragraphs: (1) the main events or teachings, (2) the key theological themes, (3) why this chapter matters in its broader biblical context. Each paragraph should be 3–5 sentences. Be clear and substantive. ${suffix}`;
 
     case 'devotional':
-      return `You are a devotional writer helping readers connect Scripture to daily life. When given a Bible verse, write a personal reflection of 4–5 sentences on its meaning and relevance today, followed by a single journaling question that invites honest self-reflection. Separate them with a line containing only "---". ${suffix}`;
+      return `You are a devotional writer helping readers connect Scripture to daily life.${passageLine} When given a Bible verse, write a personal reflection of 4–5 sentences on its meaning and relevance today, followed by a single journaling question that invites honest self-reflection. Separate them with a line containing only "---". ${suffix}`;
 
     case 'prayer_prompt':
-      return `You are a prayer guide helping readers turn a Bible passage into prayer. When given a passage, write a short, warm prayer prompt of 3–4 sentences in the second person ("you" addressing God or reflecting on the reader's own words), rooted in the specific themes of the passage — not generic. Do not include a title or introduction, just the prayer text itself. ${suffix}`;
+      return `You are a prayer guide helping readers turn a Bible passage into prayer.${passageLine} When given a passage, write a short, warm prayer prompt of 3–4 sentences in the second person ("you" addressing God or reflecting on the reader's own words), rooted in the specific themes of the passage — not generic. Do not include a title or introduction, just the prayer text itself. ${suffix}`;
 
     default:
-      return `You are a helpful Bible study assistant. ${suffix}`;
+      return `You are a helpful Bible study assistant.${passageLine} ${suffix}`;
   }
 }
 
@@ -130,7 +149,8 @@ async function handleRequest(req) {
     return json({ error: 'BAD_REQUEST', message: 'Invalid JSON' }, 400);
   }
 
-  const { translationId, bookId, chapter, verseStart, verseEnd, promptType, passageText, locale } = body ?? {};
+  const { translationId, bookId, chapter, verseStart, verseEnd, promptType, passageText, locale, reference } =
+    body ?? {};
 
   const isValidInt = (n) => typeof n === 'number' && Number.isInteger(n) && n >= 0 && n <= 200000;
 
@@ -150,6 +170,13 @@ async function handleRequest(req) {
   ) {
     return json({ error: 'BAD_REQUEST', message: 'Missing or invalid fields' }, 400);
   }
+
+  // `reference` is optional prompt context (not part of the cache key). Accept a
+  // bounded string; ignore anything else rather than rejecting the request.
+  const referenceLabel =
+    typeof reference === 'string' && reference.trim() && reference.length <= MAX_REFERENCE_LENGTH
+      ? reference.trim()
+      : null;
 
   // 2. Verify JWT
   const authHeader = req.headers.get('Authorization');
@@ -220,7 +247,7 @@ async function handleRequest(req) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        system_instruction: { parts: [{ text: systemPrompt(promptType, locale) }] },
+        system_instruction: { parts: [{ text: systemPrompt(promptType, locale, referenceLabel) }] },
         contents: [{ role: 'user', parts: [{ text: passageText }] }],
         generationConfig: {
           maxOutputTokens: maxOutputTokens(promptType),

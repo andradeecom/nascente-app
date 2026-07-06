@@ -67,9 +67,7 @@ export default function PlansScreen() {
     return (
       <SafeAreaView edges={['top']} style={styles.safe}>
         <View style={styles.content}>
-          <Text variant={TEXT_VARIANTS.Title1} style={styles.heading}>
-            {translate('plans.title')}
-          </Text>
+          <Text variant={TEXT_VARIANTS.Title1}>{translate('plans.title')}</Text>
           <ProLockCard
             icon={CalendarCheck}
             title={translate('plans.proLock.title')}
@@ -84,9 +82,7 @@ export default function PlansScreen() {
 
   const listHeader = (
     <View style={styles.listHeader}>
-      <Text variant={TEXT_VARIANTS.Title1} style={styles.heading}>
-        {translate('plans.title')}
-      </Text>
+      <Text variant={TEXT_VARIANTS.Title1}>{translate('plans.title')}</Text>
       <Button
         variant={BUTTON_VARIANTS.Pro}
         size={BUTTON_SIZES.Medium}
@@ -156,21 +152,17 @@ const styles = StyleSheet.create((theme) => ({
   safe: {
     flex: 1,
     backgroundColor: theme.colors.semantic.bgSecondary,
+    paddingHorizontal: theme.spacing[5],
   },
   content: {
-    paddingHorizontal: theme.spacing[5],
     paddingTop: theme.spacing[3],
     gap: theme.spacing[6],
-  },
-  heading: {
-    marginBottom: theme.spacing[2],
   },
   listHeader: {
     gap: theme.spacing[3],
     marginBottom: theme.spacing[4],
   },
   listContent: {
-    paddingHorizontal: theme.spacing[5],
     paddingTop: theme.spacing[3],
     paddingBottom: theme.spacing[8],
   },

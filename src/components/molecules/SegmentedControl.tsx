@@ -128,7 +128,7 @@ const styles = StyleSheet.create((theme) => ({
     gap: theme.gap(1),
     backgroundColor: theme.colors.semantic.bgTertiary,
     borderRadius: theme.radius.full,
-    padding: theme.spacing[1],
+    paddingVertical: theme.spacing[2],
     position: 'relative',
   },
   thumb: {
@@ -145,6 +145,7 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: theme.spacing[2],
+    paddingHorizontal: theme.spacing[2],
     borderRadius: theme.radius.full,
   },
 }));

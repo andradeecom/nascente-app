@@ -21,6 +21,7 @@ export default function HomeScreen() {
     greetingKey,
     verseOfTheDay,
     verseText,
+    verseLoading,
     bookName,
     chapter,
     translationLabel,
@@ -59,7 +60,7 @@ export default function HomeScreen() {
 
         <VerseOfTheDayCard
           title={translate('home.verseOfTheDay')}
-          verseText={verseText}
+          verseText={verseLoading && !verseText ? translate('common.loading') : verseText}
           reference={verseOfTheDay.ref}
           actionLabel={translate('home.readInContext')}
           onPress={handleVerseOfTheDay}

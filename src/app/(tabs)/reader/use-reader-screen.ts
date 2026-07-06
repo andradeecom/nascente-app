@@ -54,6 +54,10 @@ export default function useReaderScreen() {
   const [summaryVisible, setSummaryVisible] = useState(false);
   const [prayerVerse, setPrayerVerse] = useState<number | null>(null);
 
+  // Plan-day completion celebration (replaces the old success toast). `finished`
+  // distinguishes "day done" from "whole plan done" for the copy. Null = hidden.
+  const [planComplete, setPlanComplete] = useState<{ finished: boolean } | null>(null);
+
   const [bookPickerVisible, setBookPickerVisible] = useState(false);
   const [translationPickerVisible, setTranslationPickerVisible] = useState(false);
 
@@ -84,6 +88,7 @@ export default function useReaderScreen() {
     promptType: explainMode,
     passageText: explainPassageText,
     locale: locale as 'en' | 'es' | 'pt',
+    reference: bookName && explainVerse != null ? `${bookName} ${chapter}:${explainVerse}` : undefined,
     enabled: explainVerse != null && isPro,
   });
 
@@ -96,6 +101,7 @@ export default function useReaderScreen() {
     promptType: 'chapter_summary',
     passageText: chapterPassageText,
     locale: locale as 'en' | 'es' | 'pt',
+    reference: bookName ? `${bookName} ${chapter}` : undefined,
     enabled: summaryVisible && isPro,
   });
 
@@ -108,6 +114,7 @@ export default function useReaderScreen() {
     promptType: 'prayer_prompt',
     passageText: prayerPassageText,
     locale: locale as 'en' | 'es' | 'pt',
+    reference: bookName && prayerVerse != null ? `${bookName} ${chapter}:${prayerVerse}` : undefined,
     enabled: prayerVerse != null && isPro,
   });
 
@@ -130,21 +137,23 @@ export default function useReaderScreen() {
       { userPlanId: session.userPlanId, planId: session.planId, day: session.day, totalDays: session.totalDays },
       {
         onSuccess: ({ finished }) => {
-          clearSession();
-          Toast.show({
-            type: 'success',
-            text1: translate(finished ? 'plans.completed.planTitle' : 'plans.completed.dayTitle'),
-            text2: translate(finished ? 'plans.completed.planBody' : 'plans.completed.dayBody'),
-            visibilityTime: 4000,
-          });
-          if (router.canGoBack()) router.back();
+          // Show the celebration modal; session clear + navigate-back happen when
+          // the user taps Continue (see handlePlanCompleteContinue), so navigating
+          // away doesn't unmount the modal before it's seen.
+          setPlanComplete({ finished });
         },
         onError: () => {
           Toast.show({ type: 'error', text1: translate('plans.loadError') });
         },
       }
     );
-  }, [session, markComplete, clearSession, translate, router]);
+  }, [session, markComplete, translate]);
+
+  const handlePlanCompleteContinue = useCallback(() => {
+    setPlanComplete(null);
+    clearSession();
+    if (router.canGoBack()) router.back();
+  }, [clearSession, router]);
 
   // Verse study actions are Pro. The verse is only rendered as a pressable for Pro
   // users (see the Reader's renderVerse — non-Pro verses are plain, non-interactive
@@ -298,6 +307,8 @@ export default function useReaderScreen() {
     isPlanDayEnd,
     isFinishingPlanDay: markComplete.isPending,
     handleFinishPlanDay,
+    planComplete,
+    handlePlanCompleteContinue,
     // Highlights
     chapterHighlights,
     selectedVerse,

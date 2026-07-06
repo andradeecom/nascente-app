@@ -21,6 +21,7 @@ export { ProLockCard } from './ProLockCard';
 export { VerseActionSheet } from './VerseActionSheet';
 export { UpsellModal } from './UpsellModal';
 export { NoteEditorModal } from './NoteEditorModal';
+export { PlanDayCompleteModal } from './PlanDayCompleteModal';
 export { StudyCard } from './StudyCard';
 export { PlanDayRow } from './PlanDayRow';
 export { ProCtaCard } from './ProCtaCard';

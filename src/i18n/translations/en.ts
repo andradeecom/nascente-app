@@ -257,6 +257,7 @@ const en = {
       dayBody: 'Take a moment to pray and reflect on what you read.',
       planTitle: '🙌 Plan complete!',
       planBody: 'What a journey! Keep going in the Word.',
+      cta: 'Continue',
     },
   },
   onboarding: {

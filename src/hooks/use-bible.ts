@@ -1,11 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
-import { getBooks, getChapters, getVerses, searchVerses, getBookName } from '@/services/bible';
+import { getBooks, getChapters, getVerse, getVerses, searchVerses, getBookName } from '@/services/bible';
 import type { TranslationId } from '@/types/bible';
 
 export const bibleKeys = {
   books: (t: TranslationId) => ['bible', 'books', t] as const,
   chapters: (t: TranslationId, bookId: number) => ['bible', 'chapters', t, bookId] as const,
   verses: (t: TranslationId, bookId: number, chapter: number) => ['bible', 'verses', t, bookId, chapter] as const,
+  verse: (t: TranslationId, bookId: number, chapter: number, verse: number) =>
+    ['bible', 'verse', t, bookId, chapter, verse] as const,
   search: (t: TranslationId, q: string) => ['bible', 'search', t, q] as const,
   bookName: (t: TranslationId, bookId: number) => ['bible', 'bookName', t, bookId] as const,
 };
@@ -30,6 +32,14 @@ export function useVerses(translationId: TranslationId, bookId: number, chapter:
   return useQuery({
     queryKey: bibleKeys.verses(translationId, bookId, chapter),
     queryFn: () => getVerses(translationId, bookId, chapter),
+    staleTime: Infinity,
+  });
+}
+
+export function useVerse(translationId: TranslationId, bookId: number, chapter: number, verse: number) {
+  return useQuery({
+    queryKey: bibleKeys.verse(translationId, bookId, chapter, verse),
+    queryFn: () => getVerse(translationId, bookId, chapter, verse),
     staleTime: Infinity,
   });
 }

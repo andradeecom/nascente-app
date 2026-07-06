@@ -257,6 +257,7 @@ const pt = {
       dayBody: 'Reserve um momento para orar e meditar no que leu.',
       planTitle: '🙌 Plano concluído!',
       planBody: 'Que jornada! Continue firme na Palavra.',
+      cta: 'Continuar',
     },
   },
   onboarding: {

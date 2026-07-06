@@ -23,7 +23,7 @@ export const font = {
     bodyEmphasis: 24,
     callout: 20,
     caption: 16,
-    label: 16,
+    label: 18,
     overline: 16,
   },
   weights: {

@@ -9,6 +9,7 @@ import {
   AiExplainSheet,
   AiPrayerSheet,
   ChapterSummarySheet,
+  PlanDayCompleteModal,
   BookChapterPicker,
   NoteEditorModal,
   TranslationPicker,
@@ -46,6 +47,8 @@ export default function ReaderScreen() {
     isPlanDayEnd,
     isFinishingPlanDay,
     handleFinishPlanDay,
+    planComplete,
+    handlePlanCompleteContinue,
     chapterHighlights,
     selectedVerse,
     selectedVerseColor,
@@ -252,6 +255,14 @@ export default function ReaderScreen() {
         error={prayerError}
         onClose={closePrayerSheet}
         onRetry={retryPrayer}
+      />
+
+      <PlanDayCompleteModal
+        visible={planComplete != null}
+        title={t(planComplete?.finished ? 'plans.completed.planTitle' : 'plans.completed.dayTitle')}
+        body={t(planComplete?.finished ? 'plans.completed.planBody' : 'plans.completed.dayBody')}
+        ctaLabel={t('plans.completed.cta')}
+        onContinue={handlePlanCompleteContinue}
       />
     </SafeAreaView>
   );

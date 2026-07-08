@@ -29,9 +29,16 @@ const DB_ASSETS: Partial<Record<TranslationId, number>> = {
   // YLT: require('@/assets/db/YLT.db'),
 };
 
-const dbCache = new Map<TranslationId, SQLite.SQLiteDatabase>();
+// Cache the open *promise*, not the resolved DB. Several reader queries fire at
+// once on mount; caching the resolved value only after both awaits complete lets
+// each concurrent call re-run the import+open on the same file. On Android those
+// overlapping opens collide and one yields a DB with a null native handle — the
+// first prepareAsync on it throws `NullPointerException` (seen on fresh builds,
+// where the asset import actually runs). Caching the promise means all callers
+// await the single open.
+const dbCache = new Map<TranslationId, Promise<SQLite.SQLiteDatabase>>();
 
-async function getDb(translationId: TranslationId): Promise<SQLite.SQLiteDatabase> {
+function getDb(translationId: TranslationId): Promise<SQLite.SQLiteDatabase> {
   const cached = dbCache.get(translationId);
   if (cached) return cached;
 
@@ -44,11 +51,17 @@ async function getDb(translationId: TranslationId): Promise<SQLite.SQLiteDatabas
     );
   }
 
-  await importDatabaseFromAssetAsync(meta.dbFile, { assetId });
-  const db = await SQLite.openDatabaseAsync(meta.dbFile);
+  const open = (async () => {
+    await importDatabaseFromAssetAsync(meta.dbFile, { assetId, forceOverwrite: false });
+    return SQLite.openDatabaseAsync(meta.dbFile);
+  })();
 
-  dbCache.set(translationId, db);
-  return db;
+  // Drop a rejected open from the cache so a later call can retry rather than
+  // being permanently poisoned by one transient failure.
+  open.catch(() => dbCache.delete(translationId));
+
+  dbCache.set(translationId, open);
+  return open;
 }
 
 export async function getBooks(translationId: TranslationId): Promise<Book[]> {

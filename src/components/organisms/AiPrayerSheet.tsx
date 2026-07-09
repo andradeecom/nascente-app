@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { ActivityIndicator, Pressable, View } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, View } from 'react-native';
 import { StyleSheet, UnistylesRuntime, withUnistyles } from 'react-native-unistyles';
 import { useFocusEffect } from 'expo-router';
 import BottomSheet, {
@@ -138,7 +138,7 @@ const styles = StyleSheet.create((theme) => ({
   },
   scrollContent: {
     paddingHorizontal: theme.spacing[5],
-    paddingBottom: theme.spacing[4],
+    paddingBottom: Platform.OS === 'ios' ? theme.spacing[24] : theme.spacing[4],
     flexGrow: 1,
   },
   centered: {

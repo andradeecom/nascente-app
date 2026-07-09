@@ -1,31 +1,25 @@
-import { ScrollView } from 'react-native';
-import { StyleSheet, withUnistyles } from 'react-native-unistyles';
+import { View } from 'react-native';
+import { StyleSheet } from 'react-native-unistyles';
 import { SafeAreaView } from '@/components/atoms';
-import { Globe, Palette, Type, Bell, HelpCircle, FileText } from 'lucide-react-native';
-import { SettingsProfileCard, SettingsList } from '@/components/organisms';
-import { SettingsRow } from '@/components/molecules';
+import { SettingsProfileCard } from '@/components/organisms';
+import { SettingsGroup, type SettingsGroupSection } from '@/components/molecules';
 import { useAuthStore } from '@/stores/auth';
 import { useTranslate } from '@/i18n';
 import useSettingsScreen from './use-settings-screen';
-
-const ThemedGlobe = withUnistyles(Globe, (theme) => ({ color: theme.colors.semantic.accent }));
-const ThemedPalette = withUnistyles(Palette, (theme) => ({ color: theme.colors.semantic.accent }));
-const ThemedType = withUnistyles(Type, (theme) => ({ color: theme.colors.semantic.accent }));
-const ThemedBell = withUnistyles(Bell, (theme) => ({ color: theme.colors.semantic.accent }));
-const ThemedFileText = withUnistyles(FileText, (theme) => ({ color: theme.colors.semantic.accent }));
-const ThemedHelpCircle = withUnistyles(HelpCircle, (theme) => ({ color: theme.colors.semantic.accent }));
 
 export default function SettingsScreen() {
   const translate = useTranslate();
   const user = useAuthStore((s) => s.user);
   const {
     isAuthenticated,
-    currentThemeLabel,
-    currentLanguageLabel,
+    theme,
+    setTheme,
+    themeOptions,
+    locale,
+    setLocale,
+    languageOptions,
     currentTextSizeLabel,
     handleProfilePress,
-    handleThemePress,
-    handleLanguagePress,
     handleTextSizePress,
     handleNotifications,
     handleCreditsPress,
@@ -34,9 +28,48 @@ export default function SettingsScreen() {
 
   const fullName = user ? `${user.firstName} ${user.lastName}` : undefined;
 
+  const sections: SettingsGroupSection[] = [
+    {
+      key: 'preferences',
+      items: [
+        {
+          type: 'picker',
+          key: 'language',
+          label: translate('settings.language'),
+          options: languageOptions,
+          selectedValue: locale,
+          onValueChange: (value) => setLocale(value as typeof locale),
+        },
+        {
+          type: 'picker',
+          key: 'theme',
+          label: translate('settings.theme'),
+          options: themeOptions,
+          selectedValue: theme,
+          onValueChange: (value) => setTheme(value as typeof theme),
+        },
+      ],
+    },
+    {
+      key: 'general',
+      items: [
+        {
+          type: 'nav',
+          key: 'textSize',
+          label: translate('settings.textSize'),
+          value: currentTextSizeLabel,
+          onPress: handleTextSizePress,
+        },
+        { type: 'nav', key: 'notifications', label: translate('settings.notifications'), onPress: handleNotifications },
+        { type: 'nav', key: 'credits', label: translate('settings.credits.row'), onPress: handleCreditsPress },
+        { type: 'nav', key: 'support', label: translate('settings.support'), onPress: handleSupportPress },
+      ],
+    },
+  ];
+
   return (
-    <SafeAreaView style={styles.safe}>
-      <ScrollView contentContainerStyle={styles.scroll}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
+      <View style={styles.header}>
         <SettingsProfileCard
           isAuthenticated={isAuthenticated}
           name={fullName}
@@ -46,43 +79,10 @@ export default function SettingsScreen() {
           subtitle={translate('settings.syncSubtitle')}
           onPress={handleProfilePress}
         />
+      </View>
 
-        <SettingsList>
-          <SettingsRow
-            icon={<ThemedGlobe size={20} />}
-            label={translate('settings.language')}
-            value={currentLanguageLabel}
-            onPress={handleLanguagePress}
-          />
-          <SettingsRow
-            icon={<ThemedPalette size={20} />}
-            label={translate('settings.theme')}
-            value={currentThemeLabel}
-            onPress={handleThemePress}
-          />
-          <SettingsRow
-            icon={<ThemedType size={20} />}
-            label={translate('settings.textSize')}
-            value={currentTextSizeLabel}
-            onPress={handleTextSizePress}
-          />
-          <SettingsRow
-            icon={<ThemedBell size={20} />}
-            label={translate('settings.notifications')}
-            onPress={handleNotifications}
-          />
-          <SettingsRow
-            icon={<ThemedFileText size={20} />}
-            label={translate('settings.credits.row')}
-            onPress={handleCreditsPress}
-          />
-          <SettingsRow
-            icon={<ThemedHelpCircle size={20} />}
-            label={translate('settings.support')}
-            onPress={handleSupportPress}
-          />
-        </SettingsList>
-      </ScrollView>
+      {/* Native grouped list (SwiftUI Form / Compose) fills the rest of the screen. */}
+      <SettingsGroup sections={sections} />
     </SafeAreaView>
   );
 }
@@ -92,10 +92,9 @@ const styles = StyleSheet.create((theme) => ({
     flex: 1,
     backgroundColor: theme.colors.semantic.bgSecondary,
   },
-  scroll: {
-    flexGrow: 1,
-    gap: theme.spacing[5],
+  header: {
     paddingHorizontal: theme.spacing[5],
-    paddingVertical: theme.spacing[6],
+    paddingTop: theme.spacing[6],
+    paddingBottom: theme.spacing[2],
   },
 }));

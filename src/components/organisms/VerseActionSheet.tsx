@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { Pressable, View } from 'react-native';
+import { Pressable, View, Platform } from 'react-native';
 import { StyleSheet, UnistylesRuntime, withUnistyles } from 'react-native-unistyles';
 import { useFocusEffect } from 'expo-router';
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView, type BottomSheetBackdropProps } from '@gorhom/bottom-sheet';
@@ -209,7 +209,7 @@ const styles = StyleSheet.create((theme) => ({
   content: {
     paddingHorizontal: theme.spacing[5],
     paddingTop: theme.spacing[1],
-    paddingBottom: theme.spacing[8],
+    paddingBottom: Platform.OS === 'ios' ? theme.spacing[24] : theme.spacing[8],
     gap: theme.spacing[2],
   },
   label: {

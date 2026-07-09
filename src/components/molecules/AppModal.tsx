@@ -7,6 +7,10 @@ import { useTranslate } from '@/i18n';
 
 const ThemedX = withUnistyles(X, (theme) => ({ color: theme.colors.semantic.textSecondary }));
 
+// Plain object (not a Unistyles style) — `KeyboardAvoidingView` is Reanimated-based
+// and fails when it receives a style carrying the `unistyles_` marker.
+const flexFill = { flex: 1 } as const;
+
 type AppModalProps = {
   visible: boolean;
   onClose: () => void;
@@ -32,11 +36,11 @@ export function AppModal({ visible, onClose, children, showClose = true, dismiss
           GestureHandlerRootView doesn't reach, so gesture-handler-based
           pressables inside (our `Button` → pressto's PressableScale) get no
           touches without a GHRV of the modal's own. */}
-      <GestureHandlerRootView style={styles.root}>
+      <GestureHandlerRootView style={flexFill}>
         {/* Lift the centered card above the keyboard (e.g. NoteEditorModal's
             autoFocus'd field). rn-keyboard-controller's KeyboardAvoidingView
             works inside RN Modal, unlike RN's own. */}
-        <KeyboardAvoidingView behavior="padding" style={styles.root}>
+        <KeyboardAvoidingView behavior="padding" style={flexFill}>
           <Pressable
             style={styles.backdrop}
             onPress={dismissOnBackdrop ? onClose : undefined}
@@ -60,9 +64,6 @@ export function AppModal({ visible, onClose, children, showClose = true, dismiss
 }
 
 const styles = StyleSheet.create((theme) => ({
-  root: {
-    flex: 1,
-  },
   backdrop: {
     flex: 1,
     alignItems: 'center',

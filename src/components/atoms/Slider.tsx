@@ -43,6 +43,9 @@ export function Slider({ steps, value, onChange }: SliderProps) {
       maximumValue={maximumValue}
       step={1}
       minimumTrackTintColor={colors.semantic.accent}
+      // Android maps this to the inactive track; without it Material fills the
+      // rest of the track with a light-purple that clashes with the theme.
+      maximumTrackTintColor={colors.semantic.bgTertiary}
       thumbTintColor={colors.semantic.accent}
       style={styles.slider}
       // Native slider can report fractional values mid-drag; round to the nearest

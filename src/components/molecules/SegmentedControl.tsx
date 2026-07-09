@@ -47,7 +47,7 @@ export function SegmentedControl<T extends string>({ segments, value, onChange }
       values={values}
       selectedIndex={selectedIndex}
       appearance={themeName === 'dark' ? 'dark' : 'light'}
-      tintColor={colors.semantic.accent}
+      tintColor={colors.semantic.accentSubtle}
       onChange={(e) => {
         const index = e.nativeEvent.selectedSegmentIndex;
         const segment = segments[index];

@@ -41,6 +41,10 @@ export default function TabsLayout() {
         iconColor={colors.semantic.textSecondary}
         labelStyle={{ color: colors.semantic.textSecondary }}
         backgroundColor={colors.semantic.bgPrimary}
+        // Android's Material 3 active-tab indicator (the pill behind the selected
+        // icon) defaults to a fixed light `secondaryContainer` color, ignoring our
+        // theme — visibly wrong in dark/sepia. Theme it explicitly.
+        indicatorColor={colors.semantic.accentSubtle}
         // Stop the tab bar going transparent at a scroll view's top edge. Without
         // this, iOS swaps between the standard and (transparent) scroll-edge
         // appearances as you change tabs / scroll — the visible "flashing".

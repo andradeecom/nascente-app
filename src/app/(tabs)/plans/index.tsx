@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { CalendarCheck, Sparkles } from 'lucide-react-native';
@@ -94,7 +94,7 @@ export default function PlansScreen() {
   );
 
   return (
-    <SafeAreaView edges={['top']} style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={Platform.OS === 'ios' ? ['top', 'bottom'] : ['top']}>
       <FlashList
         data={items}
         keyExtractor={(item) => item.key}

@@ -4,17 +4,12 @@
     "slug": "nascente",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
     "scheme": "nascente",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/images/icon.png",
+      "icon": "./assets/images/nascente.icon",
       "infoPlist": {
-        "CFBundleLocalizations": [
-          "en",
-          "es",
-          "pt"
-        ]
+        "CFBundleLocalizations": ["en", "es", "pt"]
       },
       "bundleIdentifier": "com.andradee.nascente"
     },
@@ -37,7 +32,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#FFFFFF",
+          "backgroundColor": "#F5EFE0",
           "android": {
             "image": "./assets/images/splash-icon.png",
             "imageWidth": 76
@@ -48,16 +43,8 @@
         "expo-localization",
         {
           "supportedLocales": {
-            "ios": [
-              "en",
-              "es",
-              "pt"
-            ],
-            "android": [
-              "en",
-              "es",
-              "pt"
-            ]
+            "ios": ["en", "es", "pt"],
+            "android": ["en", "es", "pt"]
           }
         }
       ],

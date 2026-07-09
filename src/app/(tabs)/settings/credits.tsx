@@ -1,8 +1,9 @@
-import { Linking, ScrollView, View } from 'react-native';
+import { Linking, ScrollView } from 'react-native';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { PressableScale } from 'pressto';
 import { ExternalLink } from 'lucide-react-native';
 import { SafeAreaView, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
+import { Card } from '@/components/molecules';
 import { ScreenHeader } from '@/components/organisms';
 import { TRANSLATION_CREDITS } from '@/types/bible';
 import { spacing } from '@/theme/spacing';
@@ -20,7 +21,7 @@ export default function CreditsScreen() {
   const translate = useTranslate();
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <ScreenHeader title={translate('settings.credits.title')} />
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary} style={styles.intro}>
@@ -28,32 +29,36 @@ export default function CreditsScreen() {
         </Text>
 
         {TRANSLATION_CREDITS.map((credit) => (
-          <View key={credit.id} style={styles.card}>
-            <Text variant={TEXT_VARIANTS.BodyEmphasis}>{credit.title}</Text>
-            <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextSecondary} style={styles.license}>
-              {credit.license}
-            </Text>
-            {credit.copyright && (
-              <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextTertiary}>
-                {credit.copyright}
+          <Card key={credit.id}>
+            <Card.Header>
+              <Text variant={TEXT_VARIANTS.BodyEmphasis}>{credit.title}</Text>
+              <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextSecondary}>
+                {credit.license}
               </Text>
-            )}
-            <PressableScale
-              // Plain (non-Unistyles) object — `PressableScale` (pressto) is
-              // Reanimated-based and a Unistyles `styles.X` trips the "empty
-              // object is not a valid style value" error (the `unistyles_<hash>`
-              // marker never binds on a non-Unistyles surface). `StyleSheet.flatten`
-              // does NOT help (keeps the marker); use a plain object. See
-              // CLAUDE.md → Reanimated + Unistyles.
-              style={linkRow}
-              onPress={() => Linking.openURL(credit.licenseUrl ?? credit.sourceUrl)}
-            >
-              <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.Accent}>
-                {translate('settings.credits.viewLicense')}
-              </Text>
-              <ThemedExternalLink size={13} />
-            </PressableScale>
-          </View>
+            </Card.Header>
+            <Card.Body>
+              {credit.copyright && (
+                <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextTertiary}>
+                  {credit.copyright}
+                </Text>
+              )}
+              <PressableScale
+                // Plain (non-Unistyles) object — `PressableScale` (pressto) is
+                // Reanimated-based and a Unistyles `styles.X` trips the "empty
+                // object is not a valid style value" error (the `unistyles_<hash>`
+                // marker never binds on a non-Unistyles surface). `StyleSheet.flatten`
+                // does NOT help (keeps the marker); use a plain object. See
+                // CLAUDE.md → Reanimated + Unistyles.
+                style={linkRow}
+                onPress={() => Linking.openURL(credit.licenseUrl ?? credit.sourceUrl)}
+              >
+                <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.Accent}>
+                  {translate('settings.credits.viewLicense')}
+                </Text>
+                <ThemedExternalLink size={13} />
+              </PressableScale>
+            </Card.Body>
+          </Card>
         ))}
       </ScrollView>
     </SafeAreaView>
@@ -73,17 +78,6 @@ const styles = StyleSheet.create((theme) => ({
   intro: {
     marginBottom: theme.spacing[2],
   },
-  card: {
-    padding: theme.spacing[4],
-    borderRadius: theme.radius.lg,
-    backgroundColor: theme.colors.semantic.bgPrimary,
-    borderWidth: 1,
-    borderColor: theme.colors.semantic.bgTertiary,
-    gap: theme.spacing[1],
-  },
-  license: {
-    marginBottom: theme.spacing[0.5],
-  },
 }));
 
 // Plain (non-Unistyles) object — this sits on a `PressableScale` (Reanimated);
@@ -94,5 +88,4 @@ const linkRow = {
   flexDirection: 'row',
   alignItems: 'center',
   gap: spacing[1],
-  marginTop: spacing[2],
 } as const;

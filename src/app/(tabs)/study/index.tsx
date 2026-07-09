@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Platform, View } from 'react-native';
 import { FlashList, type FlashListRef } from '@shopify/flash-list';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { NotebookPen, Trash2 } from 'lucide-react-native';
@@ -82,7 +82,7 @@ export default function StudyScreen() {
   );
 
   return (
-    <SafeAreaView edges={['top']} style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={Platform.OS === 'ios' ? ['top', 'bottom'] : ['top']}>
       <View style={styles.header}>
         <Text variant={TEXT_VARIANTS.Title1}>{translate('study.title')}</Text>
         <SegmentedControl segments={segments} value={filter} onChange={setFilter} />

@@ -45,7 +45,7 @@ export const PressableCard = Object.assign(PressableCardRoot, sections);
 const styles = StyleSheet.create((theme) => ({
   card: {
     backgroundColor: theme.colors.semantic.bgPrimary,
-    borderRadius: theme.radius.xl,
+    borderRadius: theme.radius['2xl'],
     padding: theme.spacing[5],
     gap: theme.spacing[3],
     ...theme.shadows.lg,

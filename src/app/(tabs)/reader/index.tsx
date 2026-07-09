@@ -149,7 +149,7 @@ export default function ReaderScreen() {
   ) : null;
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <ReaderHeader
         bookName={bookName}
         chapter={chapter}

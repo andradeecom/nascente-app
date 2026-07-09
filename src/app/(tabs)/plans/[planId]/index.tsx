@@ -93,7 +93,7 @@ export default function PlanDetailScreen() {
   ) : null;
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <ScreenHeader title={plan?.title ?? translate('plans.detailTitle')} onBack={handleBack} />
 
       {isLoading ? (

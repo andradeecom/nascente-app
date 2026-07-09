@@ -63,7 +63,7 @@ const styles = StyleSheet.create((theme) => ({
     paddingVertical: theme.spacing[6],
     borderTopWidth: 1,
     borderTopColor: theme.colors.semantic.bgTertiary,
-    backgroundColor: theme.colors.semantic.bgPrimary,
+    backgroundColor: theme.colors.semantic.bgSecondary,
   },
   navButton: {
     flexDirection: 'row',

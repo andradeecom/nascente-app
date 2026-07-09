@@ -63,7 +63,7 @@ export function ShineButton({ label, onPress }: ShineButtonProps) {
       {box.width > 0 && (
         <Animated.View
           pointerEvents="none"
-          style={[styles.shineBand, { height: bandHeight, top: -(bandHeight - box.height) / 2 }, bandStyle]}
+          style={[shineBand, { height: bandHeight, top: -(bandHeight - box.height) / 2 }, bandStyle]}
         >
           <Svg width={SHINE_BAND} height={bandHeight}>
             <Defs>
@@ -81,14 +81,20 @@ export function ShineButton({ label, onPress }: ShineButtonProps) {
   );
 }
 
+// Plain (non-Unistyles) object — this sits on an `Animated.View`. Merging a
+// Unistyles `styles.X` into an `Animated.*` style array trips Reanimated 4.5's
+// "empty object is not a valid style value" (the entry resolves to {} before the
+// ShadowNode binding populates). See SplashScreen's `flexFill` + CLAUDE.md →
+// Reanimated + Unistyles.
+const shineBand = {
+  position: 'absolute',
+  left: 0,
+  width: SHINE_BAND,
+} as const;
+
 const styles = StyleSheet.create((theme) => ({
   shineClip: {
     borderRadius: theme.radius.lg,
     overflow: 'hidden',
-  },
-  shineBand: {
-    position: 'absolute',
-    left: 0,
-    width: SHINE_BAND,
   },
 }));

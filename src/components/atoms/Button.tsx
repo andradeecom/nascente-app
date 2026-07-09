@@ -29,6 +29,31 @@ type ButtonProps = CustomPressableProps & {
   fullWidth?: boolean;
 };
 
+/**
+ * Convert a `style` prop (possibly a Unistyles `styles.X`, an array, or a plain
+ * object) into a truly plain style object safe to pass to a Reanimated-based
+ * component (`pressto`'s `PressableScale`). Unistyles' Babel plugin adds a
+ * `unistyles_<hash>` marker key (the C++ binding) to processed styles; on a
+ * non-Unistyles surface that marker stays `{}` and Reanimated rejects it, so we
+ * copy only the real style keys, recursing through arrays. `StyleSheet.flatten`
+ * can't be used here — it keeps the marker. See CLAUDE.md → Reanimated + Unistyles.
+ */
+function toPlainStyle(input: unknown): ViewStyle {
+  if (!input) return {};
+  if (Array.isArray(input)) {
+    return input.reduce<ViewStyle>((acc, entry) => Object.assign(acc, toPlainStyle(entry)), {});
+  }
+  if (typeof input !== 'object') return {};
+  const out: Record<string, unknown> = {};
+  for (const key of Object.keys(input)) {
+    if (key.startsWith('unistyles_')) continue;
+    const value = (input as Record<string, unknown>)[key];
+    if (typeof value === 'function') continue;
+    out[key] = value;
+  }
+  return out as ViewStyle;
+}
+
 export function Button({
   variant = BUTTON_VARIANTS.Primary,
   size = BUTTON_SIZES.Medium,
@@ -81,8 +106,23 @@ export function Button({
     ...(disabled && { opacity: 0.5 }),
   };
 
+  // `PressableScale` (pressto) is Reanimated-based. Under Reanimated 4.5 +
+  // Unistyles 3.1 (Expo 57 / RN 0.86), handing it a Unistyles-processed
+  // `styles.X` — which many callers pass as `style` (e.g. `ProLockCard`'s
+  // `styles.cta`) — throws `[Reanimated] Invalid value for "unistyles_<hash>":
+  // an empty object is not a valid style value`: Unistyles' Babel plugin injects
+  // a `unistyles_<hash>` marker prop (the C++ ShadowNode binding) onto the style
+  // object, and since `PressableScale` isn't a Unistyles surface that marker is
+  // never bound, so it stays `{}` and Reanimated's validator rejects it.
+  // `StyleSheet.flatten` does NOT help — it preserves the marker. We instead
+  // strip it to a truly plain object via `toPlainStyle`. `containerStyle` is
+  // already plain; the caller `style` is the one that may carry the marker.
+  // Button re-derives on `themeName` (subscription above), so themed caller
+  // overrides still refresh on a theme switch. See CLAUDE.md → Reanimated + Unistyles.
+  const plainStyle = { ...containerStyle, ...toPlainStyle(style) };
+
   return (
-    <PressableScale style={[containerStyle, style as ViewStyle]} disabled={disabled} {...rest}>
+    <PressableScale style={plainStyle} disabled={disabled} {...rest}>
       {iconPosition === 'left' && icon}
       <Text
         variant={size === BUTTON_SIZES.Small ? TEXT_VARIANTS.Overline : TEXT_VARIANTS.Label}

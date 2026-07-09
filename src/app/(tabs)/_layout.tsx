@@ -1,3 +1,4 @@
+import { ThemeProvider, DarkTheme, DefaultTheme } from 'expo-router';
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { UnistylesRuntime } from 'react-native-unistyles';
 import { useTranslate } from '@/i18n';
@@ -11,15 +12,18 @@ import { useThemeStore } from '@/stores/theme';
  * Material Symbols on Android (`md`) — the hand-drawn `TabIcons` SVG set is no
  * longer wired here.
  *
- * Theming caveat (same as the old JS tab bar): the native tab bar is NOT a
- * Unistyles surface, so its colors don't repaint on a live theme switch on their
- * own. We subscribe to the theme name and read colors from the runtime so these
- * props recompute when the theme changes — mirroring the pattern the old
- * `Tabs`/`Stack` `screenOptions` used (see CLAUDE.md, "Native tabs").
- *
- * We deliberately leave `backgroundColor` unset on light/dark so iOS liquid
- * glass renders (it auto-adapts light/dark). The custom `sepia` theme is not
- * something glass can infer, so we set an explicit opaque background only then.
+ * Theming (native tab bar is NOT a Unistyles surface):
+ * - We subscribe to the theme name and read colors from the runtime so the
+ *   tint/icon/label props recompute on a live theme switch (see CLAUDE.md).
+ * - **`ThemeProvider` is the key to appearance.** The native tab bar follows the
+ *   navigator's color scheme, NOT our Unistyles theme, and NOT necessarily the OS
+ *   appearance. Without it, iOS 26 flashes a light background on tab changes and
+ *   the glass can stick to the *system* light/dark even when the app is in a
+ *   different theme (e.g. app in dark, phone in light → light tab bar). We wrap
+ *   `NativeTabs` in expo-router's `ThemeProvider` driven by OUR theme (`dark` →
+ *   `DarkTheme`; `light`/`sepia` → light) so the bar always matches the app.
+ * - `backgroundColor` is set explicitly per theme so the bar's fill matches the
+ *   app theme rather than relying on the system-glass light/dark inference.
  *
  * Requires a dev/standalone build (native module) — not available in Expo Go.
  */
@@ -28,41 +32,62 @@ export default function TabsLayout() {
 
   const themeName = useThemeStore((s) => s.theme);
   const { colors } = UnistylesRuntime.getTheme(themeName);
+  const isDark = themeName === 'dark';
 
   return (
-    <NativeTabs
-      tintColor={colors.semantic.accent}
-      iconColor={colors.semantic.textSecondary}
-      labelStyle={{ color: colors.semantic.textSecondary }}
-      // Sepia isn't a light/dark variant glass can infer — give it an opaque
-      // themed background; leave light/dark to the system glass.
-      backgroundColor={themeName === 'sepia' ? colors.semantic.bgPrimary : undefined}
-      minimizeBehavior="onScrollDown"
-    >
-      <NativeTabs.Trigger name="index">
-        <NativeTabs.Trigger.Label>{translate('tabs.home')}</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf={{ default: 'house', selected: 'house.fill' }} md="home" />
-      </NativeTabs.Trigger>
+    <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
+      <NativeTabs
+        tintColor={colors.semantic.accent}
+        iconColor={colors.semantic.textSecondary}
+        labelStyle={{ color: colors.semantic.textSecondary }}
+        backgroundColor={colors.semantic.bgPrimary}
+        // Stop the tab bar going transparent at a scroll view's top edge. Without
+        // this, iOS swaps between the standard and (transparent) scroll-edge
+        // appearances as you change tabs / scroll — the visible "flashing".
+        disableTransparentOnScrollEdge
+        minimizeBehavior="onScrollDown"
+        // The native tab bar's chrome (glass background + light/dark appearance)
+        // follows the native UIKit trait, NOT our `ThemeProvider` and NOT the
+        // `backgroundColor` prop — in expo-router 57 those aren't wired into the
+        // iOS tab-bar appearance (it's stubbed), so the bar tracked the OS scheme
+        // (app-in-dark + phone-in-light → light bar) and flickered. These two
+        // host-level react-native-screens props ARE applied natively:
+        //  - `colorScheme` forces the UITabBarController's trait to our theme
+        //    (fixes the stuck-light-in-dark bar),
+        //  - `nativeContainerStyle.backgroundColor` gives the bar an opaque
+        //    themed fill (kills the transparent flash).
+        // Reached via `unstable_nativeProps` (host-level TabsHostProps). See
+        // CLAUDE.md → Native tabs.
+        unstable_nativeProps={{
+          colorScheme: isDark ? 'dark' : 'light',
+          nativeContainerStyle: { backgroundColor: colors.semantic.bgPrimary },
+        }}
+      >
+        <NativeTabs.Trigger name="index">
+          <NativeTabs.Trigger.Label>{translate('tabs.home')}</NativeTabs.Trigger.Label>
+          <NativeTabs.Trigger.Icon sf={{ default: 'house', selected: 'house.fill' }} md="home" />
+        </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="reader">
-        <NativeTabs.Trigger.Label>{translate('tabs.reader')}</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf={{ default: 'book', selected: 'book.fill' }} md="menu_book" />
-      </NativeTabs.Trigger>
+        <NativeTabs.Trigger name="reader">
+          <NativeTabs.Trigger.Label>{translate('tabs.reader')}</NativeTabs.Trigger.Label>
+          <NativeTabs.Trigger.Icon sf={{ default: 'book', selected: 'book.fill' }} md="menu_book" />
+        </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="plans">
-        <NativeTabs.Trigger.Label>{translate('tabs.plans')}</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf="calendar" md="calendar_month" />
-      </NativeTabs.Trigger>
+        <NativeTabs.Trigger name="plans">
+          <NativeTabs.Trigger.Label>{translate('tabs.plans')}</NativeTabs.Trigger.Label>
+          <NativeTabs.Trigger.Icon sf="calendar" md="calendar_month" />
+        </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="study">
-        <NativeTabs.Trigger.Label>{translate('tabs.study')}</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf={{ default: 'bookmark', selected: 'bookmark.fill' }} md="bookmark" />
-      </NativeTabs.Trigger>
+        <NativeTabs.Trigger name="study">
+          <NativeTabs.Trigger.Label>{translate('tabs.study')}</NativeTabs.Trigger.Label>
+          <NativeTabs.Trigger.Icon sf={{ default: 'bookmark', selected: 'bookmark.fill' }} md="bookmark" />
+        </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="settings">
-        <NativeTabs.Trigger.Label>{translate('tabs.settings')}</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf="slider.horizontal.3" md="tune" />
-      </NativeTabs.Trigger>
-    </NativeTabs>
+        <NativeTabs.Trigger name="settings">
+          <NativeTabs.Trigger.Label>{translate('tabs.settings')}</NativeTabs.Trigger.Label>
+          <NativeTabs.Trigger.Icon sf="slider.horizontal.3" md="tune" />
+        </NativeTabs.Trigger>
+      </NativeTabs>
+    </ThemeProvider>
   );
 }

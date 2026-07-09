@@ -5,6 +5,7 @@ import { ExternalLink } from 'lucide-react-native';
 import { SafeAreaView, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { ScreenHeader } from '@/components/organisms';
 import { TRANSLATION_CREDITS } from '@/types/bible';
+import { spacing } from '@/theme/spacing';
 import { useTranslate } from '@/i18n';
 
 const ThemedExternalLink = withUnistyles(ExternalLink, (theme) => ({ color: theme.colors.semantic.accent }));
@@ -38,7 +39,13 @@ export default function CreditsScreen() {
               </Text>
             )}
             <PressableScale
-              style={styles.linkRow}
+              // Plain (non-Unistyles) object — `PressableScale` (pressto) is
+              // Reanimated-based and a Unistyles `styles.X` trips the "empty
+              // object is not a valid style value" error (the `unistyles_<hash>`
+              // marker never binds on a non-Unistyles surface). `StyleSheet.flatten`
+              // does NOT help (keeps the marker); use a plain object. See
+              // CLAUDE.md → Reanimated + Unistyles.
+              style={linkRow}
               onPress={() => Linking.openURL(credit.licenseUrl ?? credit.sourceUrl)}
             >
               <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.Accent}>
@@ -77,10 +84,15 @@ const styles = StyleSheet.create((theme) => ({
   license: {
     marginBottom: theme.spacing[0.5],
   },
-  linkRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: theme.spacing[1],
-    marginTop: theme.spacing[2],
-  },
 }));
+
+// Plain (non-Unistyles) object — this sits on a `PressableScale` (Reanimated);
+// a Unistyles `styles.X` there trips the "empty object" error (see the
+// PressableScale note above). Spacing tokens are theme-independent, so a plain
+// object loses nothing.
+const linkRow = {
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: spacing[1],
+  marginTop: spacing[2],
+} as const;

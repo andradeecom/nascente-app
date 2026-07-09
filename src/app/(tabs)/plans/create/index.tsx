@@ -35,7 +35,7 @@ export default function CreatePlanScreen() {
   } = useCreatePlanScreen();
 
   return (
-    <SafeAreaView edges={['top']} style={styles.safe}>
+    <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
       <ScreenHeader title={translate('aiPlan.title')} onBack={step === 'preview' ? handleBackToInput : undefined} />
 
       {step === 'input' ? (

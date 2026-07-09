@@ -105,7 +105,7 @@ export function AnimatedSun() {
         <Star key={i} top={s.top * SUN_BOX} left={s.left * SUN_BOX} size={s.size} delay={s.delay} color={accent} />
       ))}
 
-      <Animated.View style={[styles.sunLayer, raysStyle]}>
+      <Animated.View style={[sunLayer, raysStyle]}>
         <Svg width={SUN_SIZE} height={SUN_SIZE} viewBox={`0 0 ${VIEWBOX} ${VIEWBOX}`}>
           <Defs>
             {/* One gradient per ray, aligned to the ray's direction (userSpaceOnUse),
@@ -142,7 +142,7 @@ export function AnimatedSun() {
         </Svg>
       </Animated.View>
 
-      <View style={styles.sunLayer}>
+      <View style={sunLayer}>
         <Svg width={SUN_SIZE} height={SUN_SIZE} viewBox={`0 0 ${VIEWBOX} ${VIEWBOX}`}>
           <Circle cx={CENTER} cy={CENTER} r={26} stroke={accent} strokeWidth={1.5} fill="none" opacity={0.4} />
           <Circle cx={CENTER} cy={CENTER} r={15} stroke={accent} strokeWidth={2} fill="none" />
@@ -153,17 +153,24 @@ export function AnimatedSun() {
   );
 }
 
-const styles = StyleSheet.create((theme) => ({
+// Plain (non-Unistyles) object — this static layer sits on an `Animated.View`
+// (the rotating sunburst) and a plain `View`. Merging a Unistyles `styles.X`
+// into an `Animated.*` style array trips Reanimated 4.5's "empty object is not a
+// valid style value" (the Unistyles array entry resolves to {} before the
+// ShadowNode binding populates). Keep it a plain object. See SplashScreen's
+// `flexFill` + CLAUDE.md → Reanimated + Unistyles.
+const sunLayer = {
+  position: 'absolute',
+  width: SUN_SIZE,
+  height: SUN_SIZE,
+  alignItems: 'center',
+  justifyContent: 'center',
+} as const;
+
+const styles = StyleSheet.create(() => ({
   sunBox: {
     width: SUN_BOX,
     height: SUN_BOX,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sunLayer: {
-    position: 'absolute',
-    width: SUN_SIZE,
-    height: SUN_SIZE,
     alignItems: 'center',
     justifyContent: 'center',
   },

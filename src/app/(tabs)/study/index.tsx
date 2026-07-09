@@ -48,7 +48,7 @@ export default function StudyScreen() {
 
   if (!isPro) {
     return (
-      <SafeAreaView edges={['top']} style={styles.safe}>
+      <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
         <View style={styles.content}>
           <Text variant={TEXT_VARIANTS.Title1}>{translate('study.title')}</Text>
           <ProLockCard

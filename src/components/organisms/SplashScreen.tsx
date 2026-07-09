@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { View } from 'react-native';
+import { Text, View } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -80,15 +80,30 @@ export function SplashScreen({ onReady, onFinish }: SplashScreenProps) {
     opacity: screenOpacity.value,
   }));
 
+  // Static Unistyles styles live on plain RN views; each Animated.* carries only
+  // its animated style. Merging a Unistyles style into an Animated.* style array
+  // trips Reanimated 4.5's "empty object is not a valid style value" during the
+  // pre-paint splash window (the Unistyles array entry resolves to {} before the
+  // ShadowNode binding populates). See CLAUDE.md → Reanimated + Unistyles.
   return (
-    <Animated.View style={[styles.container, screenStyle]} onLayout={onReady}>
-      <View style={styles.center}>
-        <Animated.Text style={[styles.letter, letterStyle]}>N</Animated.Text>
+    <Animated.View style={[flexFill, screenStyle]} onLayout={onReady}>
+      <View style={styles.container}>
+        <View style={styles.center}>
+          <Animated.Text style={letterStyle}>
+            <Text style={styles.letter}>N</Text>
+          </Animated.Text>
+        </View>
+        <Animated.Text style={captionStyle}>
+          <Text style={styles.caption}>nascente.app</Text>
+        </Animated.Text>
       </View>
-      <Animated.Text style={[styles.caption, captionStyle]}>nascente.app</Animated.Text>
     </Animated.View>
   );
 }
+
+// Plain (non-Unistyles) object so it can be merged into the Animated.View style
+// array without hitting the Reanimated empty-object validation (see render note).
+const flexFill = { flex: 1 } as const;
 
 const styles = StyleSheet.create((theme) => ({
   container: {

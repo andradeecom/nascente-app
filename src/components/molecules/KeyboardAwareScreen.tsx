@@ -1,5 +1,4 @@
 import { KeyboardAwareScrollView, type KeyboardAwareScrollViewProps } from 'react-native-keyboard-controller';
-import { StyleSheet } from 'react-native-unistyles';
 
 type KeyboardAwareScreenProps = KeyboardAwareScrollViewProps & {
   children: React.ReactNode;
@@ -22,7 +21,7 @@ type KeyboardAwareScreenProps = KeyboardAwareScrollViewProps & {
 export function KeyboardAwareScreen({ children, style, ...rest }: KeyboardAwareScreenProps) {
   return (
     <KeyboardAwareScrollView
-      style={[styles.flex, style]}
+      style={[flexFill, style]}
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode="interactive"
       bottomOffset={24}
@@ -34,8 +33,11 @@ export function KeyboardAwareScreen({ children, style, ...rest }: KeyboardAwareS
   );
 }
 
-const styles = StyleSheet.create(() => ({
-  flex: {
-    flex: 1,
-  },
-}));
+// Plain (non-Unistyles) object — `KeyboardAwareScrollView` is Reanimated-based.
+// Merging a Unistyles `styles.X` into its style array trips Reanimated 4.5's
+// "empty object is not a valid style value" (the entry resolves to {} before the
+// ShadowNode binding populates). See SplashScreen's `flexFill` + CLAUDE.md →
+// Reanimated + Unistyles.
+const flexFill = {
+  flex: 1,
+} as const;

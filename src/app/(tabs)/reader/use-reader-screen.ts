@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import { useVerses, useBookName } from '@/hooks/use-bible';
+import { hapticSelect, hapticConfirm, hapticSuccess, hapticWarning } from '@/lib/haptics';
 import { useReaderStore } from '@/stores/reader';
 import { usePlanReadingStore } from '@/stores/plan-reading';
 import { useReadingProgressStore } from '@/stores/reading-progress';
@@ -140,6 +141,7 @@ export default function useReaderScreen() {
           // Show the celebration modal; session clear + navigate-back happen when
           // the user taps Continue (see handlePlanCompleteContinue), so navigating
           // away doesn't unmount the modal before it's seen.
+          hapticSuccess();
           setPlanComplete({ finished });
         },
         onError: () => {
@@ -161,6 +163,7 @@ export default function useReaderScreen() {
   const handleVersePress = useCallback(
     (verse: number) => {
       if (!isPro) return;
+      hapticSelect();
       setSelectedVerse(verse);
     },
     [isPro]
@@ -169,6 +172,7 @@ export default function useReaderScreen() {
   const handlePickColor = useCallback(
     (color: HighlightColor) => {
       if (selectedVerse == null) return;
+      hapticConfirm();
       setHighlight(bookId, chapter, selectedVerse, color);
       setSelectedVerse(null);
     },
@@ -184,6 +188,7 @@ export default function useReaderScreen() {
   // Bookmark toggles in place (sheet stays open so the state change is visible).
   const handleToggleBookmark = useCallback(() => {
     if (selectedVerse == null) return;
+    hapticConfirm();
     toggleBookmark(bookId, chapter, selectedVerse);
   }, [selectedVerse, bookId, chapter, toggleBookmark]);
 
@@ -202,6 +207,7 @@ export default function useReaderScreen() {
   const handleSaveNote = useCallback(
     (body: string) => {
       if (noteVerse == null) return;
+      hapticConfirm();
       setNote(bookId, chapter, noteVerse, body);
       setNoteVerse(null);
     },
@@ -210,6 +216,7 @@ export default function useReaderScreen() {
 
   const handleDeleteNote = useCallback(() => {
     if (noteVerse == null) return;
+    hapticWarning();
     removeNote(bookId, chapter, noteVerse);
     setNoteVerse(null);
   }, [noteVerse, bookId, chapter, removeNote]);

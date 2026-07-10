@@ -4,6 +4,7 @@ import { StyleSheet, UnistylesRuntime, withUnistyles } from 'react-native-unisty
 import { Check, ChevronRight } from 'lucide-react-native';
 import { TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { useTranslate } from '@/i18n';
+import { hapticConfirm } from '@/lib/haptics';
 import { useThemeStore } from '@/stores/theme';
 import type { PlanDayGroup } from '@/types/reading-plans';
 
@@ -55,7 +56,10 @@ export function PlanDayRow({ item, isEnrolled, markingDay, onToggleComplete, onO
     <PressableScale style={dayRowStyle} onPress={() => onOpenReading(item)}>
       {isEnrolled ? (
         <PressableScale
-          onPress={() => onToggleComplete(item)}
+          onPress={() => {
+            hapticConfirm();
+            onToggleComplete(item);
+          }}
           disabled={item.completed || markingDay === item.day}
           hitSlop={8}
           accessibilityRole="checkbox"

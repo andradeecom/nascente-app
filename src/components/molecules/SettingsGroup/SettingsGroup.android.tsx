@@ -12,6 +12,7 @@ import {
   Shapes,
 } from '@expo/ui/jetpack-compose/modifiers';
 import { UnistylesRuntime } from 'react-native-unistyles';
+import { hapticSelect } from '@/lib/haptics';
 import { useThemeStore } from '@/stores/theme';
 import type { SettingsGroupProps, SettingsPickerItem } from './SettingsGroup.types';
 
@@ -115,7 +116,10 @@ function PickerRow({ item, textColor, pillBg }: { item: SettingsPickerItem; text
               elementColors={{ textColor }}
               onClick={() => {
                 setExpanded(false);
-                if (option.value !== item.selectedValue) item.onValueChange(option.value);
+                if (option.value !== item.selectedValue) {
+                  hapticSelect();
+                  item.onValueChange(option.value);
+                }
               }}
             >
               <DropdownMenuItem.Text>

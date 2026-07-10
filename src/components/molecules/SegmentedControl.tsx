@@ -1,5 +1,6 @@
 import { SegmentedControl as ExpoSegmentedControl } from '@expo/ui/community/segmented-control';
 import { UnistylesRuntime } from 'react-native-unistyles';
+import { hapticSelect } from '@/lib/haptics';
 import { useThemeStore } from '@/stores/theme';
 
 export type Segment<T extends string> = {
@@ -51,7 +52,10 @@ export function SegmentedControl<T extends string>({ segments, value, onChange }
       onChange={(e) => {
         const index = e.nativeEvent.selectedSegmentIndex;
         const segment = segments[index];
-        if (segment && segment.key !== value) onChange(segment.key);
+        if (segment && segment.key !== value) {
+          hapticSelect();
+          onChange(segment.key);
+        }
       }}
     />
   );

@@ -4,6 +4,7 @@ import { Check, Lock, X } from 'lucide-react-native';
 import { SafeAreaView, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { useTranslate } from '@/i18n';
 import { useIsPro } from '@/hooks/use-profile';
+import { hapticSelect } from '@/lib/haptics';
 import { FREE_TRANSLATIONS, PRO_TRANSLATIONS, type TranslationId, type TranslationMeta } from '@/types/bible';
 
 const ThemedX = withUnistyles(X, (theme) => ({ color: theme.colors.semantic.textSecondary }));
@@ -59,7 +60,14 @@ export function TranslationPicker({ visible, currentId, onSelect, onUpsell, onCl
             const locked = section.tier === 'pro' && !isPro;
             return (
               <Pressable
-                onPress={() => (locked ? onUpsell() : onSelect(item.id))}
+                onPress={() => {
+                  if (locked) {
+                    onUpsell();
+                    return;
+                  }
+                  hapticSelect();
+                  onSelect(item.id);
+                }}
                 style={({ pressed }) => [styles.row, pressed && styles.pressed]}
               >
                 <View style={styles.rowContent}>

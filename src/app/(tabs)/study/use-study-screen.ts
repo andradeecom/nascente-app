@@ -9,6 +9,7 @@ import { useIsPro } from '@/hooks/use-profile';
 import { useAuthStore } from '@/stores/auth';
 import { useReaderStore } from '@/stores/reader';
 import { useTranslate } from '@/i18n';
+import { hapticWarning } from '@/lib/haptics';
 import { getBookName, getVerses } from '@/services/bible';
 import { syncAll } from '@/services/sync';
 import type { Bookmark, Highlight, HighlightColor, Note } from '@/types/study';
@@ -212,6 +213,7 @@ export default function useStudyScreen() {
   // it syncs), then push. The store writes are reactive, so the list re-derives on
   // its own; we just kick a sync to propagate the tombstones. No-op on "All".
   const confirmClearAll = useCallback(() => {
+    hapticWarning();
     if (clearFilter === 'highlights') clearAllHighlights();
     else if (clearFilter === 'notes') clearAllNotes();
     else if (clearFilter === 'bookmarks') clearAllBookmarks();

@@ -18,6 +18,7 @@ import {
   listRowBackground,
 } from '@expo/ui/swift-ui/modifiers';
 import { UnistylesRuntime } from 'react-native-unistyles';
+import { hapticSelect } from '@/lib/haptics';
 import { useThemeStore } from '@/stores/theme';
 import type { SettingsGroupProps, SettingsGroupItem } from './SettingsGroup.types';
 
@@ -72,7 +73,10 @@ function renderItem(item: SettingsGroupItem, secondaryColor: string) {
         label={item.label}
         selection={item.selectedValue}
         onSelectionChange={(value) => {
-          if (value != null && value !== item.selectedValue) item.onValueChange(value as string);
+          if (value != null && value !== item.selectedValue) {
+            hapticSelect();
+            item.onValueChange(value as string);
+          }
         }}
       >
         {item.options.map((option) => (

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
+import { hapticSelect } from '@/lib/haptics';
 import { useLocaleStore } from '@/stores/locale';
 import { LOCALE_OPTIONS, Locales } from '@/types';
 
@@ -12,6 +13,7 @@ export default function useOnboardingScreen() {
   });
 
   const handleSelect = (locale: Locales) => {
+    hapticSelect();
     setSelected(locale);
     setLocale(locale);
   };

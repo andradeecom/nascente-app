@@ -5,7 +5,7 @@ import { useVerses, useBookName } from '@/hooks/use-bible';
 import { hapticSelect, hapticConfirm, hapticSuccess, hapticWarning } from '@/lib/haptics';
 import { useReaderStore } from '@/stores/reader';
 import { usePlanReadingStore } from '@/stores/plan-reading';
-import { useReadingProgressStore } from '@/stores/reading-progress';
+import { computeStreak, useReadingProgressStore } from '@/stores/reading-progress';
 import { useIsPro } from '@/hooks/use-profile';
 import { useMarkPlanDayComplete } from '@/hooks/use-reading-plans';
 import { useChapterHighlights, useHighlightActions } from '@/hooks/use-highlights';
@@ -16,6 +16,7 @@ import { useTranslate } from '@/i18n';
 import { getMaxChapter } from '@/services/bible';
 import { useLocaleStore } from '@/stores/locale';
 import { useAiGenerate } from '@/hooks/use-ai-generate';
+import { maybeRequestReview } from '@/lib/review-prompt';
 import type { TranslationId } from '@/types/bible';
 import type { HighlightColor } from '@/types/study';
 import type { AiGenerateError } from '@/types/ai';
@@ -33,6 +34,7 @@ export default function useReaderScreen() {
   const clearSession = usePlanReadingStore((s) => s.clearSession);
   const markComplete = useMarkPlanDayComplete();
   const markChapterRead = useReadingProgressStore((s) => s.markChapterRead);
+  const readDays = useReadingProgressStore((s) => s.readDays);
 
   // Highlights + bookmarks (Pro only). Per-chapter lookups feed both the
   // verse rendering and the open action sheet.
@@ -127,6 +129,17 @@ export default function useReaderScreen() {
     }
   }, [isLoading, verses, bookId, chapter, markChapterRead]);
 
+  // Second review-prompt trigger, for free/guest readers only — Pro users are
+  // already covered by the whole-plan-completion trigger above, and gating this
+  // to non-Pro avoids the two triggers racing for the same once-per-install ask.
+  // A 3-day reading streak is an early but real satisfaction signal for readers
+  // who may never touch Pro-gated Plans. Reacts to `readDays` itself (not the
+  // per-chapter effect above) so it only fires the day the streak advances, not
+  // on every chapter view.
+  useEffect(() => {
+    if (!isPro && computeStreak(readDays) === 3) void maybeRequestReview();
+  }, [isPro, readDays]);
+
   // Offer "finish today's reading" only when reading the active plan day's last
   // chapter — reachable by scrolling to the end of the passage (the CTA lives in
   // the list footer), so it's an intentional, read-through completion.
@@ -152,10 +165,13 @@ export default function useReaderScreen() {
   }, [session, markComplete, translate]);
 
   const handlePlanCompleteContinue = useCallback(() => {
+    // Finishing a whole plan is a high-satisfaction "goal achieved" moment —
+    // ask after the celebration lands, not on top of it.
+    if (planComplete?.finished) void maybeRequestReview();
     setPlanComplete(null);
     clearSession();
     if (router.canGoBack()) router.back();
-  }, [clearSession, router]);
+  }, [planComplete, clearSession, router]);
 
   // Verse study actions are Pro. The verse is only rendered as a pressable for Pro
   // users (see the Reader's renderVerse — non-Pro verses are plain, non-interactive

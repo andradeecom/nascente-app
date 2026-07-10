@@ -1,16 +1,27 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { hapticSelect } from '@/lib/haptics';
 import { useLocaleStore } from '@/stores/locale';
 import { LOCALE_OPTIONS, Locales } from '@/types';
+
+const DEFAULT_LOCALE: Locales = 'pt';
 
 export default function useOnboardingScreen() {
   const router = useRouter();
   const setLocale = useLocaleStore((s) => s.setLocale);
   const [selected, setSelected] = useState<Locales>(() => {
     const current = useLocaleStore.getState().locale;
-    return LOCALE_OPTIONS.includes(current as Locales) ? (current as Locales) : 'pt';
+    return LOCALE_OPTIONS.includes(current as Locales) ? (current as Locales) : DEFAULT_LOCALE;
   });
+
+  // Ensure the store/i18n actually reflect what the screen shows as selected,
+  // even if the user proceeds without tapping any option.
+  useEffect(() => {
+    const current = useLocaleStore.getState().locale;
+    if (current !== selected) {
+      setLocale(selected);
+    }
+  }, [selected, setLocale]);
 
   const handleSelect = (locale: Locales) => {
     hapticSelect();

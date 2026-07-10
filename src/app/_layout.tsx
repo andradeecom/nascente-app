@@ -18,7 +18,7 @@ import { getLocales } from 'expo-localization';
 import { i18n } from '@/i18n';
 import { configureRevenueCat } from '@/lib/revenuecat';
 
-i18n.locale = getLocales()[0]?.languageTag || 'en';
+i18n.locale = getLocales()[0]?.languageTag || 'pt';
 i18n.enableFallback = true;
 
 // Configure RevenueCat once, before any offerings/purchase call. No-ops without a

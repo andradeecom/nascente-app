@@ -12,7 +12,7 @@ type LocaleState = {
 export const useLocaleStore = create<LocaleState>()(
   persist(
     (set) => ({
-      locale: null,
+      locale: 'pt',
       setLocale: (locale: Locales) => {
         set({ locale });
         i18n.locale = locale;

@@ -48,6 +48,8 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: theme.colors.semantic.bgPrimary,
+    borderColor: theme.colors.semantic.accentSubtle,
+    borderWidth: 1,
     overflow: 'hidden',
   },
   image: {

@@ -16,7 +16,6 @@ export function SectionHeader({ title }: SectionHeaderProps) {
 
 const styles = StyleSheet.create((theme) => ({
   title: {
-    marginBottom: theme.spacing[3],
     textTransform: 'uppercase',
   },
 }));

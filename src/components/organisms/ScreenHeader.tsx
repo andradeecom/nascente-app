@@ -11,26 +11,34 @@ type ScreenHeaderProps = {
   /** Hide the back button (e.g. for a root screen that still wants the header). */
   showBack?: boolean;
   onBack?: () => void;
+  /**
+   * Optional content pinned to the top-right of the header (e.g. a mode toggle).
+   * Sits in the slot that otherwise holds an invisible spacer mirroring the back
+   * button, so the centered title stays centered.
+   */
+  right?: React.ReactNode;
 };
 
-export function ScreenHeader({ title, showBack = true, onBack }: ScreenHeaderProps) {
+export function ScreenHeader({ title, showBack = true, onBack, right }: ScreenHeaderProps) {
   const router = useRouter();
   const handleBack = onBack ?? (() => router.back());
 
   return (
     <View style={styles.row}>
-      {showBack ? (
-        <Pressable onPress={handleBack} hitSlop={8} style={({ pressed }) => [styles.back, pressed && styles.pressed]}>
-          <ThemedChevronLeft size={26} />
-        </Pressable>
-      ) : (
-        <View style={styles.back} />
-      )}
-      <Text variant={TEXT_VARIANTS.Title3} style={styles.title} numberOfLines={1}>
-        {title}
-      </Text>
-      {/* Spacer mirrors the back button so the title stays centered. */}
-      <View style={styles.back} />
+      <View style={styles.backContainer}>
+        {showBack ? (
+          <Pressable onPress={handleBack} hitSlop={8} style={({ pressed }) => [styles.back, pressed && styles.pressed]}>
+            <ThemedChevronLeft size={26} />
+          </Pressable>
+        ) : (
+          <View style={styles.back} />
+        )}
+        <Text variant={TEXT_VARIANTS.Title3} numberOfLines={1}>
+          {title}
+        </Text>
+      </View>
+      {/* Right slot; falls back to a spacer mirroring the back button so the title stays centered. */}
+      <View style={styles.right}>{right}</View>
     </View>
   );
 }
@@ -39,8 +47,14 @@ const styles = StyleSheet.create((theme) => ({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: theme.spacing[3],
     paddingVertical: theme.spacing[3],
+  },
+  backContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing[2],
   },
   back: {
     width: 40,
@@ -48,11 +62,13 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  right: {
+    minWidth: 40,
+    height: 40,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+  },
   pressed: {
     opacity: 0.6,
-  },
-  title: {
-    flex: 1,
-    textAlign: 'center',
   },
 }));

@@ -1,4 +1,4 @@
-import { Linking, ScrollView } from 'react-native';
+import { Linking, Platform, ScrollView } from 'react-native';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { PressableScale } from 'pressto';
 import { ExternalLink } from 'lucide-react-native';
@@ -21,7 +21,7 @@ export default function CreditsScreen() {
   const translate = useTranslate();
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.safe} edges={Platform.select({ ios: ['top', 'bottom'], android: ['top'] })}>
       <ScreenHeader title={translate('settings.credits.title')} />
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary} style={styles.intro}>

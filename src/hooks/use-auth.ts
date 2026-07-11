@@ -83,6 +83,39 @@ export function useGoogleLogin() {
   });
 }
 
+export function useUpdateProfile() {
+  const queryClient = useQueryClient();
+  const setAuth = useAuthStore((state) => state.setAuth);
+
+  return useMutation({
+    // Updates the editable profile fields (first/last name, photo). These live in
+    // Supabase auth `user_metadata`, so `updateUser({ data })` is the write path — it
+    // returns the refreshed user, which we map + push to the store and query cache so
+    // the UI updates immediately (the onAuthStateChange USER_UPDATED listener also
+    // fires, but we don't wait on its async round-trip). Email is intentionally not
+    // editable here (changing it triggers a re-confirmation flow — out of scope).
+    mutationFn: async ({
+      firstName,
+      lastName,
+      profileImageUrl,
+    }: {
+      firstName: string;
+      lastName: string;
+      profileImageUrl?: string | null;
+    }) => {
+      const { data, error } = await supabase.auth.updateUser({
+        data: { firstName, lastName, profileImageUrl },
+      });
+      if (error) throw error;
+      return toAppUser(data.user);
+    },
+    onSuccess: (user) => {
+      setAuth(user);
+      queryClient.setQueryData(authKeys.me, user);
+    },
+  });
+}
+
 export function useForgotPassword() {
   return useMutation({
     mutationFn: async (email: string) => {

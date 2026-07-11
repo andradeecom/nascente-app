@@ -146,7 +146,7 @@ const styles = StyleSheet.create((theme) => ({
   safe: {
     flex: 1,
     backgroundColor: theme.colors.semantic.bgSecondary,
-    paddingHorizontal: theme.spacing[5],
+    paddingHorizontal: theme.spacing[3],
     gap: theme.spacing[3],
   },
   header: {
@@ -164,6 +164,7 @@ const styles = StyleSheet.create((theme) => ({
   listContent: {
     paddingTop: theme.spacing[3],
     paddingBottom: theme.spacing[8],
+    paddingHorizontal: theme.spacing[2],
   },
   centered: {
     alignItems: 'center',

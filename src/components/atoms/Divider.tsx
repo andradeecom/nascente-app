@@ -29,7 +29,7 @@ const styles = StyleSheet.create((theme) => ({
   line: {
     flex: 1,
     height: 1,
-    backgroundColor: theme.colors.semantic.bgTertiary,
+    backgroundColor: theme.colors.semantic.textSecondary,
   },
   label: {
     paddingHorizontal: theme.spacing[1],

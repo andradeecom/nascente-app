@@ -10,7 +10,7 @@ export default function RegisterScreen() {
   const { handleRegister, handleGoogleRegister, handleAppleRegister, isLoading } = useRegisterScreen();
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <BackButton />
       <KeyboardAwareScreen contentContainerStyle={styles.scroll}>
         <RegisterCard
@@ -38,7 +38,7 @@ const styles = StyleSheet.create((theme) => ({
     flexGrow: 1,
     justifyContent: 'center',
     paddingHorizontal: theme.spacing[5],
-    paddingVertical: theme.spacing[6],
+    paddingVertical: theme.spacing[3],
   },
   footerLink: {
     alignSelf: 'center',

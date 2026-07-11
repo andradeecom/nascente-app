@@ -1,15 +1,18 @@
 import { useMemo, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Linking, Pressable, View } from 'react-native';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { useForm, Controller } from 'react-hook-form';
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema';
 import { Eye, EyeOff } from 'lucide-react-native';
 import { Button, Divider, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
-import { InputField, SocialButton } from '@/components/molecules';
+import { Card, InputField, SocialButton } from '@/components/molecules';
 import { createRegisterSchema, type RegisterFormData } from '@/schemas/register';
 import { useTranslate } from '@/i18n';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '../atoms/Button';
 import { PROVIDERS } from '@/types/providers';
+
+const TERMS_URL = process.env.EXPO_PUBLIC_TERMS_URL || 'https://nascente.app/terms';
+const PRIVACY_URL = process.env.EXPO_PUBLIC_PRIVACY_URL || 'https://nascente.app/privacy';
 
 const ThemedEye = withUnistyles(Eye, (theme) => ({ color: theme.colors.semantic.textSecondary }));
 const ThemedEyeOff = withUnistyles(EyeOff, (theme) => ({ color: theme.colors.semantic.textSecondary }));
@@ -54,17 +57,17 @@ export function RegisterCard({ onRegister, onRegisterWithGoogle, onRegisterWithA
   }
 
   return (
-    <View style={styles.card}>
-      <View style={styles.header}>
-        <Text variant={TEXT_VARIANTS.Title1} style={styles.title}>
+    <Card style={styles.card}>
+      <Card.Header style={styles.header}>
+        <Text variant={TEXT_VARIANTS.Title2} style={styles.title}>
           {t('register.title')}
         </Text>
         <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary}>
           {t('register.subtitle')}
         </Text>
-      </View>
+      </Card.Header>
 
-      <View style={styles.form}>
+      <Card.Body style={styles.form}>
         <View style={styles.nameRow}>
           <View style={styles.nameField}>
             <Controller
@@ -162,15 +165,36 @@ export function RegisterCard({ onRegister, onRegisterWithGoogle, onRegisterWithA
           onPress={() => handleSubmit(onSubmit)()}
           disabled={isLoading}
         />
-      </View>
+      </Card.Body>
 
-      <Divider label={t('register.or')} />
+      <Card.Footer style={styles.footer}>
+        <Divider label={t('register.or')} />
 
-      <View style={styles.socialButtons}>
-        <SocialButton provider={PROVIDERS.Google} onPress={onRegisterWithGoogle} />
-        <SocialButton provider={PROVIDERS.Apple} onPress={onRegisterWithApple} />
-      </View>
-    </View>
+        <View style={styles.socialButtons}>
+          <SocialButton provider={PROVIDERS.Google} onPress={onRegisterWithGoogle} />
+          <SocialButton provider={PROVIDERS.Apple} onPress={onRegisterWithApple} />
+        </View>
+
+        <View style={styles.legalRow}>
+          <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextTertiary}>
+            {t('register.legalPrefix')}
+          </Text>
+          <Pressable onPress={() => Linking.openURL(TERMS_URL)} hitSlop={8} accessibilityRole="button">
+            <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextSecondary} style={styles.legalLink}>
+              {t('register.termsOfService')}
+            </Text>
+          </Pressable>
+          <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextTertiary}>
+            {t('register.legalAnd')}
+          </Text>
+          <Pressable onPress={() => Linking.openURL(PRIVACY_URL)} hitSlop={8} accessibilityRole="button">
+            <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextSecondary} style={styles.legalLink}>
+              {t('register.privacyPolicy')}
+            </Text>
+          </Pressable>
+        </View>
+      </Card.Footer>
+    </Card>
   );
 }
 
@@ -180,7 +204,6 @@ const styles = StyleSheet.create((theme) => ({
     borderRadius: theme.radius.xl,
     padding: theme.spacing[6],
     gap: theme.spacing[6],
-    ...theme.shadows.lg,
   },
   header: {
     alignItems: 'center',
@@ -199,7 +222,23 @@ const styles = StyleSheet.create((theme) => ({
   nameField: {
     flex: 1,
   },
+  footer: {
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    justifyContent: 'flex-start',
+    gap: theme.spacing[4],
+  },
   socialButtons: {
     gap: theme.spacing[3],
+  },
+  legalRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: theme.spacing[1],
+  },
+  legalLink: {
+    textDecorationLine: 'underline',
   },
 }));

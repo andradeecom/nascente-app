@@ -5,7 +5,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema';
 import { Eye, EyeOff } from 'lucide-react-native';
 import { Button, Divider, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
-import { InputField, SocialButton } from '@/components/molecules';
+import { Card, InputField, SocialButton } from '@/components/molecules';
 import { createLoginSchema, type LoginFormData } from '@/schemas/login';
 import { useTranslate } from '@/i18n';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '../atoms/Button';
@@ -60,17 +60,17 @@ export function LoginCard({
   }
 
   return (
-    <View style={styles.card}>
-      <View style={styles.header}>
+    <Card style={styles.card}>
+      <Card.Header style={styles.header}>
         <Text variant={TEXT_VARIANTS.Title1} style={styles.title}>
           {t('login.title')}
         </Text>
         <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary}>
           {t('login.subtitle')}
         </Text>
-      </View>
+      </Card.Header>
 
-      <View style={styles.form}>
+      <Card.Body style={styles.form}>
         <Controller
           control={control}
           name="email"
@@ -116,15 +116,16 @@ export function LoginCard({
           onPress={() => handleSubmit(onSubmit)()}
           disabled={isLoading}
         />
-      </View>
+      </Card.Body>
 
-      <Divider label={t('login.or')} />
-
-      <View style={styles.socialButtons}>
-        <SocialButton provider={PROVIDERS.Google} onPress={onLoginWithGoogle} />
-        <SocialButton provider={PROVIDERS.Apple} onPress={onLoginWithApple} />
-      </View>
-    </View>
+      <Card.Footer style={styles.footer}>
+        <Divider label={t('login.or')} />
+        <View style={styles.socialButtons}>
+          <SocialButton provider={PROVIDERS.Google} onPress={onLoginWithGoogle} />
+          <SocialButton provider={PROVIDERS.Apple} onPress={onLoginWithApple} />
+        </View>
+      </Card.Footer>
+    </Card>
   );
 }
 
@@ -134,7 +135,6 @@ const styles = StyleSheet.create((theme) => ({
     borderRadius: theme.radius.xl,
     padding: theme.spacing[6],
     gap: theme.spacing[6],
-    ...theme.shadows.lg,
   },
   header: {
     alignItems: 'center',
@@ -144,6 +144,12 @@ const styles = StyleSheet.create((theme) => ({
     textAlign: 'center',
   },
   form: {
+    gap: theme.spacing[4],
+  },
+  footer: {
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    justifyContent: 'flex-start',
     gap: theme.spacing[4],
   },
   socialButtons: {

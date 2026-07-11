@@ -49,6 +49,10 @@ const en = {
     continueWithApple: 'Continue with Apple',
     alreadyHaveAccount: 'Already have an account?',
     signIn: 'Sign In',
+    legalPrefix: 'By creating an account, you agree to our',
+    legalAnd: 'and',
+    termsOfService: 'Terms of Service',
+    privacyPolicy: 'Privacy Policy',
   },
   forgotPassword: {
     title: 'Forgot Password?',

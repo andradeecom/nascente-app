@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { ActivityIndicator, Platform, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { FlashList, type FlashListRef } from '@shopify/flash-list';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { NotebookPen, Trash2 } from 'lucide-react-native';
@@ -48,7 +48,7 @@ export default function StudyScreen() {
 
   if (!isPro) {
     return (
-      <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
+      <SafeAreaView edges={['top']} style={styles.safe}>
         <View style={styles.content}>
           <Text variant={TEXT_VARIANTS.Title1}>{translate('study.title')}</Text>
           <ProLockCard
@@ -82,7 +82,7 @@ export default function StudyScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.safe} edges={Platform.OS === 'ios' ? ['top', 'bottom'] : ['top']}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.header}>
         <Text variant={TEXT_VARIANTS.Title1}>{translate('study.title')}</Text>
         <SegmentedControl segments={segments} value={filter} onChange={setFilter} />
@@ -163,7 +163,7 @@ const styles = StyleSheet.create((theme) => ({
   },
   listContent: {
     paddingTop: theme.spacing[3],
-    paddingBottom: theme.spacing[8],
+    paddingBottom: theme.spacing[24],
     paddingHorizontal: theme.spacing[2],
   },
   centered: {

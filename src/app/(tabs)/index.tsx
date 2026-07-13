@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Platform, ScrollView } from 'react-native';
+import { ScrollView } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { CalendarCheck } from 'lucide-react-native';
 import { SafeAreaView } from '@/components/atoms';
@@ -56,7 +56,7 @@ export default function HomeScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.safe} edges={Platform.OS === 'ios' ? ['top', 'bottom'] : ['top']}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <WelcomeHeader greeting={translate(greetingKey)} subtitle={translate(subtitleKey)} timeOfDay={timeOfDay} />
 

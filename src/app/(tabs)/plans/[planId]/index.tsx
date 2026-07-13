@@ -1,4 +1,4 @@
-import { ActivityIndicator, Platform, View, type ViewStyle } from 'react-native';
+import { ActivityIndicator, View, type ViewStyle } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { Button, SafeAreaView, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
@@ -93,7 +93,7 @@ export default function PlanDetailScreen() {
   ) : null;
 
   return (
-    <SafeAreaView style={styles.safe} edges={Platform.OS === 'ios' ? ['top', 'bottom'] : ['top']}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
       <ScreenHeader title={plan?.title ?? translate('plans.detailTitle')} onBack={handleBack} />
 
       {isLoading ? (
@@ -144,7 +144,7 @@ const styles = StyleSheet.create((theme) => ({
   listContent: {
     paddingHorizontal: theme.spacing[5],
     paddingTop: theme.spacing[2],
-    paddingBottom: theme.spacing[8],
+    paddingBottom: theme.spacing[24],
   },
   header: {
     gap: theme.spacing[5],

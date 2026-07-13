@@ -65,7 +65,10 @@ declare module 'react-native-unistyles' {
 
 StyleSheet.configure({
   settings: {
-    initialTheme: 'light',
+    // Sepia is the default app theme — matches the theme store's initial value
+    // (`src/stores/theme.ts`). This is the pre-hydration paint; the store's
+    // `onRehydrateStorage` then applies any persisted user choice.
+    initialTheme: 'sepia',
   },
   breakpoints,
   themes: appThemes,

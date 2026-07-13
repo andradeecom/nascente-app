@@ -15,7 +15,9 @@ type ThemeState = {
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set) => ({
-      theme: 'light',
+      // Sepia is the default app theme (warm, paper-like) — matches
+      // `initialTheme` in `src/theme/config.ts`.
+      theme: 'sepia',
       hasHydrated: false,
       setTheme: (theme: ThemeName) => {
         set({ theme });

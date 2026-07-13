@@ -11,6 +11,7 @@ export { SuggestedPlanCard } from './SuggestedPlanCard';
 export { BookChapterPicker } from './BookChapterPicker';
 export { TranslationPicker } from './TranslationPicker';
 export { WelcomeHeader } from './WelcomeHeader';
+export type { TimeOfDay } from './WelcomeHeader';
 export { AnimatedSun } from './AnimatedSun';
 export { VerseOfTheDayCard } from './VerseOfTheDayCard';
 export { ContinueReadingCard } from './ContinueReadingCard';

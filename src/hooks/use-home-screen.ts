@@ -14,6 +14,7 @@ import { useAiGenerate } from '@/hooks/use-ai-generate';
 import { TOTAL_BIBLE_CHAPTERS, TRANSLATIONS } from '@/types/bible';
 import { VERSES_OF_THE_DAY } from '@/data/verses-of-the-day';
 import type { AiGenerateError } from '@/types/ai';
+import type { TimeOfDay } from '@/components/organisms';
 
 // ── Verse of the day ────────────────────────────────────────────────────────
 // Curated references live in `@/data/verses-of-the-day` (coordinates only); the
@@ -26,14 +27,25 @@ function pickRandomVerseRef() {
 
 // ── Time-of-day greeting ────────────────────────────────────────────────────
 
-type GreetingKey = 'home.greetingMorning' | 'home.greetingAfternoon' | 'home.greetingEvening';
-
-function getGreetingKey(): GreetingKey {
+// Single time bucket drives the welcome card scene + its greeting/subtitle copy.
+function getTimeOfDay(): TimeOfDay {
   const hour = new Date().getHours();
-  if (hour < 12) return 'home.greetingMorning';
-  if (hour < 18) return 'home.greetingAfternoon';
-  return 'home.greetingEvening';
+  if (hour < 12) return 'morning';
+  if (hour < 18) return 'noon';
+  return 'night';
 }
+
+const GREETING_KEY = {
+  morning: 'home.greetingMorning',
+  noon: 'home.greetingAfternoon',
+  night: 'home.greetingEvening',
+} as const satisfies Record<TimeOfDay, string>;
+
+const SUBTITLE_KEY = {
+  morning: 'home.subtitleMorning',
+  noon: 'home.subtitleAfternoon',
+  night: 'home.subtitleEvening',
+} as const satisfies Record<TimeOfDay, string>;
 
 // ── Hook ────────────────────────────────────────────────────────────────────
 
@@ -96,8 +108,11 @@ export function useHomeScreen() {
     enabled: devotionalVisible && isPro && verseText.length > 0,
   });
 
-  // Greeting
-  const greetingKey = getGreetingKey();
+  // Greeting — one time bucket drives the welcome-card scene + its copy.
+  const timeOfDay = getTimeOfDay();
+  // const timeOfDay = 'morning' as TimeOfDay; // TODO: re-enable time-of-day greeting when the design is ready for it
+  const greetingKey = GREETING_KEY[timeOfDay];
+  const subtitleKey = SUBTITLE_KEY[timeOfDay];
 
   // Stats — local-first reading tracking (works for guests and signed-in users).
   // Highlights count is real for signed-in users; guests have none (highlighting
@@ -156,7 +171,9 @@ export function useHomeScreen() {
     isAuthenticated,
     isPro,
     showProCta: !isPro,
+    timeOfDay,
     greetingKey,
+    subtitleKey,
     verseOfTheDay,
     verseText,
     verseLoading,

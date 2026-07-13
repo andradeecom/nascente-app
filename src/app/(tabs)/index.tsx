@@ -18,7 +18,9 @@ export default function HomeScreen() {
   const {
     translate,
     isPro,
+    timeOfDay,
     greetingKey,
+    subtitleKey,
     verseOfTheDay,
     verseText,
     verseLoading,
@@ -56,7 +58,7 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={Platform.OS === 'ios' ? ['top', 'bottom'] : ['top']}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <WelcomeHeader greeting={translate(greetingKey)} subtitle={translate('home.subtitle')} />
+        <WelcomeHeader greeting={translate(greetingKey)} subtitle={translate(subtitleKey)} timeOfDay={timeOfDay} />
 
         <VerseOfTheDayCard
           title={translate('home.verseOfTheDay')}

@@ -178,10 +178,21 @@ const pt = {
       bookmarks: 'Marcadores',
     },
     empty: {
-      all: 'Toque em um versículo no leitor para destacá-lo, anotá-lo ou salvá-lo.',
-      highlights: 'Você ainda não destacou nenhum versículo.',
-      notes: 'Você ainda não escreveu nenhuma nota.',
-      bookmarks: 'Você ainda não salvou nenhum marcador.',
+      highlights: {
+        title: 'Sem destaques ainda',
+        description: 'Selecione um versículo e escolha uma cor para destacá-lo.',
+        action: 'Começar a ler',
+      },
+      notes: {
+        title: 'Sem notas ainda',
+        description: 'Selecione um versículo e escreva a sua primeira nota de estudo.',
+        action: 'Começar a ler',
+      },
+      bookmarks: {
+        title: 'Sem marcadores ainda',
+        description: 'Toque no marcador enquanto lê para guardar um capítulo e voltar depois.',
+        action: 'Abrir a Bíblia',
+      },
     },
     clearAll: {
       action: {

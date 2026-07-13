@@ -178,10 +178,21 @@ const en = {
       bookmarks: 'Bookmarks',
     },
     empty: {
-      all: 'Tap a verse in the reader to highlight, note, or bookmark it.',
-      highlights: "You haven't highlighted any verses yet.",
-      notes: "You haven't written any notes yet.",
-      bookmarks: "You haven't saved any bookmarks yet.",
+      highlights: {
+        title: 'No highlights yet',
+        description: 'Select a verse and choose a color to highlight it.',
+        action: 'Start reading',
+      },
+      notes: {
+        title: 'No notes yet',
+        description: 'Select a verse and write your first study note.',
+        action: 'Start reading',
+      },
+      bookmarks: {
+        title: 'No bookmarks yet',
+        description: 'Tap the bookmark while you read to save a chapter and come back later.',
+        action: 'Open the Bible',
+      },
     },
     clearAll: {
       action: {

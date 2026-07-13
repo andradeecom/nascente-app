@@ -138,7 +138,9 @@ export default function useStudyScreen() {
   // the list reads, so the list refreshes on its own.
   useSyncOnFocus();
 
-  const [filter, setFilter] = useState<StudyFilter>('all');
+  // Default to the first real segment (the 'all' filter has no segment in the UI
+  // and no empty-state copy) so a segment is selected on first load.
+  const [filter, setFilter] = useState<StudyFilter>('highlights');
   // Confirmation dialog for the bulk "clear all (current filter)" action.
   const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
 
@@ -229,6 +231,11 @@ export default function useStudyScreen() {
     router.push('/paywall');
   }, [router]);
 
+  // Empty-state CTA — send the user to the reader to create their first item.
+  const handleOpenReader = useCallback(() => {
+    router.push('/(tabs)/reader');
+  }, [router]);
+
   const handleOpenItem = useCallback(
     (item: StudyItem) => {
       const store = useReaderStore.getState();
@@ -257,6 +264,7 @@ export default function useStudyScreen() {
     confirmClearAll,
     handleSignIn,
     handleUpgrade,
+    handleOpenReader,
     handleOpenItem,
   };
 }

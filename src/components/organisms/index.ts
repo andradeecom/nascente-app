@@ -24,6 +24,7 @@ export { UpsellModal } from './UpsellModal';
 export { NoteEditorModal } from './NoteEditorModal';
 export { PlanDayCompleteModal } from './PlanDayCompleteModal';
 export { StudyCard } from './StudyCard';
+export { StudyEmptyState } from './StudyEmptyState';
 export { PlanDayRow } from './PlanDayRow';
 export { ProCtaCard } from './ProCtaCard';
 export { Paywall, type PaywallOffer } from './Paywall';

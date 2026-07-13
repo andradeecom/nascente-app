@@ -2,12 +2,20 @@ import { useEffect, useRef } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { FlashList, type FlashListRef } from '@shopify/flash-list';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
-import { NotebookPen, Trash2 } from 'lucide-react-native';
+import { Bookmark, Highlighter, NotebookPen, Trash2, type LucideIcon } from 'lucide-react-native';
 import { Button, SafeAreaView, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '@/components/atoms/Button';
 import { AppModal, SegmentedControl, type Segment } from '@/components/molecules';
-import { ProLockCard, StudyCard } from '@/components/organisms';
+import { ProLockCard, StudyCard, StudyEmptyState } from '@/components/organisms';
 import useStudyScreen, { type StudyFilter, type StudyItem } from './use-study-screen';
+
+// Per-tool icons (match the reader's VerseActionSheet: bookmark + note-pen; the
+// highlighter mirrors the color-picker highlight action).
+const EMPTY_ICON: Record<'highlights' | 'notes' | 'bookmarks', LucideIcon> = {
+  highlights: Highlighter,
+  notes: NotebookPen,
+  bookmarks: Bookmark,
+};
 
 const ThemedTrash = withUnistyles(Trash2, (theme) => ({ color: theme.colors.semantic.danger }));
 
@@ -30,6 +38,7 @@ export default function StudyScreen() {
     cancelClearAll,
     confirmClearAll,
     handleUpgrade,
+    handleOpenReader,
     handleOpenItem,
   } = useStudyScreen();
 
@@ -63,6 +72,10 @@ export default function StudyScreen() {
     );
   }
 
+  // The segmented control only offers highlights/notes/bookmarks, so `filter` is
+  // always one of those here (never 'all') — pick the matching tool icon/copy.
+  const emptyFilter = filter === 'all' ? 'highlights' : filter;
+
   const listEmpty = isLoading ? (
     <View style={styles.centered}>
       <ThemedActivityIndicator size="large" />
@@ -74,11 +87,13 @@ export default function StudyScreen() {
       </Text>
     </View>
   ) : (
-    <View style={styles.centered}>
-      <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary}>
-        {translate(`study.empty.${filter}`)}
-      </Text>
-    </View>
+    <StudyEmptyState
+      icon={EMPTY_ICON[emptyFilter]}
+      title={translate(`study.empty.${emptyFilter}.title`)}
+      description={translate(`study.empty.${emptyFilter}.description`)}
+      ctaLabel={translate(`study.empty.${emptyFilter}.action`)}
+      onPress={handleOpenReader}
+    />
   );
 
   return (

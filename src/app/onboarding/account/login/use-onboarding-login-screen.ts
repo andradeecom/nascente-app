@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useGoogleLogin, useLogin, useMockLogin } from '@/hooks/use-auth';
+import { useAppleLogin, useGoogleLogin, useLogin, useMockLogin } from '@/hooks/use-auth';
 import { translate } from '@/i18n';
 import Toast from 'react-native-toast-message';
 
@@ -7,6 +7,7 @@ export default function useOnboardingLoginScreen() {
   const router = useRouter();
   const loginMutation = useLogin();
   const googleLoginMutation = useGoogleLogin();
+  const appleLoginMutation = useAppleLogin();
   const mockLogin = useMockLogin();
 
   const goToWelcome = () => router.replace('/onboarding/welcome');
@@ -44,7 +45,20 @@ export default function useOnboardingLoginScreen() {
   };
 
   const handleAppleLogin = () => {
-    // TODO: Implement Apple OAuth
+    appleLoginMutation.mutate(undefined, {
+      onSuccess: goToWelcome,
+      onError: (error) => {
+        // ERR_REQUEST_CANCELED = user dismissed the Apple sheet; swallow it like Google's cancel.
+        if (error instanceof Error && 'code' in error && error.code === 'ERR_REQUEST_CANCELED') {
+          return;
+        }
+        Toast.show({
+          type: 'error',
+          text1: translate('errors.loginFailed'),
+          text2: error instanceof Error ? error.message : translate('errors.invalidCredentials'),
+        });
+      },
+    });
   };
 
   const handleForgotPassword = () => {

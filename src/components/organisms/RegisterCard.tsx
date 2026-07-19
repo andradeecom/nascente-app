@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Linking, Pressable, View } from 'react-native';
+import { Linking, Platform, Pressable, View } from 'react-native';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { useForm, Controller } from 'react-hook-form';
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema';
@@ -172,7 +172,8 @@ export function RegisterCard({ onRegister, onRegisterWithGoogle, onRegisterWithA
 
         <View style={styles.socialButtons}>
           <SocialButton provider={PROVIDERS.Google} onPress={onRegisterWithGoogle} />
-          <SocialButton provider={PROVIDERS.Apple} onPress={onRegisterWithApple} />
+          {/* Sign in with Apple is iOS-native only (expo-apple-authentication throws on Android). */}
+          {Platform.OS === 'ios' && <SocialButton provider={PROVIDERS.Apple} onPress={onRegisterWithApple} />}
         </View>
 
         <View style={styles.legalRow}>

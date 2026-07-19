@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Platform, Pressable, View } from 'react-native';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
 import { useForm, Controller } from 'react-hook-form';
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema';
@@ -122,7 +122,8 @@ export function LoginCard({
         <Divider label={t('login.or')} />
         <View style={styles.socialButtons}>
           <SocialButton provider={PROVIDERS.Google} onPress={onLoginWithGoogle} />
-          <SocialButton provider={PROVIDERS.Apple} onPress={onLoginWithApple} />
+          {/* Sign in with Apple is iOS-native only (expo-apple-authentication throws on Android). */}
+          {Platform.OS === 'ios' && <SocialButton provider={PROVIDERS.Apple} onPress={onLoginWithApple} />}
         </View>
       </Card.Footer>
     </Card>

@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useSyncMetaStore } from '@/services/sync/sync-meta';
 import { toAppUser, type AppUser, type RegisterRequest } from '@/types/auth';
 import { GoogleSignin, isSuccessResponse } from '@react-native-google-signin/google-signin';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 GoogleSignin.configure({
@@ -74,6 +75,48 @@ export function useGoogleLogin() {
 
       const { data, error } = await supabase.auth.signInWithIdToken({ provider: 'google', token: idToken });
       if (error) throw error;
+      return toAppUser(data.user);
+    },
+    onSuccess: (user) => {
+      setAuth(user);
+      queryClient.setQueryData(authKeys.me, user);
+    },
+  });
+}
+
+export function useAppleLogin() {
+  const queryClient = useQueryClient();
+  const setAuth = useAuthStore((state) => state.setAuth);
+
+  return useMutation({
+    mutationFn: async () => {
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+
+      const idToken = credential.identityToken;
+      if (!idToken) {
+        throw new Error('No ID token received from Apple');
+      }
+
+      const { data, error } = await supabase.auth.signInWithIdToken({ provider: 'apple', token: idToken });
+      if (error) throw error;
+
+      // Apple only returns the user's name on the FIRST sign-in ever; on later
+      // sign-ins fullName is null. Persist it into user_metadata (our firstName/
+      // lastName keys, so toAppUser picks it up) the one time we get it — otherwise
+      // the account would have no name. signInWithIdToken doesn't set these itself.
+      const { givenName, familyName } = credential.fullName ?? {};
+      if (givenName || familyName) {
+        const { data: updated } = await supabase.auth.updateUser({
+          data: { firstName: givenName ?? '', lastName: familyName ?? '' },
+        });
+        if (updated.user) return toAppUser(updated.user);
+      }
+
       return toAppUser(data.user);
     },
     onSuccess: (user) => {

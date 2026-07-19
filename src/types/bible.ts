@@ -2,7 +2,7 @@ export type TranslationId =
   // Free, bundled, public-domain — available to everyone offline from install.
   | 'ONBV'
   | 'ONBVes'
-  | 'ASV'
+  | 'WEB'
   // Pro, bundled, public-domain — gated behind the Pro subscription (entitlement
   // only; the DBs ship in the app, so unlock is instant + offline). V1 is
   // public-domain only — no copyrighted/modern translations until V2.
@@ -11,7 +11,7 @@ export type TranslationId =
   | 'KJV'
   | 'BibliaLivre'
   | 'SSE'
-  | 'WEB';
+  | 'ASV';
 
 /**
  * Total chapters in the 66-book Protestant canon (all bundled translations).
@@ -83,14 +83,14 @@ export const TRANSLATIONS: Record<TranslationId, TranslationMeta> = {
     booksTable: 'ONBVes_books',
     versesTable: 'ONBVes_verses',
   },
-  ASV: {
-    id: 'ASV',
-    label: 'American Standard Version',
+  WEB: {
+    id: 'WEB',
+    label: 'World English Bible',
     lang: 'en',
     tier: 'free',
-    dbFile: 'ASV.db',
-    booksTable: 'ASV_books',
-    versesTable: 'ASV_verses',
+    dbFile: 'WEB.db',
+    booksTable: 'WEB_books',
+    versesTable: 'WEB_verses',
   },
   // --- Pro (bundled, public-domain — gated by entitlement only) ---
   Almeida: {
@@ -138,14 +138,14 @@ export const TRANSLATIONS: Record<TranslationId, TranslationMeta> = {
     booksTable: 'SSE_books',
     versesTable: 'SSE_verses',
   },
-  WEB: {
-    id: 'WEB',
-    label: 'World English Bible',
+  ASV: {
+    id: 'ASV',
+    label: 'American Standard Version',
     lang: 'en',
     tier: 'pro',
-    dbFile: 'WEB.db',
-    booksTable: 'WEB_books',
-    versesTable: 'WEB_verses',
+    dbFile: 'ASV.db',
+    booksTable: 'ASV_books',
+    versesTable: 'ASV_verses',
   },
   // YLT: {
   //   id: 'YLT',
@@ -207,11 +207,11 @@ export const TRANSLATION_CREDITS: TranslationCredit[] = [
     sourceUrl: 'https://ebible.org/Scriptures/details.php?id=spaonbv',
   },
   {
-    id: 'ASV',
-    title: 'American Standard Version',
+    id: 'WEB',
+    title: 'World English Bible',
     license: 'Public Domain',
     requiresAttribution: false,
-    sourceUrl: 'https://api.getbible.net/v2/asv',
+    sourceUrl: 'https://api.getbible.net/v2/web',
   },
   // --- Pro (bundled) ---
   {
@@ -252,11 +252,11 @@ export const TRANSLATION_CREDITS: TranslationCredit[] = [
     sourceUrl: 'https://api.getbible.net/v2/sse',
   },
   {
-    id: 'WEB',
-    title: 'World English Bible',
+    id: 'ASV',
+    title: 'American Standard Version',
     license: 'Public Domain',
     requiresAttribution: false,
-    sourceUrl: 'https://api.getbible.net/v2/web',
+    sourceUrl: 'https://api.getbible.net/v2/asv',
   },
   // {
   //   id: 'YLT',
@@ -270,5 +270,5 @@ export const TRANSLATION_CREDITS: TranslationCredit[] = [
 export function defaultTranslationForLocale(locale: string): TranslationId {
   if (locale.startsWith('pt')) return 'ONBV';
   if (locale.startsWith('es')) return 'ONBVes';
-  return 'ASV';
+  return 'WEB';
 }

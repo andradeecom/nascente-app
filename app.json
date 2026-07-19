@@ -9,9 +9,12 @@
     "ios": {
       "icon": "./assets/images/nascente.icon",
       "infoPlist": {
-        "CFBundleLocalizations": ["en", "es", "pt"]
+        "CFBundleLocalizations": ["en", "es", "pt"],
+        "ITSAppUsesNonExemptEncryption": false
       },
-      "bundleIdentifier": "com.andradee.nascente"
+      "bundleIdentifier": "com.andradee.nascenteapp",
+      "supportsTablet": false,
+      "appleTeamId": "URV3D9PRX2"
     },
     "android": {
       "adaptiveIcon": {
@@ -21,7 +24,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.andradee.nascente"
+      "package": "com.andradee.nascenteapp"
     },
     "web": {
       "output": "static",
@@ -52,7 +55,7 @@
       [
         "@react-native-google-signin/google-signin",
         {
-          "iosUrlScheme": "com.googleusercontent.apps.397336416856-dosvk0v405lhmucnd3ietr86lravpj61"
+          "iosUrlScheme": "com.googleusercontent.apps.815534166888-okj4ga5h2q78b41jtg2bmqcsd8q8aqsf"
         }
       ],
       "expo-image",

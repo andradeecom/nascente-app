@@ -78,7 +78,7 @@ export function AiPrayerSheet({ visible, reference, content, isLoading, error, o
       ref={sheetRef}
       index={-1}
       enablePanDownToClose
-      snapPoints={['60%', '90%']}
+      snapPoints={['55%', '85%']}
       onChange={handleChange}
       backdropComponent={renderBackdrop}
       backgroundStyle={sheetBackgroundStyle}

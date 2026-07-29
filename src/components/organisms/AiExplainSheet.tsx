@@ -98,7 +98,7 @@ export function AiExplainSheet({
       ref={sheetRef}
       index={-1}
       enablePanDownToClose
-      snapPoints={['60%', '90%']}
+      snapPoints={['55%', '85%']}
       onChange={handleChange}
       backdropComponent={renderBackdrop}
       backgroundStyle={sheetBackgroundStyle}
@@ -143,7 +143,7 @@ export function AiExplainSheet({
 const styles = StyleSheet.create((theme) => ({
   header: {
     paddingHorizontal: theme.spacing[5],
-    paddingTop: theme.spacing[1],
+    paddingTop: theme.spacing[3],
     paddingBottom: theme.spacing[3],
     gap: theme.spacing[3],
   },

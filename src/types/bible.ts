@@ -1,15 +1,15 @@
 export type TranslationId =
   // Free, bundled, public-domain — available to everyone offline from install.
-  | 'ONBV'
-  | 'ONBVes'
+  | 'BibliaLivre'
+  | 'RV1909'
   | 'WEB'
   // Pro, bundled, public-domain — gated behind the Pro subscription (entitlement
   // only; the DBs ship in the app, so unlock is instant + offline). V1 is
   // public-domain only — no copyrighted/modern translations until V2.
   | 'Almeida'
-  | 'RV1909'
+  | 'ONBV'
+  | 'ONBVes'
   | 'KJV'
-  | 'BibliaLivre'
   | 'SSE'
   | 'ASV';
 
@@ -65,23 +65,23 @@ export type SearchResult = {
 
 export const TRANSLATIONS: Record<TranslationId, TranslationMeta> = {
   // --- Free (bundled, public-domain) ---
-  ONBV: {
-    id: 'ONBV',
-    label: 'Open Nova Bíblia Viva (Biblica)',
+  BibliaLivre: {
+    id: 'BibliaLivre',
+    label: 'Bíblia Livre',
     lang: 'pt',
     tier: 'free',
-    dbFile: 'ONBV.db',
-    booksTable: 'ONBV_books',
-    versesTable: 'ONBV_verses',
+    dbFile: 'BibliaLivre.db',
+    booksTable: 'BibliaLivre_books',
+    versesTable: 'BibliaLivre_verses',
   },
-  ONBVes: {
-    id: 'ONBVes',
-    label: 'Open Nueva Biblia Viva (Biblica)',
+  RV1909: {
+    id: 'RV1909',
+    label: 'Reina-Valera 1909',
     lang: 'es',
     tier: 'free',
-    dbFile: 'ONBVes.db',
-    booksTable: 'ONBVes_books',
-    versesTable: 'ONBVes_verses',
+    dbFile: 'RV1909.db',
+    booksTable: 'RV1909_books',
+    versesTable: 'RV1909_verses',
   },
   WEB: {
     id: 'WEB',
@@ -102,14 +102,23 @@ export const TRANSLATIONS: Record<TranslationId, TranslationMeta> = {
     booksTable: 'Almeida_books',
     versesTable: 'Almeida_verses',
   },
-  RV1909: {
-    id: 'RV1909',
-    label: 'Reina-Valera 1909',
+  ONBV: {
+    id: 'ONBV',
+    label: 'Open Nova Bíblia Viva (Biblica)',
+    lang: 'pt',
+    tier: 'pro',
+    dbFile: 'ONBV.db',
+    booksTable: 'ONBV_books',
+    versesTable: 'ONBV_verses',
+  },
+  ONBVes: {
+    id: 'ONBVes',
+    label: 'Open Nueva Biblia Viva (Biblica)',
     lang: 'es',
     tier: 'pro',
-    dbFile: 'RV1909.db',
-    booksTable: 'RV1909_books',
-    versesTable: 'RV1909_verses',
+    dbFile: 'ONBVes.db',
+    booksTable: 'ONBVes_books',
+    versesTable: 'ONBVes_verses',
   },
   KJV: {
     id: 'KJV',
@@ -119,15 +128,6 @@ export const TRANSLATIONS: Record<TranslationId, TranslationMeta> = {
     dbFile: 'KJV.db',
     booksTable: 'KJV_books',
     versesTable: 'KJV_verses',
-  },
-  BibliaLivre: {
-    id: 'BibliaLivre',
-    label: 'Bíblia Livre',
-    lang: 'pt',
-    tier: 'pro',
-    dbFile: 'BibliaLivre.db',
-    booksTable: 'BibliaLivre_books',
-    versesTable: 'BibliaLivre_verses',
   },
   SSE: {
     id: 'SSE',
@@ -189,6 +189,37 @@ export type TranslationCredit = {
 export const TRANSLATION_CREDITS: TranslationCredit[] = [
   // --- Free (bundled) ---
   {
+    id: 'BibliaLivre',
+    title: 'Bíblia Livre',
+    license: 'CC BY 4.0',
+    requiresAttribution: true,
+    copyright: '© 2018 Diego Santos, Mario Sérgio, e Marco Teles',
+    licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
+    sourceUrl: 'https://ebible.org/Scriptures/details.php?id=porbr2018',
+  },
+  {
+    id: 'RV1909',
+    title: 'Reina-Valera 1909',
+    license: 'Public Domain',
+    requiresAttribution: false,
+    sourceUrl: 'https://ebible.org/Scriptures/details.php?id=spaRV1909',
+  },
+  {
+    id: 'WEB',
+    title: 'World English Bible',
+    license: 'Public Domain',
+    requiresAttribution: false,
+    sourceUrl: 'https://api.getbible.net/v2/web',
+  },
+  // --- Pro (bundled) ---
+  {
+    id: 'Almeida',
+    title: 'Almeida Atualizada (1911)',
+    license: 'GPL / Public Domain',
+    requiresAttribution: false,
+    sourceUrl: 'https://api.getbible.net/v2/almeida',
+  },
+  {
     id: 'ONBV',
     title: 'Open Nova Bíblia Viva (Biblica)',
     license: 'CC BY-SA 4.0',
@@ -207,42 +238,11 @@ export const TRANSLATION_CREDITS: TranslationCredit[] = [
     sourceUrl: 'https://ebible.org/Scriptures/details.php?id=spaonbv',
   },
   {
-    id: 'WEB',
-    title: 'World English Bible',
-    license: 'Public Domain',
-    requiresAttribution: false,
-    sourceUrl: 'https://api.getbible.net/v2/web',
-  },
-  // --- Pro (bundled) ---
-  {
-    id: 'Almeida',
-    title: 'Almeida Atualizada (1911)',
-    license: 'GPL / Public Domain',
-    requiresAttribution: false,
-    sourceUrl: 'https://api.getbible.net/v2/almeida',
-  },
-  {
-    id: 'RV1909',
-    title: 'Reina-Valera 1909',
-    license: 'Public Domain',
-    requiresAttribution: false,
-    sourceUrl: 'https://ebible.org/Scriptures/details.php?id=spaRV1909',
-  },
-  {
     id: 'KJV',
     title: 'King James Version',
     license: 'GPL / Public Domain',
     requiresAttribution: false,
     sourceUrl: 'https://api.getbible.net/v2/kjv',
-  },
-  {
-    id: 'BibliaLivre',
-    title: 'Bíblia Livre',
-    license: 'CC BY 4.0',
-    requiresAttribution: true,
-    copyright: '© 2018 Diego Santos, Mario Sérgio, e Marco Teles',
-    licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
-    sourceUrl: 'https://ebible.org/Scriptures/details.php?id=porbr2018',
   },
   {
     id: 'SSE',
@@ -268,7 +268,7 @@ export const TRANSLATION_CREDITS: TranslationCredit[] = [
 ];
 
 export function defaultTranslationForLocale(locale: string): TranslationId {
-  if (locale.startsWith('pt')) return 'ONBV';
-  if (locale.startsWith('es')) return 'ONBVes';
+  if (locale.startsWith('pt')) return 'BibliaLivre';
+  if (locale.startsWith('es')) return 'RV1909';
   return 'WEB';
 }

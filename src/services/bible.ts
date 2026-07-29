@@ -16,16 +16,16 @@ import {
 // Metro bundler). A Pro translation with no asset yet throws a clear error if opened.
 const DB_ASSETS: Partial<Record<TranslationId, number>> = {
   // Free (bundled, public-domain)
-  ONBV: require('@/assets/db/ONBV.db'),
-  ONBVes: require('@/assets/db/ONBVes.db'),
-  ASV: require('@/assets/db/ASV.db'),
-  // Pro (bundled, public-domain) — uncomment once each .db file is generated:
   BibliaLivre: require('@/assets/db/BibliaLivre.db'),
-  Almeida: require('@/assets/db/Almeida.db'),
-  SSE: require('@/assets/db/SSE.db'),
   RV1909: require('@/assets/db/RV1909.db'),
   WEB: require('@/assets/db/WEB.db'),
+  // Pro (bundled, public-domain) — uncomment once each .db file is generated:
+  Almeida: require('@/assets/db/Almeida.db'),
+  ONBV: require('@/assets/db/ONBV.db'),
+  ONBVes: require('@/assets/db/ONBVes.db'),
+  SSE: require('@/assets/db/SSE.db'),
   KJV: require('@/assets/db/KJV.db'),
+  ASV: require('@/assets/db/ASV.db'),
   // YLT: require('@/assets/db/YLT.db'),
 };
 

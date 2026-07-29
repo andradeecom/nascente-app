@@ -31,11 +31,11 @@ const CATALOG: Record<Locales, OnboardingTranslationSection[]> = {
       sectionKey: 'free',
       items: [
         {
-          key: 'onbv',
+          key: 'biblialivre',
           tier: TRANSLATION_TIER.Available,
-          translationId: 'ONBV',
-          title: 'Nova Bíblia Viva',
-          description: 'Linguagem moderna e acessível',
+          translationId: 'BibliaLivre',
+          title: 'Bíblia Livre',
+          description: 'Tradução livre e de leitura acessível',
           size: '5 MB',
         },
       ],
@@ -52,11 +52,11 @@ const CATALOG: Record<Locales, OnboardingTranslationSection[]> = {
           size: '5 MB',
         },
         {
-          key: 'biblialivre',
+          key: 'onbv',
           tier: TRANSLATION_TIER.Pro,
-          translationId: 'BibliaLivre',
-          title: 'Bíblia Livre',
-          description: 'Tradução livre e de leitura acessível',
+          translationId: 'ONBV',
+          title: 'Nova Bíblia Viva',
+          description: 'Linguagem moderna e acessível',
           size: '5 MB',
         },
       ],
@@ -67,11 +67,11 @@ const CATALOG: Record<Locales, OnboardingTranslationSection[]> = {
       sectionKey: 'free',
       items: [
         {
-          key: 'onbves',
+          key: 'rv1909',
           tier: TRANSLATION_TIER.Available,
-          translationId: 'ONBVes',
-          title: 'Nueva Biblia Viva',
-          description: 'Lenguaje moderno y accesible',
+          translationId: 'RV1909',
+          title: 'Reina-Valera 1909',
+          description: 'Traducción clásica de dominio público',
           size: '5 MB',
         },
       ],
@@ -80,11 +80,11 @@ const CATALOG: Record<Locales, OnboardingTranslationSection[]> = {
       sectionKey: 'pro',
       items: [
         {
-          key: 'rv1909',
+          key: 'onbves',
           tier: TRANSLATION_TIER.Pro,
-          translationId: 'RV1909',
-          title: 'Reina-Valera 1909',
-          description: 'Traducción clásica de dominio público',
+          translationId: 'ONBVes',
+          title: 'Nueva Biblia Viva',
+          description: 'Lenguaje moderno y accesible',
           size: '5 MB',
         },
         {

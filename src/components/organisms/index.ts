@@ -3,6 +3,8 @@ export { LoginFooter } from './LoginFooter';
 export { SplashScreen } from './SplashScreen';
 export { RegisterCard } from './RegisterCard';
 export { ForgotPasswordCard } from './ForgotPasswordCard';
+export { ResetPasswordCard } from './ResetPasswordCard';
+export { ChangePasswordModal } from './ChangePasswordModal';
 export { SettingsList } from './SettingsList';
 export { SettingsProfileCard } from './SettingsProfileCard';
 export { ScreenHeader } from './ScreenHeader';

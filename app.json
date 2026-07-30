@@ -4,7 +4,7 @@
     "slug": "nascente",
     "version": "1.0.0",
     "orientation": "portrait",
-    "scheme": "nascente",
+    "scheme": "nascenteapp",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/images/nascente.icon",

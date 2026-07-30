@@ -170,6 +170,15 @@ export function useForgotPassword() {
   });
 }
 
+export function useResetPassword() {
+  return useMutation({
+    mutationFn: async (password: string) => {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw error;
+    },
+  });
+}
+
 export function useMe() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 

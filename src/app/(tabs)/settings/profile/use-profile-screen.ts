@@ -3,8 +3,9 @@ import { useForm } from 'react-hook-form';
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema';
 import * as ImagePicker from 'expo-image-picker';
 import Toast from 'react-native-toast-message';
+import { router } from 'expo-router';
 import { useAuthStore } from '@/stores/auth';
-import { useLogout, useUpdateProfile } from '@/hooks/use-auth';
+import { useLogout, useResetPassword, useUpdateProfile } from '@/hooks/use-auth';
 import { uploadAvatar } from '@/lib/avatar-storage';
 import { createProfileSchema, type ProfileFormData } from '@/schemas/profile';
 import { translate } from '@/i18n';
@@ -18,12 +19,42 @@ import { translate } from '@/i18n';
  */
 export default function useProfileScreen() {
   const user = useAuthStore((s) => s.user);
-  const logout = useLogout();
+  const logoutMutation = useLogout();
   const updateProfile = useUpdateProfile();
+
+  // Signing out leaves the profile screen with nothing to show (name falls back to
+  // "Guest", no sign-out button since it's gated on `user`) — redirect back to the
+  // Settings list rather than stranding the user on a degraded guest view.
+  const logout = async () => {
+    await logoutMutation();
+    router.replace('/(tabs)/settings');
+  };
 
   const [isEditing, setIsEditing] = useState(false);
   // A locally-picked, not-yet-uploaded avatar URI (shown as an immediate preview).
   const [pendingPhotoUri, setPendingPhotoUri] = useState<string | null>(null);
+
+  const [isChangePasswordVisible, setIsChangePasswordVisible] = useState(false);
+  const changePasswordMutation = useResetPassword();
+
+  const openChangePassword = () => setIsChangePasswordVisible(true);
+  const closeChangePassword = () => setIsChangePasswordVisible(false);
+
+  const handleChangePassword = (password: string) => {
+    changePasswordMutation.mutate(password, {
+      onSuccess: () => {
+        setIsChangePasswordVisible(false);
+        Toast.show({ type: 'success', text1: translate('changePassword.successTitle') });
+      },
+      onError: (error) => {
+        Toast.show({
+          type: 'error',
+          text1: translate('changePassword.failedTitle'),
+          text2: error instanceof Error ? error.message : translate('errors.generic'),
+        });
+      },
+    });
+  };
 
   const schema = useMemo(() => createProfileSchema(), []);
   const {
@@ -125,5 +156,10 @@ export default function useProfileScreen() {
     handlePickPhoto,
     handleSave,
     logout,
+    isChangePasswordVisible,
+    openChangePassword,
+    closeChangePassword,
+    handleChangePassword,
+    isChangingPassword: changePasswordMutation.isPending,
   };
 }

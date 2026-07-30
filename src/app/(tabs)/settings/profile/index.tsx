@@ -5,7 +5,7 @@ import { Controller } from 'react-hook-form';
 import { Camera } from 'lucide-react-native';
 import { Avatar, Button, SafeAreaView, Switch, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { InputField, KeyboardAwareScreen } from '@/components/molecules';
-import { ScreenHeader } from '@/components/organisms';
+import { ChangePasswordModal, ScreenHeader } from '@/components/organisms';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '@/components/atoms/Button';
 import { hapticSelect } from '@/lib/haptics';
 import { useThemeStore } from '@/stores/theme';
@@ -26,6 +26,11 @@ export default function ProfileScreen() {
     handlePickPhoto,
     handleSave,
     logout,
+    isChangePasswordVisible,
+    openChangePassword,
+    closeChangePassword,
+    handleChangePassword,
+    isChangingPassword,
   } = useProfileScreen();
 
   return (
@@ -109,17 +114,26 @@ export default function ProfileScreen() {
               {user?.email ?? ''}
             </Text>
             {user && (
-              <Button
-                label={t('common.signOut')}
-                variant={BUTTON_VARIANTS.Secondary}
-                fullWidth
-                onPress={logout}
-                style={styles.signOut}
-              />
+              <View style={styles.viewActions}>
+                <Button
+                  label={t('changePassword.entryLabel')}
+                  variant={BUTTON_VARIANTS.Secondary}
+                  fullWidth
+                  onPress={openChangePassword}
+                />
+                <Button label={t('common.signOut')} variant={BUTTON_VARIANTS.Secondary} fullWidth onPress={logout} />
+              </View>
             )}
           </View>
         )}
       </KeyboardAwareScreen>
+
+      <ChangePasswordModal
+        visible={isChangePasswordVisible}
+        onClose={closeChangePassword}
+        onSubmit={handleChangePassword}
+        isLoading={isChangingPassword}
+      />
     </SafeAreaView>
   );
 }
@@ -159,7 +173,9 @@ const styles = StyleSheet.create((theme) => ({
   saveButton: {
     marginTop: theme.spacing[2],
   },
-  signOut: {
+  viewActions: {
+    alignSelf: 'stretch',
+    gap: theme.spacing[3],
     marginTop: theme.spacing[6],
   },
 }));

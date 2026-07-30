@@ -60,7 +60,7 @@ export default function SettingsScreen() {
           value: currentTextSizeLabel,
           onPress: handleTextSizePress,
         },
-        { type: 'nav', key: 'notifications', label: translate('settings.notifications'), onPress: handleNotifications },
+        // { type: 'nav', key: 'notifications', label: translate('settings.notifications'), onPress: handleNotifications },
         { type: 'nav', key: 'credits', label: translate('settings.credits.row'), onPress: handleCreditsPress },
         { type: 'nav', key: 'support', label: translate('settings.support'), onPress: handleSupportPress },
       ],

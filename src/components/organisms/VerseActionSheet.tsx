@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { Pressable, View, Platform } from 'react-native';
+import type { View as RNView } from 'react-native';
 import { StyleSheet, UnistylesRuntime, withUnistyles } from 'react-native-unistyles';
 import { useFocusEffect } from 'expo-router';
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView, type BottomSheetBackdropProps } from '@gorhom/bottom-sheet';
@@ -35,6 +36,10 @@ type Props = {
   onOpenNote: () => void;
   onExplain: () => void;
   onPray: () => void;
+  /** Ref to the wrapper around the Explain button, for the first-time AI tour spotlight (see `src/lib/ai-features-tour.ts`). */
+  explainTargetRef?: React.RefObject<RNView | null>;
+  /** Ref to the wrapper around the Prayer button, for the first-time AI tour spotlight. */
+  prayerTargetRef?: React.RefObject<RNView | null>;
 };
 
 export function VerseActionSheet({
@@ -50,6 +55,8 @@ export function VerseActionSheet({
   onOpenNote,
   onExplain,
   onPray,
+  explainTargetRef,
+  prayerTargetRef,
 }: Props) {
   const translate = useTranslate();
   const sheetRef = useRef<BottomSheet>(null);
@@ -134,12 +141,14 @@ export function VerseActionSheet({
       onPress: onExplain,
       label: translate('ai.explain.action'),
       icon: <UniSparkles size={20} strokeWidth={1.5} />,
+      targetRef: explainTargetRef,
     },
     {
       key: 'prayer',
       onPress: onPray,
       label: translate('ai.prayer.action'),
       icon: <UniHandHeart size={20} strokeWidth={1.5} />,
+      targetRef: prayerTargetRef,
     },
   ];
 
@@ -188,17 +197,35 @@ export function VerseActionSheet({
         <View style={styles.divider} />
 
         <View style={styles.actions}>
-          {actions.map((action) => (
-            <Button
-              key={action.key}
-              onPress={action.onPress}
-              label={action.label}
-              icon={action.icon}
-              variant={BUTTON_VARIANTS.Pro}
-              size={BUTTON_SIZES.Small}
-              style={styles.action}
-            />
-          ))}
+          {actions.map((action) =>
+            // `Button` doesn't forward refs (it's pressto's PressableScale, a
+            // function component) — the tour library needs a ref to a real host
+            // component to measure via `measureInWindow`, so the layout style
+            // (`styles.action`) moves to a wrapping View that carries the ref,
+            // and the Button itself just fills it.
+            action.targetRef ? (
+              <View key={action.key} ref={action.targetRef} style={styles.action}>
+                <Button
+                  onPress={action.onPress}
+                  label={action.label}
+                  icon={action.icon}
+                  variant={BUTTON_VARIANTS.Pro}
+                  size={BUTTON_SIZES.Small}
+                  style={styles.actionFill}
+                />
+              </View>
+            ) : (
+              <Button
+                key={action.key}
+                onPress={action.onPress}
+                label={action.label}
+                icon={action.icon}
+                variant={BUTTON_VARIANTS.Pro}
+                size={BUTTON_SIZES.Small}
+                style={styles.action}
+              />
+            )
+          )}
         </View>
       </BottomSheetView>
     </BottomSheet>
@@ -254,6 +281,12 @@ const styles = StyleSheet.create((theme) => ({
   action: {
     width: '46%',
     height: 48,
+  },
+  // For an action wrapped in a ref-carrying View (see the tour-guide target
+  // refs above) — the View owns the `action` size, this just fills it.
+  actionFill: {
+    width: '100%',
+    height: '100%',
   },
   pressed: {
     opacity: 0.6,

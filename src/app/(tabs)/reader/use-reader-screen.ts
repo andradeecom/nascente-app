@@ -1,6 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'expo-router';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { type View as RNView } from 'react-native';
+import { useIsFocused, useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTourPersistence } from '@wrack/react-native-tour-guide';
 import { useVerses, useBookName } from '@/hooks/use-bible';
 import { hapticSelect, hapticConfirm, hapticSuccess, hapticWarning } from '@/lib/haptics';
 import { useReaderStore } from '@/stores/reader';
@@ -25,6 +28,12 @@ export default function useReaderScreen() {
   const { translationId, bookId, chapter, setTranslation, setPosition, setChapter } = useReaderStore();
   const router = useRouter();
   const translate = useTranslate();
+  // NativeTabs keeps every tab screen mounted in the background for instant
+  // switching — without this, a mount-gated effect (like the chapter-summary
+  // tour below) fires as soon as its data loads, even while a DIFFERENT tab is
+  // visible, and the tour overlay (a root-level Modal) shows up wherever the
+  // user actually is.
+  const isFocused = useIsFocused();
 
   // Pull cross-device study changes when the Reader gains focus, so highlights
   // made on another device show up here without waiting for app foreground.
@@ -50,6 +59,17 @@ export default function useReaderScreen() {
   // from `selectedVerse` so opening the editor can close the action sheet.
   const [noteVerse, setNoteVerse] = useState<number | null>(null);
 
+  // First-time AI-features tour: spotlights the Explain/Prayer buttons inside
+  // VerseActionSheet the first time a Pro user opens it. `useTourPersistence`
+  // handles the "show only once" gating itself (AsyncStorage-backed), so no
+  // separate store is needed here (unlike `review-prompt.ts`'s pattern, which
+  // predates this library). Refs point at the ref-carrying Views wrapping the
+  // buttons in VerseActionSheet — Button itself doesn't forward refs.
+  const explainTargetRef = useRef<RNView>(null);
+  const prayerTargetRef = useRef<RNView>(null);
+  const summaryTargetRef = useRef<RNView>(null);
+  const { startTour: startAiTour } = useTourPersistence(AsyncStorage);
+
   // AI state
   const locale = useLocaleStore((s) => s.locale) ?? 'pt';
   const [explainVerse, setExplainVerse] = useState<number | null>(null);
@@ -66,6 +86,28 @@ export default function useReaderScreen() {
 
   const { data: verses, isLoading } = useVerses(translationId, bookId, chapter);
   const { data: bookName } = useBookName(translationId, bookId);
+
+  // Separate tour instance (own tourId) from the verse-sheet Explain/Prayer
+  // tour above — this spotlights the chapter-summary button in ChapterNavBar,
+  // fires once the chapter has actually loaded for a Pro user, and isn't tied
+  // to any tap gesture (the button is always visible, not opened on demand).
+  // Gated on `isFocused` — the Reader stays mounted in the background when
+  // another tab is active (NativeTabs), so without this the tour could fire
+  // (and its overlay render) while the user is looking at a different screen.
+  useEffect(() => {
+    if (!isFocused || !isPro || isLoading || !verses?.length) return;
+    startAiTour(
+      [
+        {
+          id: 'ai-chapter-summary',
+          targetRef: summaryTargetRef,
+          title: translate('aiTour.chapterSummary.title'),
+          description: translate('aiTour.chapterSummary.description'),
+        },
+      ],
+      { tourId: 'ai-features-chapter-summary' }
+    );
+  }, [isFocused, isPro, isLoading, verses, startAiTour, translate]);
 
   const explainPassageText = useMemo(() => {
     if (explainVerse == null || !verses) return '';
@@ -181,8 +223,32 @@ export default function useReaderScreen() {
       if (!isPro) return;
       hapticSelect();
       setSelectedVerse(verse);
+
+      // Fire the first-time AI tour once the sheet has had time to open and lay
+      // out (gorhom's BottomSheet animates in — `delayBefore` waits for that
+      // before the library measures the target; it also retries measurement
+      // internally if the target isn't ready yet). `useTourPersistence` no-ops
+      // if this tour has already been shown on this device.
+      startAiTour(
+        [
+          {
+            id: 'ai-explain',
+            targetRef: explainTargetRef,
+            title: translate('aiTour.explain.title'),
+            description: translate('aiTour.explain.description'),
+            delayBefore: 400,
+          },
+          {
+            id: 'ai-prayer',
+            targetRef: prayerTargetRef,
+            title: translate('aiTour.prayer.title'),
+            description: translate('aiTour.prayer.description'),
+          },
+        ],
+        { tourId: 'ai-features-reader' }
+      );
     },
-    [isPro]
+    [isPro, startAiTour, translate]
   );
 
   const handlePickColor = useCallback(
@@ -340,6 +406,9 @@ export default function useReaderScreen() {
     handlePickColor,
     handleRemoveHighlight,
     closeVerseSheet,
+    explainTargetRef,
+    prayerTargetRef,
+    summaryTargetRef,
     // Bookmarks
     chapterBookmarks,
     selectedVerseBookmarked: selectedVerse != null ? chapterBookmarks.has(selectedVerse) : false,

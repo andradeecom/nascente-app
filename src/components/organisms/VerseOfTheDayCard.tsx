@@ -16,6 +16,8 @@ type VerseOfTheDayCardProps = {
   actionLabel: string;
   onPress: () => void;
   onDevotional?: () => void;
+  /** Ref to the devotional button wrapper, for the first-time AI tour spotlight (see `src/hooks/use-home-screen.ts`). */
+  devotionalTargetRef?: React.RefObject<View | null>;
 };
 
 export function VerseOfTheDayCard({
@@ -25,6 +27,7 @@ export function VerseOfTheDayCard({
   actionLabel,
   onPress,
   onDevotional,
+  devotionalTargetRef,
 }: VerseOfTheDayCardProps) {
   const translate = useTranslate();
 
@@ -52,7 +55,7 @@ export function VerseOfTheDayCard({
         />
       </Card.Footer>
       {onDevotional ? (
-        <View style={styles.devotionalButtonWrapper}>
+        <View style={styles.devotionalButtonWrapper} ref={devotionalTargetRef}>
           <Button
             onPress={onDevotional}
             label={translate('ai.devotional.action')}

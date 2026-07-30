@@ -460,6 +460,24 @@ const en = {
       error: 'Could not load the prayer prompt. Please try again.',
     },
   },
+  aiTour: {
+    explain: {
+      title: 'Ask AI about this verse',
+      description: 'Tap here for a clear explanation of any verse or passage, right where you read it.',
+    },
+    prayer: {
+      title: 'Turn a verse into a prayer',
+      description: 'AI can turn this passage into a short prayer prompt to guide your reflection.',
+    },
+    devotional: {
+      title: 'Get a daily devotional',
+      description: 'Turn the verse of the day into a short devotional reflection, powered by AI.',
+    },
+    chapterSummary: {
+      title: 'Summarize this chapter',
+      description: 'Get an AI summary of the whole chapter before you dive into the verses.',
+    },
+  },
   aiPlan: {
     title: 'Create with AI',
     createButton: 'Create with AI',

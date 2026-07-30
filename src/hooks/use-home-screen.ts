@@ -1,5 +1,8 @@
-import { useCallback, useMemo, useState } from 'react';
-import { useRouter } from 'expo-router';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { type View as RNView } from 'react-native';
+import { useIsFocused, useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTourPersistence } from '@wrack/react-native-tour-guide';
 import { useTranslate } from '@/i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useReaderStore } from '@/stores/reader';
@@ -54,6 +57,11 @@ export function useHomeScreen() {
   const router = useRouter();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const locale = useLocaleStore((s) => s.locale) ?? 'pt';
+  // NativeTabs keeps every tab screen mounted in the background for instant
+  // switching — without this, the mount-gated devotional-tour effect below
+  // fires as soon as its data loads, even while a DIFFERENT tab is visible,
+  // and the tour overlay (a root-level Modal) shows up wherever the user is.
+  const isFocused = useIsFocused();
 
   // Pull cross-device progress/highlight changes when Home gains focus, so the
   // stats reflect reading done on another device without waiting for foreground.
@@ -92,6 +100,31 @@ export function useHomeScreen() {
     }),
     [verseRef, votdBookName]
   );
+
+  // First-time AI-features tour: spotlights the devotional button on the
+  // Verse-of-the-Day card, once, for a Pro user, after the verse text has
+  // actually loaded (spotlighting a loading skeleton would be a poor moment).
+  // `useTourPersistence` handles "show only once" itself (AsyncStorage-backed).
+  // Gated on `isFocused` — Home stays mounted in the background when another
+  // tab is active (NativeTabs), so without this the tour could fire (and its
+  // overlay render) while the user is looking at a different screen.
+  const devotionalTargetRef = useRef<RNView>(null);
+  const { startTour: startHomeAiTour } = useTourPersistence(AsyncStorage);
+
+  useEffect(() => {
+    if (!isFocused || !isPro || verseLoading || !verseText) return;
+    startHomeAiTour(
+      [
+        {
+          id: 'ai-devotional',
+          targetRef: devotionalTargetRef,
+          title: translate('aiTour.devotional.title'),
+          description: translate('aiTour.devotional.description'),
+        },
+      ],
+      { tourId: 'ai-features-home' }
+    );
+  }, [isFocused, isPro, verseLoading, verseText, startHomeAiTour, translate]);
 
   // AI — Devotional
   const [devotionalVisible, setDevotionalVisible] = useState(false);
@@ -192,6 +225,7 @@ export function useHomeScreen() {
     devotionalContent: devotionalQuery.data?.content ?? null,
     devotionalLoading: devotionalQuery.isFetching,
     devotionalError: devotionalQuery.error as AiGenerateError | null,
+    devotionalTargetRef,
     handleOpenDevotional,
     closeDevotionalSheet,
     retryDevotional: devotionalQuery.refetch,

@@ -461,6 +461,24 @@ const pt = {
       error: 'Não foi possível carregar a oração. Tente novamente.',
     },
   },
+  aiTour: {
+    explain: {
+      title: 'Pergunte à IA sobre este versículo',
+      description: 'Toque aqui para obter uma explicação clara de qualquer versículo ou passagem, onde estiver lendo.',
+    },
+    prayer: {
+      title: 'Transforme um versículo em oração',
+      description: 'A IA pode transformar esta passagem numa oração breve para guiar a sua reflexão.',
+    },
+    devotional: {
+      title: 'Receba um devocional diário',
+      description: 'Transforme o versículo do dia numa breve reflexão devocional, com ajuda da IA.',
+    },
+    chapterSummary: {
+      title: 'Resuma este capítulo',
+      description: 'Obtenha um resumo do capítulo inteiro com IA antes de mergulhar nos versículos.',
+    },
+  },
   aiPlan: {
     title: 'Criar com IA',
     createButton: 'Criar com IA',

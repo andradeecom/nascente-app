@@ -38,6 +38,7 @@ export default function HomeScreen() {
     devotionalContent,
     devotionalLoading,
     devotionalError,
+    devotionalTargetRef,
     handleOpenDevotional,
     closeDevotionalSheet,
     retryDevotional,
@@ -67,6 +68,7 @@ export default function HomeScreen() {
           actionLabel={translate('home.readInContext')}
           onPress={handleVerseOfTheDay}
           onDevotional={isPro ? handleOpenDevotional : undefined}
+          devotionalTargetRef={devotionalTargetRef}
         />
 
         <ContinueReadingCard

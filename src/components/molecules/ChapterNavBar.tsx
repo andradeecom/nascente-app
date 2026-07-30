@@ -15,9 +15,11 @@ type ChapterNavBarProps = {
   onPrev: () => void;
   onNext: () => void;
   onSummary?: () => void;
+  /** Ref to the summary button wrapper, for the first-time AI tour spotlight (see `reader/use-reader-screen.ts`). */
+  summaryTargetRef?: React.RefObject<View | null>;
 };
 
-export function ChapterNavBar({ bookName, chapter, onPrev, onNext, onSummary }: ChapterNavBarProps) {
+export function ChapterNavBar({ bookName, chapter, onPrev, onNext, onSummary, summaryTargetRef }: ChapterNavBarProps) {
   const translate = useTranslate();
 
   return (
@@ -30,14 +32,16 @@ export function ChapterNavBar({ bookName, chapter, onPrev, onNext, onSummary }: 
       </Pressable>
 
       {onSummary ? (
-        <Button
-          onPress={onSummary}
-          label={`${bookName} ${chapter}`}
-          icon={<ThemedSparkles size={16} strokeWidth={1.5} />}
-          iconPosition="right"
-          variant={BUTTON_VARIANTS.Ghost}
-          size={BUTTON_SIZES.Medium}
-        />
+        <View ref={summaryTargetRef}>
+          <Button
+            onPress={onSummary}
+            label={`${bookName} ${chapter}`}
+            icon={<ThemedSparkles size={16} strokeWidth={1.5} />}
+            iconPosition="right"
+            variant={BUTTON_VARIANTS.Ghost}
+            size={BUTTON_SIZES.Medium}
+          />
+        </View>
       ) : (
         <Text variant={TEXT_VARIANTS.Label} color={TEXT_COLORS.TextSecondary}>
           {bookName} {chapter}

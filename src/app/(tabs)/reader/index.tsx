@@ -56,6 +56,9 @@ export default function ReaderScreen() {
     handlePickColor,
     handleRemoveHighlight,
     closeVerseSheet,
+    explainTargetRef,
+    prayerTargetRef,
+    summaryTargetRef,
     selectedVerseBookmarked,
     handleToggleBookmark,
     selectedVerseHasNote,
@@ -180,6 +183,7 @@ export default function ReaderScreen() {
         onPrev={handlePrevChapter}
         onNext={handleNextChapter}
         onSummary={isPro ? handleOpenSummary : undefined}
+        summaryTargetRef={summaryTargetRef}
       />
 
       <BookChapterPicker
@@ -212,6 +216,8 @@ export default function ReaderScreen() {
         onOpenNote={handleOpenNote}
         onExplain={handleOpenExplain}
         onPray={handleOpenPray}
+        explainTargetRef={explainTargetRef}
+        prayerTargetRef={prayerTargetRef}
       />
 
       <NoteEditorModal

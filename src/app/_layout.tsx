@@ -9,6 +9,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { PressablesConfig } from 'pressto';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { TourGuideProvider, TourGuideOverlay } from '@wrack/react-native-tour-guide';
 import { queryClient } from '@/lib/query-client';
 import { useAuthStore } from '@/stores/auth';
 import { useThemeStore } from '@/stores/theme';
@@ -116,8 +117,11 @@ export default function RootLayout() {
         <KeyboardProvider>
           <PressablesConfig animationType="spring" config={{ minScale: 0.97 }}>
             <QueryClientProvider client={queryClient}>
-              <RootNavigator />
-              <ToastWithInsets />
+              <TourGuideProvider>
+                <RootNavigator />
+                <ToastWithInsets />
+                <TourGuideOverlay />
+              </TourGuideProvider>
             </QueryClientProvider>
           </PressablesConfig>
         </KeyboardProvider>

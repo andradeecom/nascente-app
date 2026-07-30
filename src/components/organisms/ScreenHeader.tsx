@@ -33,7 +33,7 @@ export function ScreenHeader({ title, showBack = true, onBack, right }: ScreenHe
         ) : (
           <View style={styles.back} />
         )}
-        <Text variant={TEXT_VARIANTS.Title3} numberOfLines={1}>
+        <Text variant={TEXT_VARIANTS.Title3} numberOfLines={1} ellipsizeMode="tail">
           {title}
         </Text>
       </View>
@@ -55,6 +55,7 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: 'row',
     alignItems: 'center',
     gap: theme.spacing[2],
+    maxWidth: '70%',
   },
   back: {
     width: 40,

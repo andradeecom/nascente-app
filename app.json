@@ -128,7 +128,8 @@
       ],
       "expo-asset",
       "expo-sqlite",
-      "expo-status-bar"
+      "expo-status-bar",
+      "react-native-quick-crypto"
     ],
     "experiments": {
       "typedRoutes": true,

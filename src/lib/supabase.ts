@@ -1,7 +1,19 @@
 import 'react-native-url-polyfill/auto';
+import { install } from 'react-native-quick-crypto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/database.types';
+
+/**
+ * Polyfills `global.crypto` (incl. `crypto.subtle.digest`) with a native
+ * implementation. Hermes has no WebCrypto support, so without this `auth-js`'s
+ * `generatePKCEChallenge` silently falls back to `code_challenge_method=plain`
+ * (the raw verifier as the challenge — real hashing skipped) and logs "WebCrypto
+ * API is not supported." `install` is a named export (NOT a method on the
+ * default `QuickCrypto` export, which only mirrors Node's `crypto` shape).
+ * Must run before `createClient` below.
+ */
+install();
 
 /**
  * Explicit storage key for the persisted Supabase session. Pinned (rather than

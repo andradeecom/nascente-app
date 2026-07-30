@@ -43,12 +43,17 @@ export function useRegister() {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { firstName, lastName } },
+        options: { data: { firstName, lastName }, emailRedirectTo: 'nascenteapp://confirm-email' },
       });
       if (error) throw error;
-      return toAppUser(data.user!);
+      // With email confirmation enabled, `signUp` returns a user but NO session
+      // until the confirmation link is followed — `data.session` is the only
+      // reliable signal of which case this is (an already-confirmed/existing
+      // email also comes back with `session: null` here, same shape).
+      return { user: toAppUser(data.user!), needsConfirmation: data.session === null };
     },
-    onSuccess: (user) => {
+    onSuccess: ({ user, needsConfirmation }) => {
+      if (needsConfirmation) return;
       setAuth(user);
       queryClient.setQueryData(authKeys.me, user);
     },

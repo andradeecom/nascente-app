@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useAppleLogin, useGoogleLogin, useRegister } from '@/hooks/use-auth';
 import { translate } from '@/i18n';
@@ -8,12 +9,19 @@ export default function useOnboardingRegisterScreen() {
   const registerMutation = useRegister();
   const googleLoginMutation = useGoogleLogin();
   const appleLoginMutation = useAppleLogin();
+  const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
 
   const goToWelcome = () => router.replace('/onboarding/welcome');
 
   const handleRegister = (data: { email: string; password: string; firstName: string; lastName: string }) => {
     registerMutation.mutate(data, {
-      onSuccess: goToWelcome,
+      onSuccess: ({ needsConfirmation }) => {
+        if (needsConfirmation) {
+          setSubmittedEmail(data.email);
+          return;
+        }
+        goToWelcome();
+      },
       onError: (error) => {
         Toast.show({
           type: 'error',
@@ -65,5 +73,7 @@ export default function useOnboardingRegisterScreen() {
     handleAppleRegister,
     handleBack,
     isLoading: registerMutation.isPending,
+    needsConfirmation: submittedEmail !== null,
+    submittedEmail,
   };
 }

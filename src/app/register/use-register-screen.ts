@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useAppleLogin, useGoogleLogin, useRegister } from '@/hooks/use-auth';
 import { translate } from '@/i18n';
@@ -8,6 +9,7 @@ export default function useRegisterScreen() {
   const registerMutation = useRegister();
   const googleLoginMutation = useGoogleLogin();
   const appleLoginMutation = useAppleLogin();
+  const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
 
   // Reached from settings (guest sign-up), pushed on top of the (tabs) stack.
   // Auth no longer swaps the navigator, so dismiss back to settings on success.
@@ -21,7 +23,13 @@ export default function useRegisterScreen() {
 
   const handleRegister = (data: { email: string; password: string; firstName: string; lastName: string }) => {
     registerMutation.mutate(data, {
-      onSuccess: goToApp,
+      onSuccess: ({ needsConfirmation }) => {
+        if (needsConfirmation) {
+          setSubmittedEmail(data.email);
+          return;
+        }
+        goToApp();
+      },
       onError: (error) => {
         Toast.show({
           type: 'error',
@@ -70,5 +78,7 @@ export default function useRegisterScreen() {
     handleGoogleRegister,
     handleAppleRegister,
     isLoading: registerMutation.isPending,
+    needsConfirmation: submittedEmail !== null,
+    submittedEmail,
   };
 }

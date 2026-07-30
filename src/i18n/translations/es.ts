@@ -8,6 +8,11 @@ const es = {
     retry: 'Intentar de nuevo',
     ok: 'OK',
   },
+  notFound: {
+    title: 'Esta página no existe',
+    description: 'El enlace que seguiste puede estar roto, o la página pudo haberse movido.',
+    action: 'Ir al inicio',
+  },
   login: {
     title: 'Bienvenido de nuevo',
     subtitle: 'Inicia sesión en tu cuenta',
@@ -53,6 +58,8 @@ const es = {
     legalAnd: 'y',
     termsOfService: 'Términos de servicio',
     privacyPolicy: 'Política de privacidad',
+    confirmEmailTitle: 'Revisa tu correo para confirmar tu cuenta',
+    confirmEmailMessage: 'Te hemos enviado un enlace de confirmación a {{email}}. Tócalo para activar tu cuenta.',
   },
   forgotPassword: {
     title: '¿Olvidaste tu contraseña?',
@@ -75,6 +82,19 @@ const es = {
     submitButton: 'Actualizar contraseña',
     submitting: 'Actualizando...',
     successTitle: 'Contraseña actualizada',
+    linkErrorTitle: 'Este enlace ha expirado',
+    linkErrorDescription:
+      'Los enlaces para restablecer la contraseña solo son válidos por poco tiempo. Solicita uno nuevo para continuar.',
+    linkErrorAction: 'Solicitar nuevo enlace',
+  },
+  confirmEmail: {
+    successTitle: 'Correo confirmado',
+    successDescription: 'Tu cuenta está lista. Ya puedes iniciar sesión y empezar a leer.',
+    successAction: 'Continuar',
+    errorTitle: 'Este enlace ha expirado',
+    errorDescription:
+      'Los enlaces de confirmación solo son válidos por poco tiempo, o esta cuenta ya podría estar confirmada. Intenta iniciar sesión.',
+    errorAction: 'Ir a iniciar sesión',
   },
   changePassword: {
     entryLabel: 'Cambiar contraseña',

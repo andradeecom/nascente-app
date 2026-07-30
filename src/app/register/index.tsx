@@ -7,7 +7,8 @@ import { BackButton, KeyboardAwareScreen } from '@/components/molecules';
 import useRegisterScreen from './use-register-screen';
 
 export default function RegisterScreen() {
-  const { handleRegister, handleGoogleRegister, handleAppleRegister, isLoading } = useRegisterScreen();
+  const { handleRegister, handleGoogleRegister, handleAppleRegister, isLoading, needsConfirmation, submittedEmail } =
+    useRegisterScreen();
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
@@ -18,6 +19,8 @@ export default function RegisterScreen() {
           onRegisterWithGoogle={handleGoogleRegister}
           onRegisterWithApple={handleAppleRegister}
           isLoading={isLoading}
+          needsConfirmation={needsConfirmation}
+          submittedEmail={submittedEmail ?? undefined}
         />
         <Link href="/login" style={styles.footerLink}>
           <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary}>

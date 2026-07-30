@@ -8,6 +8,11 @@ const en = {
     retry: 'Try again',
     ok: 'OK',
   },
+  notFound: {
+    title: "This page doesn't exist",
+    description: 'The link you followed may be broken, or the page may have been moved.',
+    action: 'Go to Home',
+  },
   login: {
     title: 'Welcome Back',
     subtitle: 'Sign in to your account',
@@ -53,6 +58,8 @@ const en = {
     legalAnd: 'and',
     termsOfService: 'Terms of Service',
     privacyPolicy: 'Privacy Policy',
+    confirmEmailTitle: 'Check your email to confirm your account',
+    confirmEmailMessage: "We've sent a confirmation link to {{email}}. Tap it to activate your account.",
   },
   forgotPassword: {
     title: 'Forgot Password?',
@@ -75,6 +82,18 @@ const en = {
     submitButton: 'Update Password',
     submitting: 'Updating...',
     successTitle: 'Password updated',
+    linkErrorTitle: 'This link has expired',
+    linkErrorDescription: 'Password reset links are only valid for a short time. Request a new one to continue.',
+    linkErrorAction: 'Request new link',
+  },
+  confirmEmail: {
+    successTitle: 'Email confirmed',
+    successDescription: 'Your account is ready. You can now sign in and start reading.',
+    successAction: 'Continue',
+    errorTitle: 'This link has expired',
+    errorDescription:
+      'Confirmation links are only valid for a short time, or this account may already be confirmed. Try signing in.',
+    errorAction: 'Go to Sign In',
   },
   changePassword: {
     entryLabel: 'Change Password',

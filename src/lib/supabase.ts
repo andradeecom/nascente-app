@@ -21,6 +21,12 @@ export const supabase = createClient<Database>(
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: false,
+      // PKCE (not the SDK's 'implicit' default) so signup-confirmation/password-reset/
+      // email-change redirects carry `?code=`/`?error_code=` as query params instead of
+      // a `#` fragment — expo-router's deep-link parser drops fragments entirely, which
+      // silently broke every one of those flows under the implicit flow. See the auth
+      // flow section in CLAUDE.md.
+      flowType: 'pkce',
     },
   }
 );

@@ -22,9 +22,19 @@ type RegisterCardProps = {
   onRegisterWithGoogle: () => void;
   onRegisterWithApple: () => void;
   isLoading?: boolean;
+  /** True once signUp succeeded but email confirmation is still pending. */
+  needsConfirmation?: boolean;
+  submittedEmail?: string;
 };
 
-export function RegisterCard({ onRegister, onRegisterWithGoogle, onRegisterWithApple, isLoading }: RegisterCardProps) {
+export function RegisterCard({
+  onRegister,
+  onRegisterWithGoogle,
+  onRegisterWithApple,
+  isLoading,
+  needsConfirmation,
+  submittedEmail,
+}: RegisterCardProps) {
   const t = useTranslate();
   const schema = useMemo(() => createRegisterSchema(), []);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -53,6 +63,21 @@ export function RegisterCard({ onRegister, onRegisterWithGoogle, onRegisterWithA
       >
         {visible ? <ThemedEyeOff size={20} /> : <ThemedEye size={20} />}
       </Pressable>
+    );
+  }
+
+  if (needsConfirmation) {
+    return (
+      <Card style={styles.card}>
+        <Card.Header style={styles.header}>
+          <Text variant={TEXT_VARIANTS.Title1} style={styles.title}>
+            {t('register.confirmEmailTitle')}
+          </Text>
+          <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary} style={styles.title}>
+            {t('register.confirmEmailMessage', { email: submittedEmail ?? '' })}
+          </Text>
+        </Card.Header>
+      </Card>
     );
   }
 

@@ -8,6 +8,11 @@ const pt = {
     retry: 'Tentar novamente',
     ok: 'OK',
   },
+  notFound: {
+    title: 'Esta página não existe',
+    description: 'O link que seguiu pode estar quebrado, ou a página pode ter sido movida.',
+    action: 'Ir para o início',
+  },
   login: {
     title: 'Bem-vindo de volta',
     subtitle: 'Faça login na sua conta',
@@ -53,6 +58,8 @@ const pt = {
     legalAnd: 'e',
     termsOfService: 'Termos de serviço',
     privacyPolicy: 'Política de privacidade',
+    confirmEmailTitle: 'Verifique o seu e-mail para confirmar a conta',
+    confirmEmailMessage: 'Enviámos um link de confirmação para {{email}}. Toque nele para ativar a sua conta.',
   },
   forgotPassword: {
     title: 'Esqueceu a palavra-passe?',
@@ -75,6 +82,19 @@ const pt = {
     submitButton: 'Atualizar palavra-passe',
     submitting: 'A atualizar...',
     successTitle: 'Palavra-passe atualizada',
+    linkErrorTitle: 'Este link expirou',
+    linkErrorDescription:
+      'Os links de redefinição de palavra-passe só são válidos por pouco tempo. Peça um novo para continuar.',
+    linkErrorAction: 'Pedir novo link',
+  },
+  confirmEmail: {
+    successTitle: 'E-mail confirmado',
+    successDescription: 'A sua conta está pronta. Já pode entrar e começar a ler.',
+    successAction: 'Continuar',
+    errorTitle: 'Este link expirou',
+    errorDescription:
+      'Os links de confirmação só são válidos por pouco tempo, ou esta conta já pode estar confirmada. Tente entrar.',
+    errorAction: 'Ir para Entrar',
   },
   changePassword: {
     entryLabel: 'Alterar palavra-passe',

@@ -8,8 +8,15 @@ import useOnboardingRegisterScreen from './use-onboarding-register-screen';
 
 export default function OnboardingRegisterScreen() {
   const t = useTranslate();
-  const { handleRegister, handleGoogleRegister, handleAppleRegister, handleBack, isLoading } =
-    useOnboardingRegisterScreen();
+  const {
+    handleRegister,
+    handleGoogleRegister,
+    handleAppleRegister,
+    handleBack,
+    isLoading,
+    needsConfirmation,
+    submittedEmail,
+  } = useOnboardingRegisterScreen();
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -20,6 +27,8 @@ export default function OnboardingRegisterScreen() {
           onRegisterWithGoogle={handleGoogleRegister}
           onRegisterWithApple={handleAppleRegister}
           isLoading={isLoading}
+          needsConfirmation={needsConfirmation}
+          submittedEmail={submittedEmail ?? undefined}
         />
         <Link href="/onboarding/account/login" style={styles.footerLink}>
           <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary}>

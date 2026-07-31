@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AUTH_STORAGE_KEY, supabase } from '@/lib/supabase';
 import { resetRevenueCat } from '@/lib/revenuecat';
 import { useAuthStore } from '@/stores/auth';
+import { useLocaleStore } from '@/stores/locale';
 import { useSyncMetaStore } from '@/services/sync/sync-meta';
 import { toAppUser, type AppUser, type RegisterRequest } from '@/types/auth';
 import { GoogleSignin, isSuccessResponse } from '@react-native-google-signin/google-signin';
@@ -40,10 +41,20 @@ export function useRegister() {
 
   return useMutation({
     mutationFn: async ({ email, password, firstName, lastName }: RegisterRequest) => {
+      // Sent BOTH ways on purpose (see the send-email hook's locale resolution):
+      //  - on `emailRedirectTo`, which the hook prefers — it's the language the
+      //    device is in at this moment, and can't be raced by a slow metadata write.
+      //  - into `user_metadata`, which persists for LATER emails this account may
+      //    trigger (e.g. an email change), and must be stamped here rather than
+      //    after, since the confirmation email is sent by this very call.
+      const locale = useLocaleStore.getState().locale ?? 'pt';
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { firstName, lastName }, emailRedirectTo: 'nascenteapp://confirm-email' },
+        options: {
+          data: { firstName, lastName, locale },
+          emailRedirectTo: `nascenteapp://confirm-email?locale=${locale}`,
+        },
       });
       if (error) throw error;
       // With email confirmation enabled, `signUp` returns a user but NO session
@@ -167,8 +178,15 @@ export function useUpdateProfile() {
 export function useForgotPassword() {
   return useMutation({
     mutationFn: async (email: string) => {
+      // Carry the device's CURRENT language on the redirect so the send-email hook
+      // can localize the email. This is a signed-out flow — there's no session, so
+      // `user_metadata.locale` can't have been synced, and without this param the
+      // hook falls back to whatever was stored at signup (a real bug: switch to
+      // Spanish → log out → reset password → email arrives in Portuguese).
+      // `reset-password`'s screen ignores the extra param; only the hook reads it.
+      const locale = useLocaleStore.getState().locale ?? 'pt';
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'nascenteapp://reset-password',
+        redirectTo: `nascenteapp://reset-password?locale=${locale}`,
       });
       if (error) throw error;
     },

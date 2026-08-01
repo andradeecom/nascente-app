@@ -38,6 +38,7 @@ export default function StudyScreen() {
     cancelClearAll,
     confirmClearAll,
     handleUpgrade,
+    proRequiresAccount,
     handleOpenReader,
     handleOpenItem,
   } = useStudyScreen();
@@ -65,6 +66,7 @@ export default function StudyScreen() {
             title={translate('study.proLock.title')}
             description={translate('study.proLock.description')}
             ctaLabel={translate('study.proLock.action')}
+            hint={proRequiresAccount ? translate('paywall.requiresAccount') : undefined}
             onPress={handleUpgrade}
           />
         </View>

@@ -34,6 +34,7 @@ export default function HomeScreen() {
     handleExplorePlans,
     handleOpenPlan,
     handleOpenPaywall,
+    proRequiresAccount,
     devotionalVisible,
     devotionalContent,
     devotionalLoading,
@@ -100,6 +101,7 @@ export default function HomeScreen() {
             title={translate('plans.proLock.title')}
             description={translate('plans.proLock.description')}
             ctaLabel={translate('plans.proLock.action')}
+            hint={proRequiresAccount ? translate('paywall.requiresAccount') : undefined}
             onPress={handleOpenPaywall}
           />
         )}

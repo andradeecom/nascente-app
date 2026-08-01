@@ -5,7 +5,7 @@ import { useCurrentUserHighlights, useHighlightActions } from '@/hooks/use-highl
 import { useCurrentUserBookmarks, useBookmarkActions } from '@/hooks/use-bookmarks';
 import { useCurrentUserNotes, useNoteActions } from '@/hooks/use-notes';
 import { useSyncOnFocus } from '@/hooks/use-sync';
-import { useIsPro } from '@/hooks/use-profile';
+import { useIsPro, useProGate } from '@/hooks/use-profile';
 import { useAuthStore } from '@/stores/auth';
 import { useReaderStore } from '@/stores/reader';
 import { useTranslate } from '@/i18n';
@@ -131,6 +131,7 @@ export default function useStudyScreen() {
   // Study tools are Pro. Data is still per-user (account-bound), so the list
   // query stays enabled on auth; the screen shows the Pro lock card when !isPro.
   const isPro = useIsPro();
+  const { openPro, requiresAccount } = useProGate();
   const userId = useAuthStore((s) => s.user?.id) ?? null;
 
   // Pull cross-device changes whenever the Study tab gains focus (tab switches
@@ -227,9 +228,7 @@ export default function useStudyScreen() {
     router.push('/register');
   }, [router]);
 
-  const handleUpgrade = useCallback(() => {
-    router.push('/paywall');
-  }, [router]);
+  const handleUpgrade = openPro;
 
   // Empty-state CTA — send the user to the reader to create their first item.
   const handleOpenReader = useCallback(() => {
@@ -264,6 +263,7 @@ export default function useStudyScreen() {
     confirmClearAll,
     handleSignIn,
     handleUpgrade,
+    proRequiresAccount: requiresAccount,
     handleOpenReader,
     handleOpenItem,
   };

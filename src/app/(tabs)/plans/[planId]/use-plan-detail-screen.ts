@@ -14,7 +14,7 @@ import {
 } from '@/hooks/use-reading-plans';
 import { useRefetchOnFocus } from '@/hooks/use-refetch-on-focus';
 import { useSyncOnFocus } from '@/hooks/use-sync';
-import { useTier } from '@/hooks/use-profile';
+import { useTier, useProGate } from '@/hooks/use-profile';
 import { ACTIVE_PLAN_LIMIT, isPlanLimitError } from '@/types/subscription';
 import type { PlanCadence, PlanDayGroup, ReadingPlan } from '@/types/reading-plans';
 
@@ -38,6 +38,7 @@ export default function usePlanDetailScreen() {
   const markComplete = useMarkPlanDayComplete();
   const archivePlan = useArchivePlan();
   const tier = useTier();
+  const { openPro } = useProGate();
 
   // Pull cross-device changes on focus, then refetch the (stale) detail + active
   // list — React Query doesn't refetch on focus in RN, and returning here (e.g.
@@ -57,8 +58,8 @@ export default function usePlanDetailScreen() {
   // Pro upsell CTA — dismiss the cap modal and open the paywall.
   const handleUpsellCta = useCallback(() => {
     setLimitModalVisible(false);
-    router.push('/paywall');
-  }, [router]);
+    openPro();
+  }, [openPro]);
 
   const plan = detail.data?.plan ?? null;
   const days = detail.data?.days ?? [];

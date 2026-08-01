@@ -10,7 +10,7 @@ import { useLocaleStore } from '@/stores/locale';
 import { computeStreak, useReadingProgressStore } from '@/stores/reading-progress';
 import { useSyncOnFocus } from '@/hooks/use-sync';
 import { useCurrentUserHighlights } from '@/hooks/use-highlights';
-import { useIsPro } from '@/hooks/use-profile';
+import { useIsPro, useProGate } from '@/hooks/use-profile';
 import { useBookName, useVerse } from '@/hooks/use-bible';
 import { useActivePlans } from '@/hooks/use-reading-plans';
 import { useAiGenerate } from '@/hooks/use-ai-generate';
@@ -82,6 +82,7 @@ export function useHomeScreen() {
   // create-account gate on features anymore. The active-plans slot + Destaques
   // stat are Pro-gated too (plans/highlights are Pro).
   const isPro = useIsPro();
+  const { openPro, requiresAccount } = useProGate();
 
   // Verse of the day — a random pick from the curated reference pool (stable per
   // mount), with its text + reference label resolved from the bundled DB in the
@@ -185,17 +186,15 @@ export function useHomeScreen() {
     router.push(`/(tabs)/plans/${planId}`);
   };
 
-  const handleOpenPaywall = () => {
-    router.push('/paywall');
-  };
+  const handleOpenPaywall = openPro;
 
   const handleOpenDevotional = useCallback(() => {
     if (!isPro) {
-      router.push('/paywall');
+      openPro();
       return;
     }
     setDevotionalVisible(true);
-  }, [isPro, router]);
+  }, [isPro, openPro]);
 
   const closeDevotionalSheet = useCallback(() => setDevotionalVisible(false), []);
 
@@ -221,6 +220,7 @@ export function useHomeScreen() {
     handleSignIn,
     handleOpenPlan,
     handleOpenPaywall,
+    proRequiresAccount: requiresAccount,
     devotionalVisible,
     devotionalContent: devotionalQuery.data?.content ?? null,
     devotionalLoading: devotionalQuery.isFetching,

@@ -9,7 +9,7 @@ import { hapticSelect, hapticConfirm, hapticSuccess, hapticWarning } from '@/lib
 import { useReaderStore } from '@/stores/reader';
 import { usePlanReadingStore } from '@/stores/plan-reading';
 import { computeStreak, useReadingProgressStore } from '@/stores/reading-progress';
-import { useIsPro } from '@/hooks/use-profile';
+import { useIsPro, useProGate } from '@/hooks/use-profile';
 import { useMarkPlanDayComplete } from '@/hooks/use-reading-plans';
 import { useChapterHighlights, useHighlightActions } from '@/hooks/use-highlights';
 import { useChapterBookmarks, useBookmarkActions } from '@/hooks/use-bookmarks';
@@ -48,6 +48,7 @@ export default function useReaderScreen() {
   // Highlights + bookmarks (Pro only). Per-chapter lookups feed both the
   // verse rendering and the open action sheet.
   const isPro = useIsPro();
+  const { openPro } = useProGate();
   const chapterHighlights = useChapterHighlights(bookId, chapter);
   const { setHighlight, removeHighlight } = useHighlightActions(translationId);
   const chapterBookmarks = useChapterBookmarks(bookId, chapter);
@@ -326,11 +327,11 @@ export default function useReaderScreen() {
 
   const handleOpenSummary = useCallback(() => {
     if (!isPro) {
-      router.push('/paywall');
+      openPro();
       return;
     }
     setSummaryVisible(true);
-  }, [isPro, router]);
+  }, [isPro, openPro]);
 
   const closeSummarySheet = useCallback(() => setSummaryVisible(false), []);
 
@@ -355,8 +356,8 @@ export default function useReaderScreen() {
   // Tapping a Pro-gated translation closes the picker and opens the paywall.
   const handleTranslationUpsell = useCallback(() => {
     setTranslationPickerVisible(false);
-    router.push('/paywall');
-  }, [router]);
+    openPro();
+  }, [openPro]);
 
   const handlePrevChapter = useCallback(async () => {
     if (chapter > 1) {

@@ -30,7 +30,13 @@ export default function useConfirmEmailScreen() {
     });
   }, [code, error, errorCode, errorDescription]);
 
-  const handleContinue = () => router.replace('/(tabs)/settings');
+  // Land a freshly-confirmed account on Home — the app itself, not Settings.
+  // Deliberately does NOT try to resume a Pro purchase the user may have been
+  // attempting: account creation and the paywall are separate flows (see the
+  // Paywall + RevenueCat section in CLAUDE.md), and the confirmation link
+  // cold-launches from Mail with no navigation stack to return into. A user who
+  // wanted Pro meets the Pro gate again on Home, now signed in and one tap away.
+  const handleContinue = () => router.replace('/(tabs)');
   const handleGoToLogin = () => router.replace('/login');
 
   return { status, handleContinue, handleGoToLogin };

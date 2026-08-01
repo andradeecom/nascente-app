@@ -7,11 +7,17 @@ import type { PurchasesPackage } from 'react-native-purchases';
 import { useTranslate } from '@/i18n';
 import { useProOfferings, revenueCatKeys } from '@/hooks/use-revenuecat';
 import { isProActive, isUserCancelledError, purchasePackage, restorePurchases } from '@/lib/revenuecat';
+import { useAuthStore } from '@/stores/auth';
 import { DEFAULT_PRO_OFFER, type ProBillingCycle } from '@/types/subscription';
 import type { PaywallOffer } from '@/components/organisms';
 
 const TERMS_URL = process.env.EXPO_PUBLIC_TERMS_URL || 'https://nascente.app/terms';
 const PRIVACY_URL = process.env.EXPO_PUBLIC_PRIVACY_URL || 'https://nascente.app/privacy';
+
+/** Formats an annual product's monthly-equivalent price in its own store currency. */
+function formatMonthlyEquivalent(annualPrice: number, currencyCode: string): string {
+  return new Intl.NumberFormat(undefined, { style: 'currency', currency: currencyCode }).format(annualPrice / 12);
+}
 
 /**
  * Screen-private logic for the Pro paywall. Pulls live offerings from RevenueCat
@@ -23,6 +29,7 @@ export default function usePaywallScreen() {
   const translate = useTranslate();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   const { data: offering } = useProOfferings();
   const [selectedCycle, setSelectedCycle] = useState<ProBillingCycle>(DEFAULT_PRO_OFFER);
@@ -46,7 +53,14 @@ export default function usePaywallScreen() {
         label: translate('paywall.plans.annual.label'),
         price: packages.annual?.product.priceString ?? translate('paywall.plans.annual.price'),
         period: translate('paywall.plans.annual.period'),
-        caption: translate('paywall.plans.annual.caption'),
+        // The i18n caption is a fixed USD placeholder — real store prices vary by
+        // country/currency, so derive the monthly-equivalent from the live package
+        // once offerings load; only fall back to the placeholder before that.
+        caption: packages.annual
+          ? translate('paywall.plans.annual.captionEquivalent', {
+              price: formatMonthlyEquivalent(packages.annual.product.price, packages.annual.product.currencyCode),
+            })
+          : translate('paywall.plans.annual.caption'),
         badge: translate('paywall.plans.annual.badge'),
       },
       {
@@ -82,6 +96,15 @@ export default function usePaywallScreen() {
 
   const handleSubscribe = useCallback(async () => {
     if (isPurchasing) return;
+    // Correctness backstop, not UX: every Pro gate routes guests to /register
+    // via `useProGate`, so this screen should only ever be reached signed in.
+    // A guest purchase would bind to an anonymous RevenueCat id with no
+    // `profiles` row for the webhook to grant against — and would be lost on
+    // reinstall/device-switch — so refuse rather than take their money.
+    if (!isAuthenticated) {
+      router.replace('/register');
+      return;
+    }
     const pkg = packages[selectedCycle];
     // No live package (SDK not configured / offerings unset) — nothing to buy yet.
     if (!pkg) {
@@ -105,7 +128,7 @@ export default function usePaywallScreen() {
     } finally {
       setIsPurchasing(false);
     }
-  }, [isPurchasing, packages, selectedCycle, queryClient, router, translate]);
+  }, [isPurchasing, isAuthenticated, packages, selectedCycle, queryClient, router, translate]);
 
   const handleRestore = useCallback(async () => {
     if (isPurchasing) return;

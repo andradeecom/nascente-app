@@ -11,6 +11,11 @@ type ProLockCardProps = {
   title: string;
   description: string;
   ctaLabel: string;
+  /**
+   * Small caption under the CTA disclosing a precondition — pass the
+   * "requires an account" line for guests (see `useProGate().requiresAccount`).
+   */
+  hint?: string;
   onPress: () => void;
 };
 
@@ -19,9 +24,14 @@ type ProLockCardProps = {
  * tab). Mirrors `SignInPromptCard`'s shape but with a `pro`-variant CTA that
  * routes to the paywall — used where the wall is Pro (a free account doesn't
  * unlock the feature), so we upsell directly rather than prompt sign-in. For a
- * centered dialog use `UpsellModal`; for a per-action gate just `router.push('/paywall')`.
+ * centered dialog use `UpsellModal`.
+ *
+ * Drive `onPress` from `useProGate().openPro` rather than pushing `/paywall`
+ * directly — an account is a precondition for buying Pro, so guests are routed
+ * to `/register` instead. Pass `hint` (gated on `requiresAccount`) so that
+ * precondition is disclosed before the tap, not discovered after it.
  */
-export function ProLockCard({ icon: Icon = Sparkles, title, description, ctaLabel, onPress }: ProLockCardProps) {
+export function ProLockCard({ icon: Icon = Sparkles, title, description, ctaLabel, hint, onPress }: ProLockCardProps) {
   // Icon is a caller-supplied component, so it can't be wrapped with withUnistyles at
   // module scope. Read theme name reactively and pass the color as a plain prop instead.
   const themeName = useThemeStore((s) => s.theme);
@@ -39,6 +49,11 @@ export function ProLockCard({ icon: Icon = Sparkles, title, description, ctaLabe
         {description}
       </Text>
       <Button variant={BUTTON_VARIANTS.Pro} label={ctaLabel} onPress={onPress} fullWidth style={styles.cta} />
+      {hint ? (
+        <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextTertiary} style={styles.hint}>
+          {hint}
+        </Text>
+      ) : null}
     </PressableCard>
   );
 }
@@ -66,5 +81,9 @@ const styles = StyleSheet.create((theme) => ({
   cta: {
     marginTop: theme.spacing[4],
     alignSelf: 'stretch',
+  },
+  hint: {
+    marginTop: theme.spacing[2],
+    textAlign: 'center',
   },
 }));

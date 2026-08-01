@@ -400,6 +400,7 @@ const en = {
         price: 'US$ 39.99',
         period: '/yr',
         caption: '≈ US$ 3.33 per month',
+        captionEquivalent: '≈ {{price}} per month',
         badge: 'Save 33%',
       },
       monthly: {
@@ -420,6 +421,7 @@ const en = {
     },
     cta: 'Subscribe · {{price}}{{period}}',
     finePrint: 'Auto-renews. Cancel anytime.',
+    requiresAccount: 'Requires a free account',
     restore: 'Restore purchase',
     terms: 'Terms',
     privacy: 'Privacy',

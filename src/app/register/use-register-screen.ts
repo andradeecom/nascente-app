@@ -11,8 +11,10 @@ export default function useRegisterScreen() {
   const appleLoginMutation = useAppleLogin();
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
 
-  // Reached from settings (guest sign-up), pushed on top of the (tabs) stack.
-  // Auth no longer swaps the navigator, so dismiss back to settings on success.
+  // Reached from settings (guest sign-up) or a Pro gate, pushed on top of the
+  // (tabs) stack. Auth no longer swaps the navigator, so dismiss back to settings
+  // on success. Deliberately does NOT route on to the paywall for a Pro-gate
+  // origin — account and purchase are separate flows (see CLAUDE.md).
   const goToApp = () => {
     if (router.canDismiss()) {
       router.dismissAll();

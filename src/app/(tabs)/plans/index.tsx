@@ -27,6 +27,7 @@ export default function PlansScreen() {
     formatMeta,
     handleStart,
     handleUpgrade,
+    proRequiresAccount,
     handleOpenPlan,
     handleCreateWithAi,
     startingPlanId,
@@ -73,6 +74,7 @@ export default function PlansScreen() {
             title={translate('plans.proLock.title')}
             description={translate('plans.proLock.description')}
             ctaLabel={translate('plans.proLock.action')}
+            hint={proRequiresAccount ? translate('paywall.requiresAccount') : undefined}
             onPress={handleUpgrade}
           />
         </View>

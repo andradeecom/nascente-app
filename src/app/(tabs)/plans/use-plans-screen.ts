@@ -4,7 +4,7 @@ import Toast from 'react-native-toast-message';
 import { useActivePlans, useStartPlan, useSuggestedPlans } from '@/hooks/use-reading-plans';
 import { useRefetchOnFocus } from '@/hooks/use-refetch-on-focus';
 import { useSyncOnFocus } from '@/hooks/use-sync';
-import { useTier, useIsPro } from '@/hooks/use-profile';
+import { useTier, useIsPro, useProGate } from '@/hooks/use-profile';
 import { useAuthStore } from '@/stores/auth';
 import { useTranslate } from '@/i18n';
 import { ACTIVE_PLAN_LIMIT, isPlanLimitError } from '@/types/subscription';
@@ -26,6 +26,7 @@ export default function usePlansScreen() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   // Reading plans are a Pro feature — non-Pro users get the Pro lock card.
   const isPro = useIsPro();
+  const { openPro, requiresAccount } = useProGate();
 
   const activePlans = useActivePlans();
   const suggestedPlans = useSuggestedPlans();
@@ -50,8 +51,8 @@ export default function usePlansScreen() {
   // Pro upsell CTA — dismiss the cap modal and open the paywall.
   const handleUpsellCta = useCallback(() => {
     setLimitModalVisible(false);
-    router.push('/paywall');
-  }, [router]);
+    openPro();
+  }, [openPro]);
 
   // Build the "30 dias · diário" meta line from a plan's duration + cadence.
   const formatMeta = useCallback(
@@ -87,10 +88,8 @@ export default function usePlansScreen() {
     router.push('/register');
   }, [router]);
 
-  // Pro lock card CTA (non-Pro users) → paywall.
-  const handleUpgrade = useCallback(() => {
-    router.push('/paywall');
-  }, [router]);
+  // Pro lock card CTA (non-Pro users) → paywall, or sign-up first for guests.
+  const handleUpgrade = openPro;
 
   const handleOpenPlan = useCallback(
     (planId: string) => {
@@ -114,6 +113,7 @@ export default function usePlansScreen() {
     handleStart,
     handleSignIn,
     handleUpgrade,
+    proRequiresAccount: requiresAccount,
     handleOpenPlan,
     handleCreateWithAi,
     atActiveLimit,

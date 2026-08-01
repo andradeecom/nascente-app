@@ -58,7 +58,22 @@ export async function identifyRevenueCat(userId: string): Promise<void> {
   await Purchases.logIn(userId);
 }
 
-/** Reset to an anonymous RevenueCat user on sign-out (no cross-user entitlement leak). */
+/**
+ * Reset to an anonymous RevenueCat user on sign-out (no cross-user entitlement leak).
+ *
+ * **Call this via `syncRevenueCatIdentity(null)` (src/stores/auth.ts), never directly.**
+ * That helper's `lastRevenueCatUserId` guard is what keeps `logOut()` to exactly one
+ * call per sign-out. Calling `Purchases.logOut()` twice makes the second one throw
+ * "LogOut was called but the current user is anonymous" — and an `isAnonymous()` check
+ * here does NOT fix it: the check and the call aren't atomic (logOut is a network
+ * round-trip), so concurrent callers both observe "not anonymous" and both proceed.
+ * That's a known open SDK issue (RevenueCat/purchases-flutter#934). The identity guard
+ * is synchronous, so it dedupes reliably where an async pre-check can't.
+ *
+ * We can't take RevenueCat's "just never call logOut" advice — that only applies to
+ * apps with no anonymous users, and guests browse this app before signing up, so a
+ * reset is required to stop Pro leaking to the next account on a shared device.
+ */
 export async function resetRevenueCat(): Promise<void> {
   if (!configured) return;
   await Purchases.logOut();

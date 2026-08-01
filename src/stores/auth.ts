@@ -8,7 +8,18 @@ import { toAppUser, type AppUser } from '@/types/auth';
 // failures are swallowed so they never block auth state updates.
 let lastRevenueCatUserId: string | null = null;
 
-function syncRevenueCatIdentity(userId: string | null): void {
+/**
+ * The single seam for RevenueCat identity. The `lastRevenueCatUserId` check is
+ * **synchronous** (set before any await), which is what makes this safe to call
+ * from several places during one sign-out: only the first call reaches the SDK.
+ * That matters because `Purchases.logOut()` throws "the current user is anonymous"
+ * if it runs twice, and an async `isAnonymous()` pre-check can't prevent it (the
+ * check isn't atomic with the call — RevenueCat/purchases-flutter#934).
+ *
+ * Exported so `useLogout` can reset identity through the same guard rather than
+ * calling `resetRevenueCat()` directly and racing the auth listener.
+ */
+export function syncRevenueCatIdentity(userId: string | null): void {
   if (userId === lastRevenueCatUserId) return;
   lastRevenueCatUserId = userId;
   if (userId) {

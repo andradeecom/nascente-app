@@ -1,7 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AUTH_STORAGE_KEY, supabase } from '@/lib/supabase';
-import { resetRevenueCat } from '@/lib/revenuecat';
-import { useAuthStore } from '@/stores/auth';
+import { syncRevenueCatIdentity, useAuthStore } from '@/stores/auth';
 import { useLocaleStore } from '@/stores/locale';
 import { useSyncMetaStore } from '@/services/sync/sync-meta';
 import { toAppUser, type AppUser, type RegisterRequest } from '@/types/auth';
@@ -260,12 +259,12 @@ export function useLogout() {
 
     // Reset RevenueCat to an anonymous user so Pro doesn't leak across accounts on
     // this device. The auth listener also resets on a successful signOut, but a
-    // mock-login user (no session) throws above and never fires it — do it here too.
-    try {
-      await resetRevenueCat();
-    } catch {
-      // ignore — entitlement gating also re-checks on next sign-in
-    }
+    // mock-login user (no session) throws above and never fires it — so we reset
+    // here too. Both paths go through `syncRevenueCatIdentity`, whose synchronous
+    // id guard means the SDK's `logOut()` runs exactly once: calling it twice throws
+    // "the current user is anonymous" (and an `isAnonymous()` pre-check can't fix
+    // that — it isn't atomic with the call; see the note in lib/revenuecat.ts).
+    syncRevenueCatIdentity(null);
 
     // Hard guarantee: delete the persisted session from storage so a failed or
     // offline remote sign-out can't leave a token for hydrate() to restore on

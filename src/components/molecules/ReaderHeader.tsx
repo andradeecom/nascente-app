@@ -28,6 +28,7 @@ export function ReaderHeader({ bookName, chapter, translationId, onBookPress, on
         <Text variant={TEXT_VARIANTS.Label} color={TEXT_COLORS.Accent}>
           {TRANSLATIONS[translationId].label}
         </Text>
+        <ThemedChevronDown size={18} />
       </Pressable>
     </View>
   );
@@ -53,6 +54,9 @@ const styles = StyleSheet.create((theme) => ({
     flexShrink: 1,
   },
   translationButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing[1],
     paddingHorizontal: theme.spacing[3],
     paddingVertical: theme.spacing[1.5],
     borderRadius: theme.radius.lg,

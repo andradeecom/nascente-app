@@ -135,6 +135,7 @@ const en = {
     proDescription: 'More translations, AI study tools, and priority sync.',
   },
   profile: {
+    proBadge: 'PRO',
     editToggle: 'Edit',
     firstNameLabel: 'First Name',
     firstNamePlaceholder: 'John',

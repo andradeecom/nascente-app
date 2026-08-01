@@ -6,6 +6,7 @@ export { Slider } from './Slider';
 export { Switch } from './Switch';
 export { type PickerOption } from './Picker';
 export { Avatar } from './Avatar';
+export { ProBadge } from './ProBadge';
 export { SafeAreaView } from './SafeAreaView';
 export { GoogleIcon, AppleIcon } from './BrandIcons';
 export { HomeTabIcon, ReaderTabIcon, PlansTabIcon, StudyTabIcon, SettingsTabIcon } from './TabIcons';

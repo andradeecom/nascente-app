@@ -5,6 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import Toast from 'react-native-toast-message';
 import { router } from 'expo-router';
 import { useAuthStore } from '@/stores/auth';
+import { useIsPro } from '@/hooks/use-profile';
 import { useLogout, useResetPassword, useUpdateProfile } from '@/hooks/use-auth';
 import { uploadAvatar } from '@/lib/avatar-storage';
 import { createProfileSchema, type ProfileFormData } from '@/schemas/profile';
@@ -19,6 +20,7 @@ import { translate } from '@/i18n';
  */
 export default function useProfileScreen() {
   const user = useAuthStore((s) => s.user);
+  const isPro = useIsPro();
   const logoutMutation = useLogout();
   const updateProfile = useUpdateProfile();
 
@@ -146,6 +148,7 @@ export default function useProfileScreen() {
 
   return {
     user,
+    isPro,
     fullName,
     avatarUri,
     isEditing,

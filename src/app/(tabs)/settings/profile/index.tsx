@@ -3,7 +3,7 @@ import { StyleSheet, UnistylesRuntime } from 'react-native-unistyles';
 import { PressableScale } from 'pressto';
 import { Controller } from 'react-hook-form';
 import { Camera } from 'lucide-react-native';
-import { Avatar, Button, SafeAreaView, Switch, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
+import { Avatar, Button, ProBadge, SafeAreaView, Switch, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { InputField, KeyboardAwareScreen } from '@/components/molecules';
 import { ChangePasswordModal, ScreenHeader } from '@/components/organisms';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '@/components/atoms/Button';
@@ -16,6 +16,7 @@ export default function ProfileScreen() {
   const t = useTranslate();
   const {
     user,
+    isPro,
     fullName,
     avatarUri,
     isEditing,
@@ -109,7 +110,10 @@ export default function ProfileScreen() {
           </View>
         ) : (
           <View style={styles.viewBlock}>
-            <Text variant={TEXT_VARIANTS.Title3}>{fullName}</Text>
+            <View style={styles.nameRow}>
+              <Text variant={TEXT_VARIANTS.Title3}>{fullName}</Text>
+              {isPro && <ProBadge label={t('profile.proBadge')} />}
+            </View>
             <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary}>
               {user?.email ?? ''}
             </Text>
@@ -165,6 +169,11 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: 'center',
     gap: theme.spacing[2],
     alignSelf: 'stretch',
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing[2],
   },
   form: {
     alignSelf: 'stretch',

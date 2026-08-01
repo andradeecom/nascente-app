@@ -136,6 +136,7 @@ const es = {
     proDescription: 'Más traducciones, estudio con IA y sincronización prioritaria.',
   },
   profile: {
+    proBadge: 'PRO',
     editToggle: 'Editar',
     firstNameLabel: 'Nombre',
     firstNamePlaceholder: 'Juan',

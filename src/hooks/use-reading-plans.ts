@@ -12,6 +12,8 @@ import {
 import { usePlanCompletionsStore, completedDaysFor } from '@/stores/plan-completions';
 import { ACTIVE_PLAN_LIMIT, PlanLimitError } from '@/types/subscription';
 import type { AccountTier } from '@/types/subscription';
+import { capture } from '@/lib/posthog';
+import type { PlanCompletionSource } from '@/types/analytics';
 import { enrollmentKey } from '@/types/reading-plans';
 import type {
   ActiveReadingPlan,
@@ -170,9 +172,19 @@ export function useStartPlan() {
         const total = plans[e.planId]?.total_days ?? 0;
         return deriveStatus(e, completedDaysFor(completionsByKey, user.id, e.id).size, total) === 'active';
       }).length;
-      if (activeCount >= limit) throw new PlanLimitError(limit);
+      if (activeCount >= limit) {
+        // The cap being hit is an upsell moment, not just an error — capture it
+        // here (both callers surface the same UpsellModal from this one throw).
+        capture('plan_limit_reached', { limit, tier });
+        throw new PlanLimitError(limit);
+      }
 
       const row = usePlanEnrollmentsStore.getState().start(user.id, plan.id);
+      capture('plan_started', {
+        plan_id: plan.id,
+        is_ai_generated: plan.is_ai_generated ?? false,
+        total_days: plan.total_days,
+      });
       void syncAll(user.id);
       return toUserReadingPlan(row, 1, 'active', null);
     },
@@ -243,6 +255,13 @@ export function useMarkPlanDayComplete() {
       planId: string;
       day: number;
       totalDays: number;
+      /**
+       * Which trigger fired this — the Reader's read-through CTA (the primary
+       * path) or the detail screen's manual day check (the offline/paper
+       * fallback). Instrumented here rather than at the two call sites so the
+       * event can't drift between them.
+       */
+      source: PlanCompletionSource;
     }): Promise<{ finished: boolean }> => {
       if (!user) throw new Error('Not authenticated');
 
@@ -251,6 +270,9 @@ export function useMarkPlanDayComplete() {
       const done = completedDaysFor(usePlanCompletionsStore.getState().byKey, user.id, vars.userPlanId);
       const finished = done.size >= vars.totalDays;
       if (finished) usePlanEnrollmentsStore.getState().markComplete(user.id, vars.planId);
+
+      capture('plan_day_completed', { plan_id: vars.planId, day: vars.day, source: vars.source });
+      if (finished) capture('plan_finished', { plan_id: vars.planId, total_days: vars.totalDays });
 
       void syncAll(user.id);
       return { finished };
@@ -275,6 +297,7 @@ export function useArchivePlan() {
     mutationFn: async (vars: { userPlanId: string; planId: string }) => {
       if (!user) throw new Error('Not authenticated');
       usePlanEnrollmentsStore.getState().archive(user.id, vars.planId);
+      capture('plan_archived', { plan_id: vars.planId });
       void syncAll(user.id);
     },
     onSuccess: (_data, vars) => {

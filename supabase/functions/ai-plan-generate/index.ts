@@ -1,6 +1,7 @@
 // @ts-nocheck — Deno edge function; type-checked by Deno at deploy, not the app's tsserver.
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { createPostHog, captureAiGeneration, flushPostHog } from '../_shared/posthog.ts';
 
 /**
  * AI reading-plan generator — user-keyed, metered, Pro-only.
@@ -194,6 +195,28 @@ async function handleRequest(req) {
   let inputTokens = null;
   let outputTokens = null;
 
+  // AI observability — see ../_shared/posthog.ts. `prompt_type: 'plan_generate'`
+  // separates the plan generator from the scripture-keyed tools in ai-generate, so
+  // cost can be attributed per feature. The topic itself is never sent (free-text
+  // user input); only the requested day count.
+  const posthog = createPostHog();
+  const startedAt = Date.now();
+  const aiContext = { distinctId: user.id, model: GEMINI_MODEL, promptType: 'plan_generate', locale };
+
+  // Every failure path below is a real generation attempt that may have burned
+  // tokens, so each reports rather than vanishing into a console.error.
+  const failGeneration = async (error) => {
+    captureAiGeneration(posthog, {
+      ...aiContext,
+      inputTokens,
+      outputTokens,
+      latencySeconds: (Date.now() - startedAt) / 1000,
+      isError: true,
+      error,
+    });
+    await flushPostHog(posthog);
+  };
+
   try {
     const geminiRes = await fetch(`${GEMINI_ENDPOINT}?key=${geminiKey}`, {
       method: 'POST',
@@ -213,6 +236,7 @@ async function handleRequest(req) {
     if (!geminiRes.ok) {
       const errBody = await geminiRes.text();
       console.error('Gemini error', geminiRes.status, errBody);
+      await failGeneration(`HTTP ${geminiRes.status}`);
       return json({ error: 'GEMINI_ERROR', message: 'AI generation failed' }, 503);
     }
 
@@ -224,6 +248,7 @@ async function handleRequest(req) {
 
     if (!text) {
       console.error('Unexpected Gemini response shape', JSON.stringify(geminiJson));
+      await failGeneration('Empty response');
       return json({ error: 'GEMINI_ERROR', message: 'Empty AI response' }, 503);
     }
 
@@ -231,18 +256,30 @@ async function handleRequest(req) {
       parsed = JSON.parse(text);
     } catch {
       console.error('Gemini returned non-JSON', text.slice(0, 500));
+      await failGeneration('Malformed JSON');
       return json({ error: 'GEMINI_ERROR', message: 'AI returned malformed plan' }, 503);
     }
   } catch (err) {
     console.error('Gemini fetch failed', err);
+    await failGeneration(err instanceof Error ? err.message : 'fetch failed');
     return json({ error: 'GEMINI_ERROR', message: 'AI generation failed' }, 503);
   }
 
   // 5. Validate the structured plan
   const validated = validatePlan(parsed, days);
   if (!validated) {
+    await failGeneration('Invalid plan structure');
     return json({ error: 'GEMINI_ERROR', message: 'AI returned an invalid plan' }, 503);
   }
+
+  // Success — the generation happened and is metered, regardless of whether the
+  // user later saves the previewed plan (see `ai_plan_generated` in the app).
+  captureAiGeneration(posthog, {
+    ...aiContext,
+    inputTokens,
+    outputTokens,
+    latencySeconds: (Date.now() - startedAt) / 1000,
+  });
 
   // 6. Charge both counters (generation cost is real even if the user discards the preview)
   const callCost = (inputTokens ?? 0) * GEMINI_INPUT_COST_PER_TOKEN + (outputTokens ?? 0) * GEMINI_OUTPUT_COST_PER_TOKEN;
@@ -253,7 +290,9 @@ async function handleRequest(req) {
   if (planUsageResult.error) console.error('ai_plan_usage increment failed', planUsageResult.error);
   if (costUsageResult.error) console.error('ai_usage increment failed', costUsageResult.error);
 
-  // 7. Return the validated preview (NOT persisted)
+  // 7. Return the validated preview (NOT persisted). Flush first — the isolate is
+  // frozen after the response, so buffered events would be dropped silently.
+  await flushPostHog(posthog);
   return json({
     title: validated.title,
     description: validated.description,

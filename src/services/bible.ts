@@ -1,5 +1,6 @@
 import * as SQLite from 'expo-sqlite';
 import { importDatabaseFromAssetAsync } from 'expo-sqlite';
+import { captureError, log } from '@/lib/posthog';
 import {
   TRANSLATIONS,
   type TranslationId,
@@ -57,8 +58,15 @@ function getDb(translationId: TranslationId): Promise<SQLite.SQLiteDatabase> {
   })();
 
   // Drop a rejected open from the cache so a later call can retry rather than
-  // being permanently poisoned by one transient failure.
-  open.catch(() => dbCache.delete(translationId));
+  // being permanently poisoned by one transient failure. Also report it: a failed
+  // open means the Reader can't render at all, and the Android import/open race
+  // this guards against is exactly the kind of intermittent, device-specific
+  // failure that's invisible without telemetry.
+  open.catch((error: unknown) => {
+    dbCache.delete(translationId);
+    captureError(error, { context: 'bible_db_open', translation_id: translationId });
+    log.error('bible db open failed', { translation_id: translationId });
+  });
 
   dbCache.set(translationId, open);
   return open;

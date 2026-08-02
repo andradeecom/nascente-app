@@ -51,7 +51,7 @@ export default function usePlansScreen() {
   // Pro upsell CTA — dismiss the cap modal and open the paywall.
   const handleUpsellCta = useCallback(() => {
     setLimitModalVisible(false);
-    openPro();
+    openPro('plans_tab');
   }, [openPro]);
 
   // Build the "30 dias · diário" meta line from a plan's duration + cadence.
@@ -89,7 +89,9 @@ export default function usePlansScreen() {
   }, [router]);
 
   // Pro lock card CTA (non-Pro users) → paywall, or sign-up first for guests.
-  const handleUpgrade = openPro;
+  // Wrapped, not aliased: `openPro` takes a source, and a bare alias would pass
+  // the press event as that argument.
+  const handleUpgrade = useCallback(() => openPro('plans_tab'), [openPro]);
 
   const handleOpenPlan = useCallback(
     (planId: string) => {

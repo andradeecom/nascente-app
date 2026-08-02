@@ -20,9 +20,17 @@ import { getMaxChapter } from '@/services/bible';
 import { useLocaleStore } from '@/stores/locale';
 import { useAiGenerate } from '@/hooks/use-ai-generate';
 import { maybeRequestReview } from '@/lib/review-prompt';
-import type { TranslationId } from '@/types/bible';
+import { capture } from '@/lib/posthog';
+import { TRANSLATIONS, type TranslationId } from '@/types/bible';
 import type { HighlightColor } from '@/types/study';
 import type { AiGenerateError } from '@/types/ai';
+
+/**
+ * Streak lengths worth capturing as a milestone event. Deliberately sparse — a
+ * `reading_streak_reached` on every consecutive day would be high-volume and add
+ * nothing over `chapter_read`, which already carries daily reading activity.
+ */
+const STREAK_MILESTONES = [3, 7, 14, 30, 100];
 
 export default function useReaderScreen() {
   const { translationId, bookId, chapter, setTranslation, setPosition, setChapter } = useReaderStore();
@@ -172,6 +180,16 @@ export default function useReaderScreen() {
     }
   }, [isLoading, verses, bookId, chapter, markChapterRead]);
 
+  // Analytics counterpart of the effect above, but ADDITIONALLY gated on
+  // `isFocused`. NativeTabs keeps the Reader mounted in the background, so a
+  // data-ready-only effect fires for a tab the user isn't looking at — harmless
+  // for the local store (idempotent, and the chapter genuinely is their position)
+  // but it would report phantom reads to analytics. Same trap the AI tours hit.
+  useEffect(() => {
+    if (!isFocused || isLoading || !verses?.length) return;
+    capture('chapter_read', { book_id: bookId, chapter, translation_id: translationId });
+  }, [isFocused, isLoading, verses, bookId, chapter, translationId]);
+
   // Second review-prompt trigger, for free/guest readers only — Pro users are
   // already covered by the whole-plan-completion trigger above, and gating this
   // to non-Pro avoids the two triggers racing for the same once-per-install ask.
@@ -183,6 +201,15 @@ export default function useReaderScreen() {
     if (!isPro && computeStreak(readDays) === 3) void maybeRequestReview();
   }, [isPro, readDays]);
 
+  // Streak milestones. Keyed on `readDays` (like the review prompt above), so it
+  // fires the day a streak advances rather than on every chapter view. Limited to
+  // a few milestone lengths — capturing every day would be a high-volume event
+  // that says little more than `chapter_read` already does.
+  useEffect(() => {
+    const streak = computeStreak(readDays);
+    if (STREAK_MILESTONES.includes(streak)) capture('reading_streak_reached', { days: streak });
+  }, [readDays]);
+
   // Offer "finish today's reading" only when reading the active plan day's last
   // chapter — reachable by scrolling to the end of the passage (the CTA lives in
   // the list footer), so it's an intentional, read-through completion.
@@ -191,7 +218,13 @@ export default function useReaderScreen() {
   const handleFinishPlanDay = useCallback(() => {
     if (!session || markComplete.isPending) return;
     markComplete.mutate(
-      { userPlanId: session.userPlanId, planId: session.planId, day: session.day, totalDays: session.totalDays },
+      {
+        userPlanId: session.userPlanId,
+        planId: session.planId,
+        day: session.day,
+        totalDays: session.totalDays,
+        source: 'reader',
+      },
       {
         onSuccess: ({ finished }) => {
           // Show the celebration modal; session clear + navigate-back happen when
@@ -257,6 +290,7 @@ export default function useReaderScreen() {
       if (selectedVerse == null) return;
       hapticConfirm();
       setHighlight(bookId, chapter, selectedVerse, color);
+      capture('highlight_created', { color, book_id: bookId, chapter });
       setSelectedVerse(null);
     },
     [selectedVerse, bookId, chapter, setHighlight]
@@ -265,6 +299,7 @@ export default function useReaderScreen() {
   const handleRemoveHighlight = useCallback(() => {
     if (selectedVerse == null) return;
     removeHighlight(bookId, chapter, selectedVerse);
+    capture('highlight_removed', { book_id: bookId, chapter });
     setSelectedVerse(null);
   }, [selectedVerse, bookId, chapter, removeHighlight]);
 
@@ -273,7 +308,14 @@ export default function useReaderScreen() {
     if (selectedVerse == null) return;
     hapticConfirm();
     toggleBookmark(bookId, chapter, selectedVerse);
-  }, [selectedVerse, bookId, chapter, toggleBookmark]);
+    // `chapterBookmarks` is the pre-toggle state, so the resulting state is its
+    // inverse — capture that rather than the state we just left.
+    capture('bookmark_toggled', {
+      enabled: !chapterBookmarks.has(selectedVerse),
+      book_id: bookId,
+      chapter,
+    });
+  }, [selectedVerse, bookId, chapter, toggleBookmark, chapterBookmarks]);
 
   const closeVerseSheet = useCallback(() => setSelectedVerse(null), []);
 
@@ -292,6 +334,8 @@ export default function useReaderScreen() {
       if (noteVerse == null) return;
       hapticConfirm();
       setNote(bookId, chapter, noteVerse, body);
+      // Length only — the note body is user-authored content and never leaves the device.
+      capture('note_saved', { book_id: bookId, chapter, body_length: body.length });
       setNoteVerse(null);
     },
     [noteVerse, bookId, chapter, setNote]
@@ -301,6 +345,7 @@ export default function useReaderScreen() {
     if (noteVerse == null) return;
     hapticWarning();
     removeNote(bookId, chapter, noteVerse);
+    capture('note_deleted', { book_id: bookId, chapter });
     setNoteVerse(null);
   }, [noteVerse, bookId, chapter, removeNote]);
 
@@ -327,7 +372,7 @@ export default function useReaderScreen() {
 
   const handleOpenSummary = useCallback(() => {
     if (!isPro) {
-      openPro();
+      openPro('chapter_summary');
       return;
     }
     setSummaryVisible(true);
@@ -347,16 +392,21 @@ export default function useReaderScreen() {
 
   const handleTranslationSelect = useCallback(
     (id: TranslationId) => {
+      capture('translation_changed', {
+        from: translationId,
+        to: id,
+        tier: TRANSLATIONS[id]?.tier ?? 'free',
+      });
       setTranslation(id);
       setTranslationPickerVisible(false);
     },
-    [setTranslation]
+    [setTranslation, translationId]
   );
 
   // Tapping a Pro-gated translation closes the picker and opens the paywall.
   const handleTranslationUpsell = useCallback(() => {
     setTranslationPickerVisible(false);
-    openPro();
+    openPro('translation_picker');
   }, [openPro]);
 
   const handlePrevChapter = useCallback(async () => {

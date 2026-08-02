@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { THEME_OPTIONS, useThemeStore, type ThemeName } from '@/stores/theme';
 import { FONT_SIZE_OPTIONS, useReaderStore } from '@/stores/reader';
 import { typography } from '@/theme/typography';
+import { capture } from '@/lib/posthog';
 
 export default function useOnboardingPreferencesScreen() {
   const router = useRouter();
@@ -22,6 +23,7 @@ export default function useOnboardingPreferencesScreen() {
   };
 
   const handleFinish = () => {
+    capture('onboarding_step_completed', { step: 'preferences', step_index: 3 });
     router.push('/onboarding/account');
   };
 

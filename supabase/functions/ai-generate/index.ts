@@ -1,6 +1,7 @@
 // @ts-nocheck — Deno edge function; type-checked by Deno at deploy, not the app's tsserver.
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { createPostHog, captureAiGeneration, flushPostHog } from '../_shared/posthog.ts';
 
 /**
  * AI content generation — scripture-keyed, shared-cached, Pro-only.
@@ -242,6 +243,14 @@ async function handleRequest(req) {
   let inputTokens = null;
   let outputTokens = null;
 
+  // AI observability. Only cache MISSES reach here, which is exactly right: a hit
+  // costs nothing and isn't a generation. Every value below already exists for the
+  // ai_usage/ai_cache bookkeeping — latency is the only thing we add.
+  const posthog = createPostHog();
+  const startedAt = Date.now();
+  const elapsedSeconds = () => (Date.now() - startedAt) / 1000;
+  const aiContext = { distinctId: user.id, model: GEMINI_MODEL, promptType, locale };
+
   try {
     const geminiRes = await fetch(`${GEMINI_ENDPOINT}?key=${geminiKey}`, {
       method: 'POST',
@@ -260,6 +269,13 @@ async function handleRequest(req) {
     if (!geminiRes.ok) {
       const errBody = await geminiRes.text();
       console.error('Gemini error', geminiRes.status, errBody);
+      captureAiGeneration(posthog, {
+        ...aiContext,
+        latencySeconds: elapsedSeconds(),
+        isError: true,
+        error: `HTTP ${geminiRes.status}`,
+      });
+      await flushPostHog(posthog);
       return json({ error: 'GEMINI_ERROR', message: 'AI generation failed' }, 503);
     }
 
@@ -276,12 +292,37 @@ async function handleRequest(req) {
 
     if (!geminiContent) {
       console.error('Unexpected Gemini response shape', JSON.stringify(geminiJson));
+      captureAiGeneration(posthog, {
+        ...aiContext,
+        inputTokens,
+        outputTokens,
+        latencySeconds: elapsedSeconds(),
+        isError: true,
+        error: `Empty response (finishReason=${finishReason ?? 'unknown'})`,
+      });
+      await flushPostHog(posthog);
       return json({ error: 'GEMINI_ERROR', message: 'Empty AI response' }, 503);
     }
   } catch (err) {
     console.error('Gemini fetch failed', err);
+    captureAiGeneration(posthog, {
+      ...aiContext,
+      latencySeconds: elapsedSeconds(),
+      isError: true,
+      error: err instanceof Error ? err.message : 'fetch failed',
+    });
+    await flushPostHog(posthog);
     return json({ error: 'GEMINI_ERROR', message: 'AI generation failed' }, 503);
   }
+
+  // Success. Captured here (before the cache/usage writes) so the generation is
+  // recorded even if that bookkeeping fails — those are explicitly non-fatal.
+  captureAiGeneration(posthog, {
+    ...aiContext,
+    inputTokens,
+    outputTokens,
+    latencySeconds: elapsedSeconds(),
+  });
 
   // 7. Upsert into shared cache (idempotent on concurrent first-requests)
   const { error: upsertError } = await adminClient.from('ai_cache').upsert(
@@ -321,7 +362,9 @@ async function handleRequest(req) {
     // Non-fatal — still return the content; worst case the ceiling under-counts this call
   }
 
-  // 9. Return
+  // 9. Return — flush analytics first. The isolate is frozen once this response is
+  // returned, so anything still buffered would be dropped silently.
+  await flushPostHog(posthog);
   return json({ content: geminiContent, fromCache: false });
 }
 

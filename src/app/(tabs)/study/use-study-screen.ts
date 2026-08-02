@@ -10,6 +10,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useReaderStore } from '@/stores/reader';
 import { useTranslate } from '@/i18n';
 import { hapticWarning } from '@/lib/haptics';
+import { capture } from '@/lib/posthog';
 import { getBookName, getVerses } from '@/services/bible';
 import { syncAll } from '@/services/sync';
 import type { Bookmark, Highlight, HighlightColor, Note } from '@/types/study';
@@ -217,18 +218,36 @@ export default function useStudyScreen() {
   // its own; we just kick a sync to propagate the tombstones. No-op on "All".
   const confirmClearAll = useCallback(() => {
     hapticWarning();
-    if (clearFilter === 'highlights') clearAllHighlights();
-    else if (clearFilter === 'notes') clearAllNotes();
-    else if (clearFilter === 'bookmarks') clearAllBookmarks();
+    if (clearFilter === 'highlights') {
+      capture('study_items_cleared', { type: 'highlight', count: highlights.length });
+      clearAllHighlights();
+    } else if (clearFilter === 'notes') {
+      capture('study_items_cleared', { type: 'note', count: notes.length });
+      clearAllNotes();
+    } else if (clearFilter === 'bookmarks') {
+      capture('study_items_cleared', { type: 'bookmark', count: bookmarks.length });
+      clearAllBookmarks();
+    }
     setClearConfirmOpen(false);
     if (userId != null) void syncAll(userId);
-  }, [clearFilter, clearAllHighlights, clearAllNotes, clearAllBookmarks, userId]);
+  }, [
+    clearFilter,
+    clearAllHighlights,
+    clearAllNotes,
+    clearAllBookmarks,
+    userId,
+    highlights.length,
+    notes.length,
+    bookmarks.length,
+  ]);
 
   const handleSignIn = useCallback(() => {
     router.push('/register');
   }, [router]);
 
-  const handleUpgrade = openPro;
+  // Wrapped rather than aliased directly: `openPro` now takes a source, and a
+  // bare alias would hand it the press event as that argument.
+  const handleUpgrade = useCallback(() => openPro('study_tab'), [openPro]);
 
   // Empty-state CTA — send the user to the reader to create their first item.
   const handleOpenReader = useCallback(() => {
@@ -237,6 +256,7 @@ export default function useStudyScreen() {
 
   const handleOpenItem = useCallback(
     (item: StudyItem) => {
+      capture('study_item_opened', { type: item.type });
       const store = useReaderStore.getState();
       if (store.translationId !== item.translationId) store.setTranslation(item.translationId);
       store.setPosition(item.bookId, item.chapter);

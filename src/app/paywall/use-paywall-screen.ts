@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
@@ -7,6 +7,7 @@ import type { PurchasesPackage } from 'react-native-purchases';
 import { useTranslate } from '@/i18n';
 import { useProOfferings, revenueCatKeys } from '@/hooks/use-revenuecat';
 import { isProActive, isUserCancelledError, purchasePackage, restorePurchases } from '@/lib/revenuecat';
+import { capture } from '@/lib/posthog';
 import { useAuthStore } from '@/stores/auth';
 import { DEFAULT_PRO_OFFER, type ProBillingCycle } from '@/types/subscription';
 import type { PaywallOffer } from '@/components/organisms';
@@ -92,6 +93,19 @@ export default function usePaywallScreen() {
     period: selectedOffer.period,
   });
 
+  // The paywall is a modal reached only from a Pro gate, so mount == viewed.
+  // Pairs with `pro_gate_hit` (fired in `useProGate`) to give gate → paywall reach.
+  useEffect(() => {
+    capture('paywall_viewed');
+  }, []);
+
+  // Wraps the raw setter so the choice is captured without changing the screen's
+  // public shape (`index.tsx` still passes this straight to `onSelectCycle`).
+  const handleSelectCycle = useCallback((cycle: ProBillingCycle) => {
+    setSelectedCycle(cycle);
+    capture('paywall_plan_selected', { cycle });
+  }, []);
+
   const handleClose = useCallback(() => router.back(), [router]);
 
   const handleSubscribe = useCallback(async () => {
@@ -112,17 +126,35 @@ export default function usePaywallScreen() {
       return;
     }
     setIsPurchasing(true);
+    capture('purchase_started', {
+      cycle: selectedCycle,
+      price: pkg.product.price,
+      currency: pkg.product.currencyCode,
+    });
     try {
       const customerInfo = await purchasePackage(pkg);
       // Push the fresh entitlement into the cache so useIsPro flips immediately.
       queryClient.setQueryData(revenueCatKeys.customerInfo, customerInfo);
       if (isProActive(customerInfo)) {
+        capture('purchase_completed', {
+          cycle: selectedCycle,
+          price: pkg.product.price,
+          currency: pkg.product.currencyCode,
+        });
         Toast.show({ type: 'success', text1: translate('paywall.purchaseSuccess') });
         router.back();
       }
     } catch (e) {
-      // A user-cancelled purchase isn't an error worth surfacing.
-      if (!isUserCancelledError(e)) {
+      // A user-cancelled purchase isn't an error worth surfacing to the user —
+      // but it IS worth capturing: store-sheet abandonment is a real funnel step
+      // that was previously invisible, and it's distinct from a failed purchase.
+      if (isUserCancelledError(e)) {
+        capture('purchase_cancelled', { cycle: selectedCycle });
+      } else {
+        capture('purchase_failed', {
+          cycle: selectedCycle,
+          reason: e instanceof Error ? e.message : 'unknown',
+        });
         Toast.show({ type: 'error', text1: translate('paywall.purchaseError') });
       }
     } finally {
@@ -136,7 +168,9 @@ export default function usePaywallScreen() {
     try {
       const customerInfo = await restorePurchases();
       queryClient.setQueryData(revenueCatKeys.customerInfo, customerInfo);
-      if (isProActive(customerInfo)) {
+      const hadEntitlement = isProActive(customerInfo);
+      capture('purchase_restored', { had_entitlement: hadEntitlement });
+      if (hadEntitlement) {
         Toast.show({ type: 'success', text1: translate('paywall.restoreSuccess') });
         router.back();
       } else {
@@ -162,7 +196,7 @@ export default function usePaywallScreen() {
     offers,
     features,
     selectedCycle,
-    setSelectedCycle,
+    setSelectedCycle: handleSelectCycle,
     ctaLabel,
     isPurchasing,
     handleClose,

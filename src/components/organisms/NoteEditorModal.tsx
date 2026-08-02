@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { TextInput, View } from 'react-native';
 import { StyleSheet, UnistylesRuntime } from 'react-native-unistyles';
 import { Trash2 } from 'lucide-react-native';
+import { PostHogMaskView } from 'posthog-react-native';
 import { Button, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { AppModal } from '@/components/molecules';
 import { useTranslate } from '@/i18n';
@@ -57,16 +58,24 @@ export function NoteEditorModal({
           {reference}
         </Text>
 
-        <TextInput
-          value={body}
-          onChangeText={setBody}
-          placeholder={translate('study.note.placeholder')}
-          placeholderTextColor={theme.colors.semantic.textSecondary}
-          style={styles.input}
-          multiline
-          textAlignVertical="top"
-          autoFocus
-        />
+        {/*
+          Hidden from session replay. `maskAllTextInputs` is already on globally,
+          but a note is the most personal content in the app (private reflections
+          on scripture), so the guarantee shouldn't rest on a global flag someone
+          could later flip. Masking here is explicit and local to the risk.
+        */}
+        <PostHogMaskView>
+          <TextInput
+            value={body}
+            onChangeText={setBody}
+            placeholder={translate('study.note.placeholder')}
+            placeholderTextColor={theme.colors.semantic.textSecondary}
+            style={styles.input}
+            multiline
+            textAlignVertical="top"
+            autoFocus
+          />
+        </PostHogMaskView>
 
         <Button
           label={translate('study.note.save')}

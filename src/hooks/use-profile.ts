@@ -4,7 +4,9 @@ import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/auth';
 import { useIsProRevenueCat } from '@/hooks/use-revenuecat';
+import { capture } from '@/lib/posthog';
 import type { AccountTier } from '@/types/subscription';
+import type { ProGateSource } from '@/types/analytics';
 
 export const profileKeys = {
   all: ['profile'] as const,
@@ -81,9 +83,18 @@ export function useProGate() {
   const router = useRouter();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
-  const openPro = useCallback(() => {
-    router.push(isAuthenticated ? '/paywall' : '/register');
-  }, [router, isAuthenticated]);
+  const openPro = useCallback(
+    (source: ProGateSource) => {
+      // Because every Pro-gated surface routes through here, this one capture is
+      // complete upsell attribution — it answers "which locked feature actually
+      // drives demand" without instrumenting each surface separately. Keep new
+      // gates going through `openPro` rather than pushing /paywall directly, or
+      // they'll be invisible in the funnel.
+      capture('pro_gate_hit', { source, requires_account: !isAuthenticated });
+      router.push(isAuthenticated ? '/paywall' : '/register');
+    },
+    [router, isAuthenticated]
+  );
 
   return { openPro, requiresAccount: !isAuthenticated };
 }

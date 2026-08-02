@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { log } from '@/lib/posthog';
 
 /**
  * Shape of the query params a Supabase PKCE auth-callback deep link (signup
@@ -34,6 +35,11 @@ export async function resolveAuthLink(params: AuthLinkParams): Promise<AuthLinkR
 
   const { error } = await supabase.auth.exchangeCodeForSession(params.code);
   if (error) {
+    // Logged (not `captureError`) on purpose: the common cause is an expired or
+    // already-used link, which is expected UX with its own recovery screen, not an
+    // exception. But a spike here would mean the PKCE flow is broken — worth being
+    // able to see. The code is Supabase's classification; no token is ever logged.
+    log.warn('auth link exchange failed', { code: error.code ?? 'unknown' });
     return { status: 'error', code: error.code, description: error.message };
   }
 

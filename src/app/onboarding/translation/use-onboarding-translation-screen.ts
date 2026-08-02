@@ -5,6 +5,7 @@ import { useReaderStore } from '@/stores/reader';
 import type { TranslationTier } from '@/components/molecules';
 import type { TranslationId, Locales } from '@/types';
 import { TRANSLATION_TIER } from '@/components/molecules/TranslationOption';
+import { capture } from '@/lib/posthog';
 
 export type OnboardingTranslation = {
   key: string;
@@ -168,6 +169,7 @@ export default function useOnboardingTranslationScreen() {
     if (selectedItem?.translationId) {
       setTranslation(selectedItem.translationId);
     }
+    capture('onboarding_step_completed', { step: 'translation', step_index: 2 });
     router.push('/onboarding/preferences');
   };
 

@@ -58,7 +58,7 @@ export default function usePlanDetailScreen() {
   // Pro upsell CTA — dismiss the cap modal and open the paywall.
   const handleUpsellCta = useCallback(() => {
     setLimitModalVisible(false);
-    openPro();
+    openPro('plans_tab');
   }, [openPro]);
 
   const plan = detail.data?.plan ?? null;
@@ -129,6 +129,7 @@ export default function usePlanDetailScreen() {
         planId: plan.id,
         day: day.day,
         totalDays: plan.total_days,
+        source: 'detail',
       });
     },
     [enrollment, plan, markComplete]

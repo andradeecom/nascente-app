@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase';
 import { callAiPlanGenerate } from '@/services/ai-plan';
 import { getBookName } from '@/services/bible';
 import { syncAll } from '@/services/sync';
+import { capture } from '@/lib/posthog';
 import { usePlanCatalogStore } from '@/stores/plan-catalog';
 import { usePlanEnrollmentsStore, deriveStatus } from '@/stores/plan-enrollments';
 import { usePlanCompletionsStore, completedDaysFor } from '@/stores/plan-completions';
@@ -41,6 +42,14 @@ export function useGenerateAiPlan() {
         days: vars.days,
         locale: locale as 'en' | 'es' | 'pt',
       });
+    },
+    onSuccess: (_preview, vars) => {
+      // The metered step: quota is charged server-side at generation, even if the
+      // user discards the preview. Pairing this with `ai_plan_saved` gives the
+      // generate → save drop-off, i.e. how much AI budget is spent on plans that
+      // are never kept. `has_topic` (not the topic text) — free-text input is
+      // user-authored content and never leaves the device.
+      capture('ai_plan_generated', { days: vars.days, has_topic: vars.topic.trim().length > 0 });
     },
   });
 }
@@ -118,7 +127,8 @@ export function useSaveAiPlan() {
 
       return plan as ReadingPlan;
     },
-    onSuccess: () => {
+    onSuccess: (plan) => {
+      capture('ai_plan_saved', { days: plan.total_days });
       queryClient.invalidateQueries({ queryKey: planKeys.active });
       queryClient.invalidateQueries({ queryKey: planKeys.suggested });
     },

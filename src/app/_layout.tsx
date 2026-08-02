@@ -10,14 +10,17 @@ import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { PressablesConfig } from 'pressto';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TourGuideProvider, TourGuideOverlay } from '@wrack/react-native-tour-guide';
+import { PostHogProvider, PostHogErrorBoundary } from 'posthog-react-native';
 import { queryClient } from '@/lib/query-client';
 import { useAuthStore } from '@/stores/auth';
 import { useThemeStore } from '@/stores/theme';
 import { useOnboardingStore } from '@/stores/onboarding';
 import { useSync } from '@/hooks/use-sync';
+import { useAnalytics } from '@/hooks/use-analytics';
 import { getLocales } from 'expo-localization';
 import { i18n } from '@/i18n';
 import { configureRevenueCat } from '@/lib/revenuecat';
+import { configurePostHog, getPostHogClient } from '@/lib/posthog';
 
 i18n.locale = getLocales()[0]?.languageTag || 'pt';
 i18n.enableFallback = true;
@@ -26,6 +29,11 @@ i18n.enableFallback = true;
 // platform API key (Expo Go / no key) so the app still boots. User identity is
 // bound separately from the auth lifecycle (see src/stores/auth.ts).
 configureRevenueCat();
+
+// Same contract as RevenueCat above: configure once at module scope, no-op without
+// an API key so the app boots analytics-free. Identity is bound from the auth
+// lifecycle (see src/stores/auth.ts), never here.
+configurePostHog();
 
 // Keep the native splash visible until JS loads and the app has hydrated.
 NativeSplash.preventAutoHideAsync();
@@ -52,6 +60,8 @@ function RootNavigator() {
   // Mirror local-first user data (study tools + reading-progress) to Supabase
   // when signed in + online. Headless and self-gating — a no-op for guests.
   useSync();
+  // Screen views + analytics super properties. Headless; no-ops without a key.
+  useAnalytics();
   const hasCompletedOnboarding = useOnboardingStore((s) => s.hasCompleted);
   const themeName = useThemeStore((s) => s.theme);
   const [splashDone, setSplashDone] = useState(false);
@@ -117,11 +127,26 @@ export default function RootLayout() {
         <KeyboardProvider>
           <PressablesConfig animationType="spring" config={{ minScale: 0.97 }}>
             <QueryClientProvider client={queryClient}>
-              <TourGuideProvider>
-                <RootNavigator />
-                <ToastWithInsets />
-                <TourGuideOverlay />
-              </TourGuideProvider>
+              {/*
+                `client` (not `apiKey`) hands the provider the same singleton the
+                non-component call sites use (`@/lib/posthog`), so `usePostHog()`
+                and a `capture()` from a Zustand store are the one instance.
+
+                `autocapture={false}` disables BOTH captureTouches and
+                captureScreens. Touches are off by decision (named events only —
+                generic $autocapture would also risk capturing note/verse text via
+                element labels); screens are captured manually in `useAnalytics`
+                because captureScreens doesn't support React Navigation v7+.
+              */}
+              <PostHogProvider client={getPostHogClient() ?? undefined} autocapture={false}>
+                <PostHogErrorBoundary>
+                  <TourGuideProvider>
+                    <RootNavigator />
+                    <ToastWithInsets />
+                    <TourGuideOverlay />
+                  </TourGuideProvider>
+                </PostHogErrorBoundary>
+              </PostHogProvider>
             </QueryClientProvider>
           </PressablesConfig>
         </KeyboardProvider>

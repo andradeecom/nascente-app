@@ -2,6 +2,7 @@ import { View } from 'react-native';
 import { PressableScale } from 'pressto';
 import { StyleSheet, UnistylesRuntime } from 'react-native-unistyles';
 import { Bookmark, NotebookPen } from 'lucide-react-native';
+import { PostHogMaskView } from 'posthog-react-native';
 import { TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { useThemeStore } from '@/stores/theme';
 import { highlights as HIGHLIGHT_HEX } from '@/theme/colors';
@@ -46,9 +47,17 @@ export function StudyCard({ item, onPress }: StudyCardProps) {
         </Text>
         {item.type === 'note' ? (
           <>
-            <Text variant={TEXT_VARIANTS.Callout} numberOfLines={3}>
-              {item.body}
-            </Text>
+            {/*
+              A note body rendered as `Text` is NOT covered by the replay config's
+              `maskAllTextInputs` (that only masks `TextInput`s), so the Study list
+              would otherwise show users' private notes in recordings. Mask it
+              explicitly — same reasoning as `NoteEditorModal`.
+            */}
+            <PostHogMaskView>
+              <Text variant={TEXT_VARIANTS.Callout} numberOfLines={3}>
+                {item.body}
+              </Text>
+            </PostHogMaskView>
             <Text variant={TEXT_VARIANTS.Caption} color={TEXT_COLORS.TextTertiary} numberOfLines={1}>
               {item.text}
             </Text>

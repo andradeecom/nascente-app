@@ -186,11 +186,13 @@ export function useHomeScreen() {
     router.push(`/(tabs)/plans/${planId}`);
   };
 
-  const handleOpenPaywall = openPro;
+  // Wrapped, not aliased: `openPro` takes a source, and a bare alias would pass
+  // the press event as that argument.
+  const handleOpenPaywall = useCallback(() => openPro('home_plans'), [openPro]);
 
   const handleOpenDevotional = useCallback(() => {
     if (!isPro) {
-      openPro();
+      openPro('home_devotional');
       return;
     }
     setDevotionalVisible(true);

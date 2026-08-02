@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AUTH_STORAGE_KEY, supabase } from '@/lib/supabase';
-import { syncRevenueCatIdentity, useAuthStore } from '@/stores/auth';
+import { syncPostHogIdentity, syncRevenueCatIdentity, useAuthStore } from '@/stores/auth';
+import { capture } from '@/lib/posthog';
 import { useLocaleStore } from '@/stores/locale';
 import { useSyncMetaStore } from '@/services/sync/sync-meta';
 import { toAppUser, type AppUser, type RegisterRequest } from '@/types/auth';
@@ -30,6 +31,7 @@ export function useLogin() {
     onSuccess: (user) => {
       setAuth(user);
       queryClient.setQueryData(authKeys.me, user);
+      capture('signed_in', { method: 'email' });
     },
   });
 }
@@ -63,6 +65,9 @@ export function useRegister() {
       return { user: toAppUser(data.user!), needsConfirmation: data.session === null };
     },
     onSuccess: ({ user, needsConfirmation }) => {
+      // Captured before the early return so the "signed up but never confirmed"
+      // drop-off is visible — that's the interesting cohort, and it has no session.
+      capture('signed_up', { method: 'email', needs_confirmation: needsConfirmation });
       if (needsConfirmation) return;
       setAuth(user);
       queryClient.setQueryData(authKeys.me, user);
@@ -95,6 +100,7 @@ export function useGoogleLogin() {
     onSuccess: (user) => {
       setAuth(user);
       queryClient.setQueryData(authKeys.me, user);
+      capture('signed_in', { method: 'google' });
     },
   });
 }
@@ -137,6 +143,7 @@ export function useAppleLogin() {
     onSuccess: (user) => {
       setAuth(user);
       queryClient.setQueryData(authKeys.me, user);
+      capture('signed_in', { method: 'apple' });
     },
   });
 }
@@ -265,6 +272,14 @@ export function useLogout() {
     // "the current user is anonymous" (and an `isAnonymous()` pre-check can't fix
     // that — it isn't atomic with the call; see the note in lib/revenuecat.ts).
     syncRevenueCatIdentity(null);
+
+    // Same rationale for analytics: reset to an anonymous distinct id so the next
+    // account on this device doesn't inherit the previous person's identity. Fired
+    // here (not only from the auth listener) because a mock-login user throws above
+    // and never reaches it. Capture before the reset — after it, the event would be
+    // attributed to the new anonymous id rather than the user who signed out.
+    capture('signed_out');
+    syncPostHogIdentity(null);
 
     // Hard guarantee: delete the persisted session from storage so a failed or
     // offline remote sign-out can't leave a token for hydrate() to restore on

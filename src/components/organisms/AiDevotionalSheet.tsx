@@ -101,7 +101,8 @@ export function AiDevotionalSheet({
       ref={sheetRef}
       index={-1}
       enablePanDownToClose
-      snapPoints={['55%', '85%']}
+      enableDynamicSizing={false}
+      snapPoints={['55%', '93%']}
       onChange={handleChange}
       backdropComponent={renderBackdrop}
       backgroundStyle={sheetBackgroundStyle}
@@ -179,7 +180,7 @@ const styles = StyleSheet.create((theme) => ({
   },
   scrollContent: {
     paddingHorizontal: theme.spacing[5],
-    paddingBottom: Platform.OS === 'ios' ? theme.spacing[24] : theme.spacing[4],
+    paddingBottom: Platform.OS === 'ios' ? theme.spacing[28] : theme.spacing[4],
     flexGrow: 1,
   },
   centered: {

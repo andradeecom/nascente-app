@@ -236,7 +236,7 @@ const styles = StyleSheet.create((theme) => ({
   content: {
     paddingHorizontal: theme.spacing[5],
     paddingTop: theme.spacing[1],
-    paddingBottom: Platform.OS === 'ios' ? theme.spacing[24] : theme.spacing[8],
+    paddingBottom: Platform.OS === 'ios' ? theme.spacing[32] : theme.spacing[8],
     gap: theme.spacing[2],
   },
   label: {

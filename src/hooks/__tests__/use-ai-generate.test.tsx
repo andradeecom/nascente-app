@@ -121,27 +121,20 @@ describe('useAiGenerate — analytics contract', () => {
     expect(capturedEvents('ai_generate_requested')).toEqual([{ prompt_type: 'explain' }]);
   });
 
-  it('fires NO event on a warm local cache — hits are currently unmeasured', async () => {
-    // ⚠️ This CONTRADICTS the comment block in `use-ai-generate.ts`, which claims
-    // the queryFn still executes on a locally-cached passage (because the sheets
-    // mount with `enabled: false` and flip true on open) and therefore captures
-    // hit events. It does not. `initialData` is recomputed from the store on
-    // every render, so as soon as the key is warm the query resolves
-    // synchronously with `staleTime: Infinity` and the queryFn never runs —
-    // verified across all three sequences: mounted already-enabled, `enabled`
-    // flipped false→true, and the reader's real "key changes when the sheet
-    // opens" flow (verse null→16), including with a fresh QueryClient standing
-    // in for a new screen mount.
+  it('fires no ai_generate_* event on a warm local cache — those count misses, not opens', async () => {
+    // `initialData` is recomputed from the store on every render, so as soon as the
+    // key is warm the query resolves synchronously under `staleTime: Infinity` and
+    // the queryFn never runs — verified across all three sequences: mounted
+    // already-enabled, `enabled` flipped false→true, and the reader's real "key
+    // changes when the sheet opens" flow (verse null→16), including with a fresh
+    // QueryClient standing in for a new screen mount.
     //
-    // The practical effect: `ai_generate_requested` / `ai_generate_succeeded`
-    // count local MISSES, not opens. Since only misses cost money, cost analysis
-    // is unaffected — but engagement ("how often is Explain used?") is
-    // undercounted, and `from_cache: true` on `ai_generate_succeeded` can now
-    // only ever mean a SERVER-cache hit (see the test below), never a local one.
-    //
-    // Fixing this needs a deliberate decision, not a reflex: capturing in an
-    // effect instead would restore hit visibility but risks double-counting the
-    // miss path. Left as-is and pinned here so the behaviour is at least known.
+    // This is now INTENTIONAL and documented rather than a defect: `ai_generate_*`
+    // means "a billed generation", lining up 1:1 with spend, and `from_cache: true`
+    // on `ai_generate_succeeded` can only ever mean a SERVER-cache hit. Engagement
+    // ("how often is Explain opened?") is answered by `ai_tool_opened` instead —
+    // see the tests below. Do NOT move the ai_generate_* captures into an effect to
+    // "restore" hit coverage; that reintroduces double-counting on the miss path.
     useAiCacheStore.setState({
       byKey: { [KEY]: { content: 'cached', fetchedAt: '2026-01-01T00:00:00.000Z' } },
     });
@@ -171,6 +164,57 @@ describe('useAiGenerate — analytics contract', () => {
 
     expect(capturedEvents('ai_generate_requested')).toHaveLength(0);
     expect(mockedCall).toHaveBeenCalledTimes(1); // and it stayed free
+  });
+
+  it('fires ai_tool_opened on a warm local cache — the engagement metric', async () => {
+    // The gap the ai_generate_* events leave: a reopened passage is free and silent
+    // there, but it IS usage, and the local cache is persisted with no expiry — so
+    // without this a passage opened once would be invisible forever after.
+    useAiCacheStore.setState({
+      byKey: { [KEY]: { content: 'cached', fetchedAt: '2026-01-01T00:00:00.000Z' } },
+    });
+
+    const { result } = await renderHook(() => useAiGenerate(params), createQueryWrapper());
+    await waitFor(() => expect(result.current.data?.content).toBe('cached'));
+
+    expect(capturedEvents('ai_tool_opened')).toEqual([{ prompt_type: 'explain', from_cache: true }]);
+  });
+
+  it('fires ai_tool_opened EXACTLY once on a miss — the cache write must not double-count', async () => {
+    // The regression this guards: the miss path writes to the AI cache store, which
+    // flips this key from cold → warm mid-flight. If the effect depended on that
+    // state it would refire and report two opens for one tap. Reading it through a
+    // ref is what keeps this at one.
+    mockedCall.mockResolvedValue({ content: 'fresh', fromCache: false });
+
+    const { result } = await renderHook(() => useAiGenerate(params), createQueryWrapper());
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(capturedEvents('ai_tool_opened')).toEqual([{ prompt_type: 'explain', from_cache: false }]);
+  });
+
+  it('does not fire ai_tool_opened while the sheet is closed', async () => {
+    useAiCacheStore.setState({
+      byKey: { [KEY]: { content: 'cached', fetchedAt: '2026-01-01T00:00:00.000Z' } },
+    });
+
+    await renderHook(() => useAiGenerate({ ...params, enabled: false }), createQueryWrapper());
+
+    expect(capturedEvents('ai_tool_opened')).toHaveLength(0);
+  });
+
+  it('counts a reopen as a second ai_tool_opened, unlike ai_generate_*', async () => {
+    // Two opens of the same passage: one billed generation, two engagements.
+    mockedCall.mockResolvedValue({ content: 'fresh', fromCache: false });
+
+    const first = await renderHook(() => useAiGenerate(params), createQueryWrapper());
+    await waitFor(() => expect(first.result.current.isSuccess).toBe(true));
+
+    const second = await renderHook(() => useAiGenerate(params), createQueryWrapper());
+    await waitFor(() => expect(second.result.current.data?.content).toBe('fresh'));
+
+    expect(capturedEvents('ai_tool_opened')).toHaveLength(2);
+    expect(capturedEvents('ai_generate_requested')).toHaveLength(1);
   });
 
   it('flags a real generation as NOT from_cache — this is the billed path', async () => {

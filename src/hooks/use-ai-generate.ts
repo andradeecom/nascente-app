@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAiCacheStore } from '@/stores/ai-cache';
 import { callAiGenerate } from '@/services/ai';
@@ -38,6 +39,30 @@ export function useAiGenerate({
 
   const localEntry = localCacheGet(cacheKey);
 
+  // ── Engagement: one event per OPEN, cached or not ────────────────────────────
+  //
+  // This exists because the `capture()` calls inside `queryFn` below can't answer
+  // "how often is this tool used?". With `initialData` recomputed from the store on
+  // every render + `staleTime: Infinity`, a warm key resolves synchronously and the
+  // queryFn never runs — so those events count local cache MISSES, not opens. Since
+  // the local cache is persisted and never expires, a passage opened once would
+  // otherwise be invisible forever after.
+  //
+  // Kept as a SEPARATE event rather than moving the existing captures out here: the
+  // two questions are genuinely different (billed generations vs. engagement), and
+  // one event trying to answer both is what makes double-counting easy to introduce.
+  //
+  // The cache is read imperatively via `getState()` INSIDE the effect, not from the
+  // subscribed `localEntry` above. That's deliberate: the miss path writes to this
+  // store, flipping the key cold → warm mid-flight, so depending on the subscribed
+  // value would refire the effect and report two opens for one tap. `getState()` is
+  // untracked, and the deps are the open itself — the passage key and `enabled`.
+  useEffect(() => {
+    if (!enabled) return;
+    const fromCache = useAiCacheStore.getState().get(cacheKey) != null;
+    capture('ai_tool_opened', { prompt_type: promptType, from_cache: fromCache });
+  }, [enabled, cacheKey, promptType]);
+
   return useQuery({
     queryKey: aiKeys.generate(translationId, bookId, chapter, verseStart, verseEnd, promptType, locale),
     enabled,
@@ -45,18 +70,16 @@ export function useAiGenerate({
     gcTime: Infinity,
     initialData: localEntry ? { content: localEntry.content, fromCache: true } : undefined,
     queryFn: async () => {
-      // One instrumentation point covers all five prompt types — `promptType` is
-      // what tells verse-explain from chapter-summary/devotional/prayer downstream.
+      // ⚠️ These events fire on a local cache MISS ONLY — they are "a generation was
+      // requested", NOT "a tool was opened". A warm key resolves from `initialData`
+      // without ever running this function (pinned in the hook's tests). Use
+      // `ai_tool_opened` (captured in the effect above) for engagement questions.
       //
-      // `fromCache` is the property that matters: only cache misses call Gemini, cost
-      // money, and count against the per-user ceiling. (Server-side `$ai_generation`
-      // events carry tokens/latency/cost for those misses; see functions/ai-generate.)
-      //
-      // This DOES run on a local-cache hit: the sheets mount with `enabled: false` and
-      // flip true on open, so opening a cached passage still executes the query rather
-      // than resolving synchronously from `initialData`. Verified on-device — don't
-      // "fix" a perceived missing-hit-event by also capturing in an effect, which
-      // would double-count every hit.
+      // That split is deliberate and worth keeping: only misses call Gemini, cost
+      // money, and count against the per-user ceiling, so these events line up 1:1
+      // with spend. Server-side `$ai_generation` carries the tokens/latency/cost for
+      // the same calls (see functions/ai-generate). `promptType` distinguishes the
+      // five tools on both sides.
       capture('ai_generate_requested', { prompt_type: promptType });
 
       const cached = localCacheGet(cacheKey);

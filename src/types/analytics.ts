@@ -84,6 +84,17 @@ export type AnalyticsEventMap = {
   study_items_cleared: { type: StudyItemType; count: number };
 
   // ── AI features (client-side usage; cost/latency come from the server) ───
+  /**
+   * **The engagement metric — use this for "how often is Explain used?".**
+   *
+   * Fires once per open of an AI tool, whether or not the content came from the
+   * local cache. The `ai_generate_*` events below deliberately do NOT answer this:
+   * they only fire on a local cache MISS (see `use-ai-generate.ts`), so a user
+   * reopening the same chapter summary ten times produces one of those and ten of
+   * these. `from_cache` says which opens were free.
+   */
+  ai_tool_opened: { prompt_type: string; from_cache: boolean };
+  /** Fires on a local cache MISS only — i.e. a billed generation, not an open. */
   ai_generate_requested: { prompt_type: string };
   /** `from_cache` is the key metric — only cache misses cost money. */
   ai_generate_succeeded: { prompt_type: string; from_cache: boolean };

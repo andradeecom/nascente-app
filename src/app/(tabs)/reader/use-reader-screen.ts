@@ -114,7 +114,11 @@ export default function useReaderScreen() {
           description: translate('aiTour.chapterSummary.description'),
         },
       ],
-      { tourId: 'ai-features-chapter-summary' }
+      // insets.top: 0 cancels the library's Android-only measureTopOffset — it
+      // assumes measureInWindow excludes the status bar, but edge-to-edge
+      // (default since Expo SDK 55) makes it already include it, so the
+      // uncorrected offset pushed every Android spotlight/tooltip down.
+      { tourId: 'ai-features-chapter-summary', insets: { top: 0 } }
     );
   }, [isFocused, isPro, isLoading, verses, startAiTour, translate]);
 
@@ -279,7 +283,8 @@ export default function useReaderScreen() {
             description: translate('aiTour.prayer.description'),
           },
         ],
-        { tourId: 'ai-features-reader' }
+        // insets.top: 0 — see the chapter-summary tour above for why.
+        { tourId: 'ai-features-reader', insets: { top: 0 } }
       );
     },
     [isPro, startAiTour, translate]

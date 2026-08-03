@@ -123,7 +123,11 @@ export function useHomeScreen() {
           description: translate('aiTour.devotional.description'),
         },
       ],
-      { tourId: 'ai-features-home' }
+      // insets.top: 0 cancels the library's Android-only measureTopOffset — it
+      // assumes measureInWindow excludes the status bar, but edge-to-edge
+      // (default since Expo SDK 55) makes it already include it, so the
+      // uncorrected offset pushed every Android spotlight/tooltip down.
+      { tourId: 'ai-features-home', insets: { top: 5 } }
     );
   }, [isFocused, isPro, verseLoading, verseText, startHomeAiTour, translate]);
 

@@ -45,11 +45,18 @@ export function useAiGenerate({
     gcTime: Infinity,
     initialData: localEntry ? { content: localEntry.content, fromCache: true } : undefined,
     queryFn: async () => {
-      // One instrumentation point covers all five prompt types. `fromCache` is the
-      // property that matters: only cache misses call Gemini, cost money, and count
-      // against the per-user ceiling — so the cache hit ratio here is the lever on
-      // AI spend. (Server-side `$ai_generation` events carry the tokens/latency/cost
-      // for the misses; see supabase/functions/ai-generate.)
+      // One instrumentation point covers all five prompt types — `promptType` is
+      // what tells verse-explain from chapter-summary/devotional/prayer downstream.
+      //
+      // `fromCache` is the property that matters: only cache misses call Gemini, cost
+      // money, and count against the per-user ceiling. (Server-side `$ai_generation`
+      // events carry tokens/latency/cost for those misses; see functions/ai-generate.)
+      //
+      // This DOES run on a local-cache hit: the sheets mount with `enabled: false` and
+      // flip true on open, so opening a cached passage still executes the query rather
+      // than resolving synchronously from `initialData`. Verified on-device — don't
+      // "fix" a perceived missing-hit-event by also capturing in an effect, which
+      // would double-count every hit.
       capture('ai_generate_requested', { prompt_type: promptType });
 
       const cached = localCacheGet(cacheKey);

@@ -22,8 +22,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Action majors are kept current mainly for their RUNTIME: GitHub is
+      # retiring the Node 20 that older actions bundle (forced to 24 from
+      # 2026-06-02, removed 2026-09-16), and any action still declaring
+      # `using: node20` prints a deprecation warning per run. All three below are
+      # `using: node24`. Note this is the runtime executing the ACTIONS — it is
+      # unrelated to the project's own Node, which `.nvmrc` pins to 24.18.0.
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # pnpm must be installed BEFORE setup-node, so setup-node's pnpm cache
       # resolver can find the binary and the store path.
@@ -33,10 +39,10 @@ jobs:
       # It does NOT read `engines.pnpm` or `devEngines.packageManager`; omitting
       # `packageManager` is what causes "No pnpm version is specified".
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: pnpm

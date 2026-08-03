@@ -16,12 +16,16 @@ pnpm ios                # expo run:ios
 pnpm android            # expo run:android
 pnpm web                # expo start --web
 pnpm lint               # expo lint
+pnpm typecheck          # tsc --noEmit
+pnpm test               # jest (both projects)
+pnpm test:node          # jest --selectProjects node (pure functions, fast)
+pnpm test:hooks         # jest --selectProjects hooks (renderHook + RN runtime)
+pnpm test:watch         # jest --watch
+pnpm test:ci            # jest --ci --maxWorkers=2 (what CI runs)
 pnpm format             # prettier --write "**/*.{ts,tsx,js,jsx}"
 pnpm update:deps        # expo install --check (use instead of manually bumping deps)
 pnpm clean-install      # scripts/clean-and-reinstall.sh — wipes node_modules/lockfile and reinstalls
 ```
-
-There is no test runner configured in this template.
 
 Husky + lint-staged run `prettier --write` and `expo lint --fix` on staged `*.{js,jsx,ts,tsx}` files on every commit (`.husky/pre-commit`). Node version is pinned via `.nvmrc` (24.17.0); `engines.node` in `package.json` requires `>= 24.17.0`.
 
@@ -340,8 +344,37 @@ Product analytics, session replay, error tracking and structured logs, plus **se
   - Secrets are separate from the app's: `supabase secrets set POSTHOG_API_KEY=... POSTHOG_HOST=...` (**same project key** as the app — that's what makes the join work), then redeploy both functions.
 - **Env:** `EXPO_PUBLIC_POSTHOG_API_KEY` (public `phc_…` write-only key) + `EXPO_PUBLIC_POSTHOG_HOST`. The host is the project's **region**, not a settings field — this project is **EU Cloud** (`https://eu.i.posthog.com`) for pt/es data residency. A project's region cannot be changed after creation.
 
+### Testing (Jest + RNTL)
+
+Jest with **two projects** split by how much React Native runtime a test needs (`jest.config.js`). The split is the whole design: it keeps the logic that matters testable without dragging in the Unistyles/Reanimated/native-module stack.
+
+- **`node`** — pure functions. Plain `node` environment, no `jest-expo` preset. Matches **`src/**/__tests__/**/*.test.ts`** (`.ts`, no `x`). Covers the sync merge helpers, Zod schemas, `aiCacheKey`, `toAppUser`, the `callAiGenerate` error mapper, and the RevenueCat predicates. Sub-second; put new pure logic here.
+- **`hooks`** — anything needing `renderHook`, React Query, or a store that imports RN modules. Runs under `jest-expo`. Matches **`src/**/__tests__/**/*.test.tsx`** (`.tsx`). Covers `useIsPro`/`useTier`/`useProGate`, the auth identity seams, and `useAiGenerate`.
+- **The file extension IS the project boundary** — `.test.ts` → node, `.test.tsx` → hooks. A pure test accidentally named `.tsx` silently pays the whole RN-preset cost; a hook test named `.ts` fails to resolve `react-native`.
+- **No component/screen project, deliberately.** The UI is Unistyles 3 + Reanimated 4 + native `@expo/ui` views + gorhom sheets — RNTL rendering there is a mocking swamp with poor signal, and this codebase has repeatedly been bitten by RN-version-specific breakage in exactly those libraries (see the Reanimated section). Screen-level flows belong in **Maestro**, against the real native stack.
+
+Shared test infrastructure lives in **`src/test-utils/`** (inside `src/` on purpose — the `@/*` alias, the ESLint config and `tsconfig.include` are all `src`-rooted, so utilities outside it lose type-checking and lint coverage):
+
+- `setup-node.ts` / `setup-hooks.ts` — the two `setupFiles`. `setup-hooks.ts` mocks every native module with no JS fallback (RevenueCat, nitro/quick-crypto, expo-sqlite/secure-store/haptics, AsyncStorage) plus the app seams (`@/lib/supabase`, `@/lib/posthog`, `expo-router`). Defaults are **inert** (no-op / not-configured); tests override per-case.
+- `query-wrapper.tsx` — `createQueryWrapper()`, an isolated `QueryClient` per test with retries off. Never reuse the app's `src/lib/query-client.ts` singleton in tests; its cache leaks across cases and makes them order-dependent.
+
+Gotchas, each one a real failure hit while setting this up:
+
+- **`@types/jest` must be listed in `tsconfig.json`'s `types`.** pnpm's non-hoisted layout keeps it out of the `node_modules/@types` directory TS scans by default, so `describe`/`it`/`expect` are unresolved even with the package installed.
+- **Jest is pinned to the `29` line.** `jest-expo@57` is built against Jest 29; installing Jest 30 makes its runtime call `clearMocksOnScope` on a `jest-mock@29` that has no such method, and every suite fails to run.
+- **`transformIgnorePatterns` needs `(?!\.pnpm/)`.** pnpm resolves to `node_modules/.pnpm/<pkg>@<ver>/node_modules/<pkg>/…` — two `node_modules/` segments. The usual `node_modules/(?!pkg)` idiom matches at the outer one (where the next segment is `.pnpm`, not a package name), so every allowlisted package gets ignored anyway and ESM deps like `expo/virtual/env.js` blow up with `Unexpected token 'export'`. Prefixing `.*` does **not** help — it backtracks to the same position.
+- **RNTL 14's `renderHook` is async.** `await` it; `rerender`/`unmount` are async too. Forgetting leaves `result` undefined and every assertion fails with the misleading "Cannot read properties of undefined (reading 'current')".
+- **Seed Zustand state BEFORE `renderHook`, with a plain `setState`.** Wrapping pre-render seeding in `act()` detaches `result.current` (it becomes `null`). Only a store write made *while* a hook is mounted needs `act`.
+
+**A test documents a real divergence in `useAiGenerate`:** the source comment claims the queryFn still runs on a locally-cached passage and so captures cache-hit analytics. It does not — `initialData` resolves a warm key synchronously under `staleTime: Infinity`, so **no event fires at all** (verified across mounted-enabled, `enabled` false→true, and the reader's real key-changes-on-open flow, with a fresh `QueryClient` too). Net effect: `ai_generate_requested`/`_succeeded` count local **misses**, not opens — cost analysis is unaffected (only misses cost money) but engagement is undercounted, and `from_cache: true` can now only mean a *server*-cache hit. Left as-is and pinned by tests; changing it is a product-analytics decision, and "just capture in an effect" would double-count the miss path.
+
+### CI
+
+`.github/workflows/ci.yml` — runs **typecheck → lint → test** on push to `main` and on PRs targeting it. Also exposes `workflow_call` so the planned OTA-update pipeline can reuse it as a gate rather than duplicating the steps. `concurrency` cancels superseded runs on branches but never on `main`. **Install pnpm before `setup-node`** (via `pnpm/action-setup`), or `cache: pnpm` can't resolve the store path.
+
 ## Conventions
 
 - ESLint config (`eslint.config.js`) is `eslint-config-expo` flat config + Prettier + `eslint-plugin-react-compiler` (recommended ruleset is enforced — write components compatible with the React Compiler, e.g. no manual memoization workarounds it would conflict with).
+- **Tests live in `__tests__/` next to the code they cover** (`src/services/sync/__tests__/store-helpers.test.ts`), named `<module>.test.ts[x]` — extension picks the Jest project (see Testing above).
 - Prettier: single quotes, semicolons, 120 print width, ES5 trailing commas, LF line endings (`.prettierrc`).
 - Components/hooks/services follow named exports (no default exports except Expo Router screens, which require default export, and their co-located screen-private hooks — see "Route folders with co-located logic" above).

@@ -1,0 +1,51 @@
+name: CI
+
+# Runs on every push to main and on PRs targeting it. The OTA-update pipeline is
+# expected to reuse this workflow via `workflow_call` (see the trigger below) so
+# tests gate a release without the steps being duplicated there.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_call:
+
+# A newer push to the same branch cancels an in-flight run — but never on main,
+# where each commit's status should stand on its own.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  verify:
+    name: Typecheck, lint and test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # pnpm must be installed BEFORE setup-node, so setup-node's pnpm cache
+      # resolver can find the binary and the store path.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      # Both Jest projects (`node` pure functions + `hooks`). `--ci` fails rather
+      # than writes new snapshots; the worker cap suits the 2-core GitHub runner.
+      - name: Test
+        run: pnpm test:ci

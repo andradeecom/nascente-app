@@ -2,6 +2,11 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    // `@types/jest` must be listed explicitly: pnpm's non-hoisted layout keeps it
+    // out of the `node_modules/@types` directory TS scans by default, so
+    // `describe`/`it`/`expect`/`jest` would be unresolved in test files even with
+    // the package installed.
+    "types": ["jest"],
     "paths": {
       "@/*": ["./src/*"],
       "@/assets/*": ["./assets/*"]

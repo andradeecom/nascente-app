@@ -7,6 +7,30 @@
  * defaults inert (no-op / not-configured), never behavioural.
  */
 
+import { notifyManager } from '@tanstack/react-query';
+
+/* ------------------------------------------------------------------ *
+ * React Query scheduling
+ * ------------------------------------------------------------------ */
+
+/**
+ * Flush React Query's observer notifications synchronously.
+ *
+ * By default `notifyManager` batches them onto a scheduled task, so a query that
+ * settles near the end of a test can notify its observers AFTER the test body has
+ * returned — a React state update outside `act()`, which logs "An update to
+ * HookContainer inside a test was not wrapped in act(...)". It's a **timing race,
+ * so it reproduces on a slow/loaded machine (CI) and not locally**; the suite
+ * still passes either way, which makes it easy to dismiss as noise.
+ *
+ * Wrapping call sites in `act()` does NOT fix this — the update originates in
+ * React Query's scheduler, not in test code (the stack runs through
+ * `notifyManager.batchNotifyFn` → `forceStoreRerender`). Making the scheduler
+ * synchronous removes the gap entirely, and is the mechanism React Query
+ * documents for tests.
+ */
+notifyManager.setScheduler((cb) => cb());
+
 /* ------------------------------------------------------------------ *
  * Native modules with no JS fallback
  * ------------------------------------------------------------------ */

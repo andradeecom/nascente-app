@@ -27,6 +27,11 @@ jobs:
 
       # pnpm must be installed BEFORE setup-node, so setup-node's pnpm cache
       # resolver can find the binary and the store path.
+      #
+      # No `version:` here on purpose — the action reads `packageManager` from
+      # package.json, which is the single source of truth for the pnpm version.
+      # It does NOT read `engines.pnpm` or `devEngines.packageManager`; omitting
+      # `packageManager` is what causes "No pnpm version is specified".
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 

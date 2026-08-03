@@ -370,7 +370,11 @@ Gotchas, each one a real failure hit while setting this up:
 
 ### CI
 
-`.github/workflows/ci.yml` — runs **typecheck → lint → test** on push to `main` and on PRs targeting it. Also exposes `workflow_call` so the planned OTA-update pipeline can reuse it as a gate rather than duplicating the steps. `concurrency` cancels superseded runs on branches but never on `main`. **Install pnpm before `setup-node`** (via `pnpm/action-setup`), or `cache: pnpm` can't resolve the store path.
+`.github/workflows/ci.yml` — runs **typecheck → lint → test** on push to `main` and on PRs targeting it. Also exposes `workflow_call` so the planned OTA-update pipeline can reuse it as a gate rather than duplicating the steps. `concurrency` cancels superseded runs on branches but never on `main`.
+
+Two pnpm gotchas, both hit for real:
+- **Install pnpm before `setup-node`** (via `pnpm/action-setup`), or `cache: pnpm` can't resolve the store path.
+- **`package.json` must carry a `packageManager` field** (`"pnpm@11.9.0"`). `pnpm/action-setup` resolves the version from an explicit `version:` input or that field — and **nothing else**; it reads neither `engines.pnpm` nor `devEngines.packageManager` (verified against the action's source). Without it CI fails with "No pnpm version is specified". `devEngines.packageManager` stays as-is because *pnpm itself* reads it to enforce the package manager locally (that's the `EBADDEVENGINES` error you get from `npx`) — the two fields serve different consumers and must be **bumped together**. Adding `engines.pnpm` would be a third place to update and would fix nothing.
 
 ## Conventions
 

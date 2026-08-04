@@ -4,8 +4,8 @@
   "version": "1.0.0",
   "description": "A premium, offline-first Bible reading experience for Portuguese and Spanish speakers.",
   "author": {
-    "name": "Eduardo Andrade",
-    "email": "eduardo@andradee.com"
+    "name": "Andradee Apps",
+    "email": "apps@andradee.com"
   },
   "license": "MIT",
   "engines": {
@@ -29,7 +29,7 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx}\"",
     "prepare": "husky",
-    "pre-build": "expo prebuild --clean",
+    "prebuild": "expo prebuild --clean",
     "clean-project": "sh ./scripts/clean-project.sh",
     "expo:check:deps": "expo install --check",
     "expo:update:deps": "expo install --fix"

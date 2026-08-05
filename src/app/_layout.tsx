@@ -1,26 +1,18 @@
-import { useEffect, useState } from 'react';
-import { Stack, ThemeProvider, DarkTheme, DefaultTheme } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as NativeSplash from 'expo-splash-screen';
-import { SplashScreen } from '@/components/organisms';
+import { getLocales } from 'expo-localization';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { RootNavigator } from '@/navigator/root-navigator';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { QueryClientProvider } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { PressablesConfig } from 'pressto';
-import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TourGuideProvider, TourGuideOverlay } from '@wrack/react-native-tour-guide';
 import { PostHogProvider, PostHogErrorBoundary } from 'posthog-react-native';
 import { queryClient } from '@/lib/query-client';
-import { useAuthStore } from '@/stores/auth';
-import { useThemeStore } from '@/stores/theme';
-import { useOnboardingStore } from '@/stores/onboarding';
-import { useSync } from '@/hooks/use-sync';
-import { useAnalytics } from '@/hooks/use-analytics';
-import { getLocales } from 'expo-localization';
-import { i18n } from '@/i18n';
 import { configureRevenueCat } from '@/lib/revenuecat';
 import { configurePostHog, getPostHogClient } from '@/lib/posthog';
+import { i18n } from '@/i18n';
 
 i18n.locale = getLocales()[0]?.languageTag || 'pt';
 i18n.enableFallback = true;
@@ -38,73 +30,6 @@ configurePostHog();
 // Keep the native splash visible until JS loads and the app has hydrated.
 NativeSplash.preventAutoHideAsync();
 NativeSplash.setOptions({ duration: 300, fade: true });
-
-// Flip to true during development to force the onboarding flow on every launch.
-const FORCE_ONBOARDING = __DEV__ && false;
-
-function useHydrate() {
-  const hydrate = useAuthStore((s) => s.hydrate);
-  const isAuthHydrated = useAuthStore((s) => s.isHydrated);
-  const isThemeHydrated = useThemeStore((s) => s.hasHydrated);
-  const isOnboardingHydrated = useOnboardingStore((s) => s.hasHydrated);
-
-  useEffect(() => {
-    hydrate();
-  }, [hydrate]);
-
-  return isAuthHydrated && isThemeHydrated && isOnboardingHydrated;
-}
-
-function RootNavigator() {
-  const isHydrated = useHydrate();
-  // Mirror local-first user data (study tools + reading-progress) to Supabase
-  // when signed in + online. Headless and self-gating — a no-op for guests.
-  useSync();
-  // Screen views + analytics super properties. Headless; no-ops without a key.
-  useAnalytics();
-  const hasCompletedOnboarding = useOnboardingStore((s) => s.hasCompleted);
-  const themeName = useThemeStore((s) => s.theme);
-  const [splashDone, setSplashDone] = useState(false);
-  const shouldShowOnboarding = FORCE_ONBOARDING || !hasCompletedOnboarding;
-
-  // Hold on the native splash (no JS render) until resources are ready.
-  if (!isHydrated) {
-    return null;
-  }
-
-  // Hand off to the animated splash, hiding the native one once it's laid out.
-  if (!splashDone) {
-    return <SplashScreen onReady={() => NativeSplash.hideAsync()} onFinish={() => setSplashDone(true)} />;
-  }
-
-  // Keep every screen in a single Stack and let Protected guards decide which is
-  // reachable — swapping the whole Stack tree confuses Expo Router's persisted
-  // navigation state, which is why onboarding only appeared on the very first run.
-  //
-  // `ThemeProvider` drives the *native navigator's* color scheme from our app
-  // theme (`dark` → DarkTheme; `light`/`sepia` → light). Without it the native
-  // surfaces (the NativeTabs bar, screen transition backgrounds) default to a
-  // light scheme regardless of the app theme — causing the white flash on tab
-  // changes and the tab bar sticking to light in dark mode. It's set here (root)
-  // so every transition is covered, and also inside `(tabs)/_layout` for the bar.
-  return (
-    <ThemeProvider value={themeName === 'dark' ? DarkTheme : DefaultTheme}>
-      <StatusBar style={themeName === 'dark' ? 'light' : 'dark'} />
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Protected guard={shouldShowOnboarding}>
-          <Stack.Screen name="onboarding" />
-        </Stack.Protected>
-        <Stack.Protected guard={!shouldShowOnboarding}>
-          {/* Guests can use the app without an account; login/register stay reachable (e.g. from settings). */}
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="(auth)" />
-          {/* Pro paywall — pushed from any tier-gated CTA, presented as a modal. */}
-          <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
-        </Stack.Protected>
-      </Stack>
-    </ThemeProvider>
-  );
-}
 
 // Toast reads safe-area insets, which resolve asynchronously after native
 // measurement. Kept as its own component *inside* SafeAreaProvider so that

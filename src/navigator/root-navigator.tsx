@@ -1,28 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Stack, ThemeProvider, DarkTheme, DefaultTheme } from 'expo-router';
 import * as NativeSplash from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useAnalytics, useSync } from '@/hooks';
-import { useAuthStore } from '@/stores/auth';
+import { useAnalytics, useHydrate, useSync } from '@/hooks';
 import { useOnboardingStore } from '@/stores/onboarding';
 import { SplashScreen } from '@/components/organisms';
 import { useThemeStore } from '@/stores/theme';
 
 // Flip to true during development to force the onboarding flow on every launch.
 const FORCE_ONBOARDING = __DEV__ && false;
-
-function useHydrate() {
-  const hydrate = useAuthStore((s) => s.hydrate);
-  const isAuthHydrated = useAuthStore((s) => s.isHydrated);
-  const isThemeHydrated = useThemeStore((s) => s.hasHydrated);
-  const isOnboardingHydrated = useOnboardingStore((s) => s.hasHydrated);
-
-  useEffect(() => {
-    hydrate();
-  }, [hydrate]);
-
-  return isAuthHydrated && isThemeHydrated && isOnboardingHydrated;
-}
 
 export function RootNavigator() {
   const isHydrated = useHydrate();

@@ -97,11 +97,7 @@ function RootNavigator() {
         <Stack.Protected guard={!shouldShowOnboarding}>
           {/* Guests can use the app without an account; login/register stay reachable (e.g. from settings). */}
           <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="login" />
-          <Stack.Screen name="register" />
-          <Stack.Screen name="forgot-password" />
-          <Stack.Screen name="reset-password" />
-          <Stack.Screen name="confirm-email" />
+          <Stack.Screen name="(auth)" />
           {/* Pro paywall — pushed from any tier-gated CTA, presented as a modal. */}
           <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
         </Stack.Protected>

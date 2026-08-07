@@ -1,9 +1,7 @@
 import { File } from 'expo-file-system';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import { supabase } from '@/lib/supabase';
-
-/** Storage bucket holding user profile photos (public-read, owner-scoped writes). */
-const AVATAR_BUCKET = 'avatars';
+import { AVATAR_BUCKET, pathFromPublicUrl } from '@/lib/avatar-url';
 
 /**
  * Target edge (px) for the stored avatar. The picker already crops to a square, so a
@@ -59,7 +57,7 @@ async function processAvatarImage(localUri: string): Promise<string> {
  * (SDK 57 API) rather than base64 — Supabase's storage client accepts an ArrayBuffer
  * directly, which sidesteps the RN `Blob`/`FormData` upload pitfalls.
  */
-export async function uploadAvatar(localUri: string): Promise<string> {
+export async function uploadAvatar(localUri: string, previousUrl?: string | null): Promise<string> {
   // Read the uid from the local session (no network round-trip) — its user id is the
   // same one Storage's RLS keys on via auth.uid().
   const { data: sessionData } = await supabase.auth.getSession();
@@ -80,6 +78,31 @@ export async function uploadAvatar(localUri: string): Promise<string> {
     contentType: 'image/jpeg',
   });
   if (error) throw error;
+
+  // Replace, don't accumulate: the timestamped path means every photo change would
+  // otherwise orphan the previous object in the bucket forever. Done AFTER the new
+  // upload succeeds, so a failed upload can never leave the user with no avatar.
+  //
+  // Best-effort by design — the new avatar is already stored and recorded, so a
+  // failed cleanup must not surface as a failed save. It only ever targets a path
+  // under this user's own `<uid>/` folder (the DELETE policy would reject anything
+  // else anyway), and `pathFromPublicUrl` returns null for a non-bucket URL such as
+  // a social-login provider's avatar.
+  //
+  // ⚠️ This needs BOTH a DELETE and a SELECT policy. storage-api has to LOOK UP the
+  // object before deleting it, and that lookup runs under the caller's RLS — with no
+  // SELECT policy it matches zero rows, so `remove()` deletes nothing and still
+  // returns **HTTP 200 with no error** (a silent no-op; the same class of trap as
+  // `upsert` needing SELECT+UPDATE above). That is a real bug we shipped and caught
+  // only by diffing the bucket against the storage logs. The `avatars` bucket now has
+  // an owner-scoped SELECT policy gated with `storage.allow_only_operation` so it
+  // still cannot be used to enumerate/list the bucket. Because the failure mode is
+  // silent, `removeError` being null does NOT prove the object is gone.
+  const previousPath = pathFromPublicUrl(previousUrl);
+  if (previousPath && previousPath !== path && previousPath.startsWith(`${uid}/`)) {
+    const { error: removeError } = await supabase.storage.from(AVATAR_BUCKET).remove([previousPath]);
+    if (removeError) console.warn('[avatar-storage] failed to remove previous avatar', removeError);
+  }
 
   const { data } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(path);
   return data.publicUrl;

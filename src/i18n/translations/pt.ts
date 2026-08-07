@@ -104,6 +104,17 @@ const pt = {
     successTitle: 'Palavra-passe atualizada',
     failedTitle: 'Não foi possível atualizar a palavra-passe',
   },
+  deleteAccount: {
+    entryLabel: 'Eliminar conta',
+    title: 'Eliminar a sua conta?',
+    message:
+      'Esta ação é permanente e não pode ser anulada. Todos os seus dados serão eliminados: destaques, notas, marcadores, planos de leitura e o seu progresso.',
+    confirm: 'Eliminar definitivamente',
+    cancel: 'Cancelar',
+    deleting: 'A eliminar…',
+    successTitle: 'Conta eliminada',
+    failedTitle: 'Não foi possível eliminar a conta',
+  },
   validation: {
     emailRequired: 'O e-mail é obrigatório',
     emailInvalid: 'Por favor, introduza um e-mail válido',

@@ -67,6 +67,7 @@ export type AnalyticsEventMap = {
   signed_up: { method: AuthMethod; needs_confirmation: boolean };
   signed_in: { method: AuthMethod };
   signed_out: Record<string, never>;
+  account_deleted: Record<string, never>;
 
   // ── Reading (the free core) ──────────────────────────────────────────────
   chapter_read: { book_id: number; chapter: number; translation_id: string };

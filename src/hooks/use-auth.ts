@@ -4,6 +4,12 @@ import { syncPostHogIdentity, syncRevenueCatIdentity, useAuthStore } from '@/sto
 import { capture } from '@/lib/posthog';
 import { useLocaleStore } from '@/stores/locale';
 import { useSyncMetaStore } from '@/services/sync/sync-meta';
+import { useHighlightsStore } from '@/stores/highlights';
+import { useBookmarksStore } from '@/stores/bookmarks';
+import { useNotesStore } from '@/stores/notes';
+import { usePlanEnrollmentsStore } from '@/stores/plan-enrollments';
+import { usePlanCompletionsStore } from '@/stores/plan-completions';
+import { callDeleteAccount } from '@/services/delete-account';
 import { toAppUser, type AppUser, type RegisterRequest } from '@/types/auth';
 import { GoogleSignin, isSuccessResponse } from '@react-native-google-signin/google-signin';
 import * as AppleAuthentication from 'expo-apple-authentication';
@@ -295,4 +301,53 @@ export function useLogout() {
       // ignore — store/cache already cleared; nothing more we can do here
     }
   };
+}
+
+/**
+ * Permanently delete the signed-in user's account (App Store Guideline 5.1.1(v)
+ * requires an in-app way to initiate this). Order matters:
+ *
+ *   1. Delete server-side FIRST, via the `delete-account` Edge Function. If it
+ *      fails we surface the error with the session still intact, so the user can
+ *      retry — wiping locally first would sign them out of an account that still
+ *      exists, leaving them no way back in to try again.
+ *   2. Hard-purge this device's per-user rows. `useLogout` deliberately leaves
+ *      these (they filter by user id, and un-pushed writes flush on re-login),
+ *      but that reasoning inverts here: the account is gone, so there is nothing
+ *      left to sync to and those rows would be stranded forever. This is also
+ *      why it's a HARD delete, not the `clearAll*` tombstone path — a tombstone
+ *      exists to propagate a deletion that no longer has anywhere to go.
+ *   3. Reuse `useLogout` for the rest of the teardown (auth store, query cache,
+ *      sync cursors, RevenueCat + PostHog identity, persisted-token purge) so
+ *      the sign-out sequence lives in exactly one place.
+ *
+ * The device-global reading progress/streak store is intentionally NOT purged:
+ * it isn't keyed per user (see CLAUDE.md → Reading progress tracking), it's the
+ * one surface that works for guests, and clearing it would wipe the reading
+ * history of whoever keeps using the app on this device afterwards.
+ */
+export function useDeleteAccount() {
+  const logout = useLogout();
+
+  return useMutation({
+    mutationFn: async () => {
+      const userId = useAuthStore.getState().user?.id;
+      if (!userId) throw new Error('Not authenticated');
+
+      await callDeleteAccount();
+
+      useHighlightsStore.getState().purgeUser(userId);
+      useBookmarksStore.getState().purgeUser(userId);
+      useNotesStore.getState().purgeUser(userId);
+      usePlanEnrollmentsStore.getState().purgeUser(userId);
+      usePlanCompletionsStore.getState().purgeUser(userId);
+
+      // Captured before logout resets the analytics identity — afterwards the
+      // event would be attributed to a fresh anonymous id, not the person who
+      // actually deleted their account.
+      capture('account_deleted');
+
+      await logout();
+    },
+  });
 }

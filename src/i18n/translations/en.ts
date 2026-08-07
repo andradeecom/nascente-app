@@ -103,6 +103,17 @@ const en = {
     successTitle: 'Password updated',
     failedTitle: 'Could not update password',
   },
+  deleteAccount: {
+    entryLabel: 'Delete Account',
+    title: 'Delete your account?',
+    message:
+      'This is permanent and cannot be undone. All of your data will be deleted: highlights, notes, bookmarks, reading plans, and your progress.',
+    confirm: 'Delete permanently',
+    cancel: 'Cancel',
+    deleting: 'Deleting…',
+    successTitle: 'Account deleted',
+    failedTitle: 'Could not delete account',
+  },
   validation: {
     emailRequired: 'Email is required',
     emailInvalid: 'Please enter a valid email address',

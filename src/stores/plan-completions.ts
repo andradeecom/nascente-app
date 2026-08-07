@@ -19,6 +19,8 @@ type PlanCompletionsState = {
   add: (userId: string, userPlanId: string, day: number) => void;
   /** Union pulled remote completions in (never removes). */
   mergeRemote: (userId: string, rows: { userPlanId: string; day: number; completedAt: string }[]) => void;
+  /** Hard-remove every completion for the user — account deletion only. */
+  purgeUser: (userId: string) => void;
   setHasHydrated: (value: boolean) => void;
 };
 
@@ -48,6 +50,19 @@ export const usePlanCompletionsStore = create<PlanCompletionsState>()(
         if (!changed) return; // nothing new → no re-render
         set({ byKey: next });
       },
+      purgeUser: (userId) =>
+        set((state) => {
+          const next: Record<string, LocalPlanCompletion> = {};
+          let changed = false;
+          for (const [key, row] of Object.entries(state.byKey)) {
+            if (row.userId === userId) {
+              changed = true;
+              continue;
+            }
+            next[key] = row;
+          }
+          return changed ? { byKey: next } : state;
+        }),
       setHasHydrated: (value) => set({ hasHydrated: value }),
     }),
     {

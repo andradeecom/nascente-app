@@ -1,5 +1,6 @@
 import {
   applyPulledRow,
+  hardDeleteAllForUser,
   markRowSynced,
   migrateSyncMeta,
   pruneTombstones,
@@ -255,5 +256,35 @@ describe('pruneTombstones', () => {
 
   it('defaults to the 90-day window that mirrors the server purge cron', () => {
     expect(TOMBSTONE_TTL_DAYS).toBe(90);
+  });
+});
+
+describe('hardDeleteAllForUser', () => {
+  it('drops every row for the user, tombstones included', () => {
+    // The account-deletion counterpart to softDeleteAllForUser: once the account
+    // is gone there is nothing to sync to, so leaving tombstones would strand
+    // that user's rows on the device forever.
+    const byKey = {
+      a: record({ userId: 'user-1' }),
+      b: record({ userId: 'user-1', bookId: 1, deletedAt: '2026-01-01T00:00:00.000Z' }),
+    };
+
+    expect(hardDeleteAllForUser(byKey, 'user-1')).toEqual({});
+  });
+
+  it('leaves other users rows untouched', () => {
+    const otherUser = record({ userId: 'user-2' });
+    const byKey = { a: record({ userId: 'user-1' }), b: otherUser };
+
+    const next = hardDeleteAllForUser(byKey, 'user-1');
+
+    expect(Object.keys(next)).toEqual(['b']);
+    expect(next.b).toBe(otherUser);
+  });
+
+  it('returns the same reference when nothing matched (no needless re-render)', () => {
+    const byKey = { a: record({ userId: 'user-2' }) };
+
+    expect(hardDeleteAllForUser(byKey, 'user-1')).toBe(byKey);
   });
 });

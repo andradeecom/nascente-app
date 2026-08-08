@@ -107,7 +107,7 @@ const en = {
     entryLabel: 'Delete Account',
     title: 'Delete your account?',
     message:
-      'This is permanent and cannot be undone. All of your data will be deleted: highlights, notes, bookmarks, reading plans, and your progress.',
+      'This is permanent and cannot be undone. All of your data will be deleted: highlights, notes, bookmarks, reading plans, and your progress.\n\nIf you have an active Nascente Pro subscription, it is not cancelled automatically — billing is handled by the App Store or Google Play. Cancel it in your account settings before deleting.',
     confirm: 'Delete permanently',
     cancel: 'Cancel',
     deleting: 'Deleting…',

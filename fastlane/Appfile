@@ -1,0 +1,7 @@
+# Identifiers only — no credentials. Authentication is via an App Store Connect
+# API key (see the `api_key` lane in the Fastfile), which is why there is no
+# `apple_id` / password here.
+
+app_identifier('com.andradee.nascenteapp')
+itc_team_id(ENV['ASC_TEAM_ID']) if ENV['ASC_TEAM_ID']
+team_id('URV3D9PRX2')

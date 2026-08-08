@@ -1,0 +1,152 @@
+name: Release iOS
+
+# iOS only — Android is deferred (see .docs/notes.md → "Android deferred").
+#
+# Manual trigger: this bumps the version, commits, tags and ships to TestFlight,
+# which is not something that should fire on every push to main.
+#
+# Unlike bump-version.yml (which only bumps and is left in place for version
+# bumps that are NOT a release), this workflow owns the whole release: bump →
+# build → TestFlight → optional App Store submission. Both write the same
+# app.json fields via scripts/sync-version.mjs, so their histories interleave
+# safely — the build number is derived from app.json, not from a counter here.
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version bump type'
+        required: true
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      submit_for_review:
+        description: 'Also submit the build to App Store review (otherwise TestFlight only)'
+        required: true
+        default: false
+        type: boolean
+
+# Never let two releases build at once — they would race on the version bump
+# and could push conflicting commits. No cancel-in-progress: a half-finished
+# release that has already pushed a tag should be allowed to finish.
+concurrency:
+  group: release-ios
+  cancel-in-progress: false
+
+jobs:
+  # Gate the release on the same checks that guard main. Reuses ci.yml rather
+  # than duplicating the steps — this is what its `workflow_call` trigger is for.
+  verify:
+    uses: ./.github/workflows/ci.yml
+
+  release:
+    needs: verify
+    # macOS is required for Xcode. `-15` pins the image so an Xcode bump does not
+    # silently change the build; revisit deliberately.
+    runs-on: macos-15
+    timeout-minutes: 60
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      # bundler-cache handles `bundle install` plus caching of vendor/bundle,
+      # keyed on Gemfile.lock.
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump package.json version
+        id: bump
+        run: |
+          pnpm version ${{ inputs.bump }} --no-git-tag-version
+          NEW_VERSION="v$(node -p "require('./package.json').version")"
+          echo "version=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
+
+      # Writes expo.version + expo.android.versionCode + expo.ios.buildNumber.
+      # The Android field is bumped in lockstep even though Android does not
+      # ship, so its history stays consistent for whenever it is picked up.
+      - name: Sync version and build number to app.json
+        id: sync
+        run: node scripts/sync-version.mjs "${VERSION#v}"
+        env:
+          VERSION: ${{ steps.bump.outputs.version }}
+
+      # Committed BEFORE the build so the tag always points at the exact source
+      # the uploaded binary was built from.
+      - name: Commit, tag and push
+        run: |
+          VERSION="${{ steps.bump.outputs.version }}"
+          BUILD="${{ steps.sync.outputs.build }}"
+          git add package.json app.json
+          git commit -m "chore: release ${VERSION} (build ${BUILD})"
+          git tag "${VERSION}"
+          git push origin HEAD --tags
+
+      - name: Build and upload to TestFlight
+        run: bundle exec fastlane ios beta
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+          # Signing certificates are created/downloaded by cert+sigh, which need
+          # a keychain password to import into on a fresh runner.
+          MATCH_KEYCHAIN_PASSWORD: ${{ secrets.MATCH_KEYCHAIN_PASSWORD }}
+          FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: '120'
+          # The public EXPO_PUBLIC_* values are compiled into the JS bundle at
+          # build time, so they must be present here — they are shipped in the
+          # binary either way (that is what the prefix means), but they are kept
+          # as secrets to avoid publishing project URLs/keys in workflow logs.
+          EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+          EXPO_PUBLIC_REVENUECAT_IOS_API_KEY: ${{ secrets.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY }}
+          EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY: ${{ secrets.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY }}
+          EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID: ${{ secrets.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID }}
+          EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID: ${{ secrets.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID }}
+          EXPO_PUBLIC_TERMS_URL: ${{ secrets.EXPO_PUBLIC_TERMS_URL }}
+          EXPO_PUBLIC_PRIVACY_URL: ${{ secrets.EXPO_PUBLIC_PRIVACY_URL }}
+          EXPO_PUBLIC_POSTHOG_API_KEY: ${{ secrets.EXPO_PUBLIC_POSTHOG_API_KEY }}
+          EXPO_PUBLIC_POSTHOG_HOST: ${{ secrets.EXPO_PUBLIC_POSTHOG_HOST }}
+
+      - name: Submit to App Store review
+        if: ${{ inputs.submit_for_review }}
+        run: bundle exec fastlane ios release
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+
+      # Kept for 14 days so a failed upload can be inspected or re-submitted by
+      # hand without re-running the whole build.
+      - name: Upload IPA artifact
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: nascente-ipa
+          path: build/*.ipa
+          retention-days: 14
+          if-no-files-found: warn

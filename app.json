@@ -14,7 +14,8 @@
       },
       "bundleIdentifier": "com.andradee.nascenteapp",
       "supportsTablet": false,
-      "appleTeamId": "URV3D9PRX2"
+      "appleTeamId": "URV3D9PRX2",
+      "buildNumber": "4"
     },
     "android": {
       "adaptiveIcon": {
@@ -24,7 +25,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.andradee.nascenteapp"
+      "package": "com.andradee.nascenteapp",
+      "versionCode": 1
     },
     "web": {
       "output": "static",

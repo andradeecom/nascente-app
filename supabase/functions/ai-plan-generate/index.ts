@@ -28,7 +28,7 @@ import { createPostHog, captureAiGeneration, flushPostHog } from '../_shared/pos
  * Secrets: GOOGLE_GEMINI_API_KEY, plus the auto-injected SUPABASE_* keys.
  */
 
-const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_MODEL = 'gemini-3.8-flash';
 const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 const LOCALES = ['en', 'es', 'pt'];

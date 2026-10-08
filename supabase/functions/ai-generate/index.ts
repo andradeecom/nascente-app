@@ -12,7 +12,7 @@ import { createPostHog, captureAiGeneration, flushPostHog } from '../_shared/pos
  *   3. Check profiles.tier === 'pro'
  *   4. Check this month's ai_usage cost ceiling → reject if already at/over ceiling
  *   5. Check shared ai_cache table (scripture-keyed) → return at $0 on hit
- *   6. Call Gemini 2.5 Flash REST API
+ *   6. Call Gemini 3.8 Flash REST API
  *   7. Upsert into ai_cache (idempotent on race conditions)
  *   8. Record cost into ai_usage (cache misses only — hits are $0 and exempt)
  *   9. Return { content, fromCache: false }
@@ -50,10 +50,11 @@ const MAX_PASSAGE_TEXT_LENGTH = 20000; // generous cap for a full chapter; block
 const MAX_TRANSLATION_ID_LENGTH = 64;
 const MAX_REFERENCE_LENGTH = 128; // e.g. "1 Coríntios 13:4-7" — a label, not free text
 
-// Gemini 2.5 Flash pricing (per .docs/ai-features.md §4) — used only to estimate
+// Gemini 3.8 Flash pricing (per .docs/ai-features.md §4) — used only to estimate
 // spend for the cost-ceiling backstop, not billed anywhere else.
-const GEMINI_INPUT_COST_PER_TOKEN = 0.3 / 1_000_000;
-const GEMINI_OUTPUT_COST_PER_TOKEN = 2.5 / 1_000_000;
+// Google paid-tier pricing through 2026-12-31: $0.75 input / $3.75 output per 1M tokens.
+const GEMINI_INPUT_COST_PER_TOKEN = 0.75 / 1_000_000;
+const GEMINI_OUTPUT_COST_PER_TOKEN = 3.75 / 1_000_000;
 const MONTHLY_COST_CEILING_USD = 1.5; // .docs/ai-features.md §3 "soft monthly cost ceiling"
 
 // ── System prompts ──────────────────────────────────────────────────────────

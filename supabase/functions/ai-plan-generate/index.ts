@@ -36,9 +36,10 @@ const MIN_DAYS = 3;
 const MAX_DAYS = 40;
 const MAX_TOPIC_LENGTH = 200;
 
-// Gemini 2.5 Flash pricing (per .docs/ai-features.md §4) — cost-ceiling estimate only.
-const GEMINI_INPUT_COST_PER_TOKEN = 0.3 / 1_000_000;
-const GEMINI_OUTPUT_COST_PER_TOKEN = 2.5 / 1_000_000;
+// Gemini 3.8 Flash pricing (per .docs/ai-features.md §4) — cost-ceiling estimate only.
+// Google paid-tier pricing through 2026-12-31: $0.75 input / $3.75 output per 1M tokens.
+const GEMINI_INPUT_COST_PER_TOKEN = 0.75 / 1_000_000;
+const GEMINI_OUTPUT_COST_PER_TOKEN = 3.75 / 1_000_000;
 const MONTHLY_COST_CEILING_USD = 1.5; // .docs/ai-features.md §3
 const AI_PLAN_LIMIT = 10; // .docs/ai-features.md §3 — 10 AI plans per cycle
 

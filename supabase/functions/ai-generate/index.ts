@@ -2,6 +2,13 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { createPostHog, captureAiGeneration, flushPostHog } from '../_shared/posthog.ts';
+import {
+  GEMINI_ENDPOINT,
+  buildInteractionsRequest,
+  calculateGeminiCost,
+  extractTextFromInteraction,
+  extractUsageFromInteraction,
+} from '../_shared/gemini-interactions.ts';
 
 /**
  * AI content generation — scripture-keyed, shared-cached, Pro-only.
@@ -31,7 +38,6 @@ import { createPostHog, captureAiGeneration, flushPostHog } from '../_shared/pos
  */
 
 const GEMINI_MODEL = 'gemini-3.8-flash';
-const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/interactions';
 
 const PROMPT_TYPES = ['explain', 'explain_simple', 'chapter_summary', 'devotional', 'prayer_prompt'];
 // Cache-invalidation token for the shared `ai_cache` table — part of the cache
@@ -50,11 +56,6 @@ const MAX_PASSAGE_TEXT_LENGTH = 20000; // generous cap for a full chapter; block
 const MAX_TRANSLATION_ID_LENGTH = 64;
 const MAX_REFERENCE_LENGTH = 128; // e.g. "1 Coríntios 13:4-7" — a label, not free text
 
-// Gemini 3.8 Flash pricing (per .docs/ai-features.md §4) — used only to estimate
-// spend for the cost-ceiling backstop, not billed anywhere else.
-// Google paid-tier pricing through 2026-12-31: $0.75 input / $3.75 output per 1M tokens.
-const GEMINI_INPUT_COST_PER_TOKEN = 0.75 / 1_000_000;
-const GEMINI_OUTPUT_COST_PER_TOKEN = 3.75 / 1_000_000;
 const MONTHLY_COST_CEILING_USD = 1.5; // .docs/ai-features.md §3 "soft monthly cost ceiling"
 
 // ── System prompts ──────────────────────────────────────────────────────────
@@ -259,17 +260,18 @@ async function handleRequest(req) {
         'Content-Type': 'application/json',
         'x-goog-api-key': geminiKey,
       },
-      body: JSON.stringify({
-        model: GEMINI_MODEL,
-        system_instruction: systemPrompt(promptType, locale, referenceLabel),
-        input: passageText,
-        store: false,
-        generation_config: {
-          max_output_tokens: maxOutputTokens(promptType),
-          temperature: 0.7,
-          thinking_level: 'low',
-        },
-      }),
+      body: JSON.stringify(
+        buildInteractionsRequest({
+          model: GEMINI_MODEL,
+          systemInstruction: systemPrompt(promptType, locale, referenceLabel),
+          input: passageText,
+          generationConfig: {
+            max_output_tokens: maxOutputTokens(promptType),
+            temperature: 0.7,
+            thinking_level: 'low',
+          },
+        })
+      ),
     });
 
     if (!geminiRes.ok) {
@@ -286,13 +288,12 @@ async function handleRequest(req) {
     }
 
     const geminiJson = await geminiRes.json();
-    const modelOutputStep = geminiJson?.steps?.findLast?.((step) => step.type === 'model_output');
-    const textParts = modelOutputStep?.content?.filter?.((part) => part.type === 'text');
-    geminiContent = textParts?.length ? textParts.map((part) => part.text).join('') : null;
-    inputTokens = geminiJson?.usage?.total_input_tokens ?? null;
-    outputTokens = geminiJson?.usage?.total_output_tokens ?? null;
+    geminiContent = extractTextFromInteraction(geminiJson);
+    const usage = extractUsageFromInteraction(geminiJson);
+    inputTokens = usage.inputTokens;
+    outputTokens = usage.outputTokens;
 
-    const stepStatus = modelOutputStep?.status;
+    const stepStatus = geminiJson?.steps?.findLast?.((step) => step.type === 'model_output')?.status;
     if (stepStatus && stepStatus !== 'done') {
       console.warn(`Gemini model_output status=${stepStatus} outputTokens=${outputTokens} promptType=${promptType}`);
     }
@@ -356,7 +357,7 @@ async function handleRequest(req) {
   }
 
   // 8. Record cost toward this cycle's ceiling (cache misses only — hits never reach here)
-  const callCost = (inputTokens ?? 0) * GEMINI_INPUT_COST_PER_TOKEN + (outputTokens ?? 0) * GEMINI_OUTPUT_COST_PER_TOKEN;
+  const callCost = calculateGeminiCost(inputTokens, outputTokens);
 
   const { error: usageError } = await adminClient.rpc('increment_ai_usage', {
     p_user_id: user.id,

@@ -29,7 +29,7 @@ import { createPostHog, captureAiGeneration, flushPostHog } from '../_shared/pos
  */
 
 const GEMINI_MODEL = 'gemini-3.8-flash';
-const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/interactions';
 
 const LOCALES = ['en', 'es', 'pt'];
 const MIN_DAYS = 3;
@@ -219,17 +219,48 @@ async function handleRequest(req) {
   };
 
   try {
-    const geminiRes = await fetch(`${GEMINI_ENDPOINT}?key=${geminiKey}`, {
+    const geminiRes = await fetch(GEMINI_ENDPOINT, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': geminiKey,
+      },
       body: JSON.stringify({
-        system_instruction: { parts: [{ text: systemPrompt(days, locale) }] },
-        contents: [{ role: 'user', parts: [{ text: topic }] }],
-        generationConfig: {
-          maxOutputTokens: 2400,
+        model: GEMINI_MODEL,
+        system_instruction: systemPrompt(days, locale),
+        input: topic,
+        store: false,
+        response_format: [
+          {
+            type: 'text',
+            mime_type: 'application/json',
+            schema: {
+              type: 'OBJECT',
+              properties: {
+                title: { type: 'STRING' },
+                description: { type: 'STRING' },
+                days: {
+                  type: 'ARRAY',
+                  items: {
+                    type: 'OBJECT',
+                    properties: {
+                      day: { type: 'INTEGER' },
+                      book_id: { type: 'INTEGER' },
+                      chapter_start: { type: 'INTEGER' },
+                      chapter_end: { type: 'INTEGER' },
+                    },
+                    required: ['day', 'book_id', 'chapter_start', 'chapter_end'],
+                  },
+                },
+              },
+              required: ['title', 'description', 'days'],
+            },
+          },
+        ],
+        generation_config: {
+          max_output_tokens: 2400,
           temperature: 0.8,
-          responseMimeType: 'application/json',
-          thinkingConfig: { thinkingBudget: 0 },
+          thinking_level: 'low',
         },
       }),
     });
@@ -242,10 +273,11 @@ async function handleRequest(req) {
     }
 
     const geminiJson = await geminiRes.json();
-    const candidate = geminiJson?.candidates?.[0];
-    const text = candidate?.content?.parts?.[0]?.text;
-    inputTokens = geminiJson?.usageMetadata?.promptTokenCount ?? null;
-    outputTokens = geminiJson?.usageMetadata?.candidatesTokenCount ?? null;
+    const modelOutputStep = geminiJson?.steps?.findLast?.((step) => step.type === 'model_output');
+    const textParts = modelOutputStep?.content?.filter?.((part) => part.type === 'text');
+    const text = textParts?.length ? textParts.map((part) => part.text).join('') : null;
+    inputTokens = geminiJson?.usage?.total_input_tokens ?? null;
+    outputTokens = geminiJson?.usage?.total_output_tokens ?? null;
 
     if (!text) {
       console.error('Unexpected Gemini response shape', JSON.stringify(geminiJson));

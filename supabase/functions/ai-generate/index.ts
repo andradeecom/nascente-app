@@ -31,7 +31,7 @@ import { createPostHog, captureAiGeneration, flushPostHog } from '../_shared/pos
  */
 
 const GEMINI_MODEL = 'gemini-3.8-flash';
-const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/interactions';
 
 const PROMPT_TYPES = ['explain', 'explain_simple', 'chapter_summary', 'devotional', 'prayer_prompt'];
 // Cache-invalidation token for the shared `ai_cache` table — part of the cache
@@ -253,16 +253,21 @@ async function handleRequest(req) {
   const aiContext = { distinctId: user.id, model: GEMINI_MODEL, promptType, locale };
 
   try {
-    const geminiRes = await fetch(`${GEMINI_ENDPOINT}?key=${geminiKey}`, {
+    const geminiRes = await fetch(GEMINI_ENDPOINT, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': geminiKey,
+      },
       body: JSON.stringify({
-        system_instruction: { parts: [{ text: systemPrompt(promptType, locale, referenceLabel) }] },
-        contents: [{ role: 'user', parts: [{ text: passageText }] }],
-        generationConfig: {
-          maxOutputTokens: maxOutputTokens(promptType),
+        model: GEMINI_MODEL,
+        system_instruction: systemPrompt(promptType, locale, referenceLabel),
+        input: passageText,
+        store: false,
+        generation_config: {
+          max_output_tokens: maxOutputTokens(promptType),
           temperature: 0.7,
-          thinkingConfig: { thinkingBudget: 0 },
+          thinking_level: 'low',
         },
       }),
     });
@@ -281,14 +286,15 @@ async function handleRequest(req) {
     }
 
     const geminiJson = await geminiRes.json();
-    const candidate = geminiJson?.candidates?.[0];
-    geminiContent = candidate?.content?.parts?.[0]?.text;
-    inputTokens = geminiJson?.usageMetadata?.promptTokenCount ?? null;
-    outputTokens = geminiJson?.usageMetadata?.candidatesTokenCount ?? null;
+    const modelOutputStep = geminiJson?.steps?.findLast?.((step) => step.type === 'model_output');
+    const textParts = modelOutputStep?.content?.filter?.((part) => part.type === 'text');
+    geminiContent = textParts?.length ? textParts.map((part) => part.text).join('') : null;
+    inputTokens = geminiJson?.usage?.total_input_tokens ?? null;
+    outputTokens = geminiJson?.usage?.total_output_tokens ?? null;
 
-    const finishReason = candidate?.finishReason;
-    if (finishReason && finishReason !== 'STOP') {
-      console.warn(`Gemini finishReason=${finishReason} outputTokens=${outputTokens} promptType=${promptType}`);
+    const stepStatus = modelOutputStep?.status;
+    if (stepStatus && stepStatus !== 'done') {
+      console.warn(`Gemini model_output status=${stepStatus} outputTokens=${outputTokens} promptType=${promptType}`);
     }
 
     if (!geminiContent) {
@@ -299,7 +305,7 @@ async function handleRequest(req) {
         outputTokens,
         latencySeconds: elapsedSeconds(),
         isError: true,
-        error: `Empty response (finishReason=${finishReason ?? 'unknown'})`,
+        error: `Empty response (model_output status=${stepStatus ?? 'unknown'})`,
       });
       await flushPostHog(posthog);
       return json({ error: 'GEMINI_ERROR', message: 'Empty AI response' }, 503);

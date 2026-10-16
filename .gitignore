@@ -48,6 +48,16 @@ scripts/build-bible-dbs.mjs
 scripts/build-bible-dbs-helloao.mjs
 scripts/lib/
 
+# Ruby / Fastlane — gems are vendored locally; Gemfile.lock IS committed so CI
+# resolves identical versions.
+vendor/bundle/
+.bundle/
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+build/
+
 # Supabase 
 supabase/.temp/*
 supabase/.env

@@ -104,6 +104,17 @@ const es = {
     successTitle: 'Contraseña actualizada',
     failedTitle: 'No se pudo actualizar la contraseña',
   },
+  deleteAccount: {
+    entryLabel: 'Eliminar cuenta',
+    title: '¿Eliminar tu cuenta?',
+    message:
+      'Esta acción es permanente y no se puede deshacer. Se eliminarán todos tus datos: destacados, notas, marcadores, planes de lectura y tu progreso.\n\nSi tienes una suscripción activa a Nascente Pro, no se cancela automáticamente — la facturación la gestiona la App Store o Google Play. Cancélala en los ajustes de tu cuenta antes de eliminar.',
+    confirm: 'Eliminar definitivamente',
+    cancel: 'Cancelar',
+    deleting: 'Eliminando…',
+    successTitle: 'Cuenta eliminada',
+    failedTitle: 'No se pudo eliminar la cuenta',
+  },
   validation: {
     emailRequired: 'El correo electrónico es obligatorio',
     emailInvalid: 'Por favor, introduce un correo electrónico válido',

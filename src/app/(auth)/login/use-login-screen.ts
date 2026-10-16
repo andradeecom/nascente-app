@@ -13,9 +13,14 @@ export default function useLoginScreen() {
   // This screen is reached from settings (guest sign-in), pushed on top of the
   // (tabs) stack. Auth no longer swaps the navigator, so dismiss the pushed auth
   // screens to return to settings (origin) where the profile card now shows the user.
+  // `dismissTo` (not `dismissAll`) because login/register both live inside the
+  // (auth) group's own nested Stack — `dismissAll`'s POP_TO_TOP targets whichever
+  // stack is currently focused, so navigating login <-> register only pops within
+  // the nested (auth) stack instead of all the way back to (tabs). `dismissTo`
+  // targets the actual route, regardless of nesting depth.
   const goToApp = () => {
     if (router.canDismiss()) {
-      router.dismissAll();
+      router.dismissTo('/(tabs)/settings');
     } else {
       router.replace('/(tabs)/settings');
     }

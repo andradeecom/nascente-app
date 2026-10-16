@@ -15,9 +15,14 @@ export default function useRegisterScreen() {
   // (tabs) stack. Auth no longer swaps the navigator, so dismiss back to settings
   // on success. Deliberately does NOT route on to the paywall for a Pro-gate
   // origin — account and purchase are separate flows (see CLAUDE.md).
+  // `dismissTo` (not `dismissAll`) because login/register both live inside the
+  // (auth) group's own nested Stack — `dismissAll`'s POP_TO_TOP targets whichever
+  // stack is currently focused, so navigating register <-> login only pops within
+  // the nested (auth) stack instead of all the way back to (tabs). `dismissTo`
+  // targets the actual route, regardless of nesting depth.
   const goToApp = () => {
     if (router.canDismiss()) {
-      router.dismissAll();
+      router.dismissTo('/(tabs)/settings');
     } else {
       router.replace('/(tabs)/settings');
     }

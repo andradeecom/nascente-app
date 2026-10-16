@@ -2,6 +2,13 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { createPostHog, captureAiGeneration, flushPostHog } from '../_shared/posthog.ts';
+import {
+  GEMINI_ENDPOINT,
+  buildInteractionsRequest,
+  calculateGeminiCost,
+  extractTextFromInteraction,
+  extractUsageFromInteraction,
+} from '../_shared/gemini-interactions.ts';
 
 /**
  * AI reading-plan generator — user-keyed, metered, Pro-only.
@@ -28,17 +35,13 @@ import { createPostHog, captureAiGeneration, flushPostHog } from '../_shared/pos
  * Secrets: GOOGLE_GEMINI_API_KEY, plus the auto-injected SUPABASE_* keys.
  */
 
-const GEMINI_MODEL = 'gemini-2.5-flash';
-const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+const GEMINI_MODEL = 'gemini-3.8-flash';
 
 const LOCALES = ['en', 'es', 'pt'];
 const MIN_DAYS = 3;
 const MAX_DAYS = 40;
 const MAX_TOPIC_LENGTH = 200;
 
-// Gemini 2.5 Flash pricing (per .docs/ai-features.md §4) — cost-ceiling estimate only.
-const GEMINI_INPUT_COST_PER_TOKEN = 0.3 / 1_000_000;
-const GEMINI_OUTPUT_COST_PER_TOKEN = 2.5 / 1_000_000;
 const MONTHLY_COST_CEILING_USD = 1.5; // .docs/ai-features.md §3
 const AI_PLAN_LIMIT = 10; // .docs/ai-features.md §3 — 10 AI plans per cycle
 
@@ -218,19 +221,51 @@ async function handleRequest(req) {
   };
 
   try {
-    const geminiRes = await fetch(`${GEMINI_ENDPOINT}?key=${geminiKey}`, {
+    const geminiRes = await fetch(GEMINI_ENDPOINT, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: systemPrompt(days, locale) }] },
-        contents: [{ role: 'user', parts: [{ text: topic }] }],
-        generationConfig: {
-          maxOutputTokens: 2400,
-          temperature: 0.8,
-          responseMimeType: 'application/json',
-          thinkingConfig: { thinkingBudget: 0 },
-        },
-      }),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': geminiKey,
+      },
+      body: JSON.stringify(
+        buildInteractionsRequest({
+          model: GEMINI_MODEL,
+          systemInstruction: systemPrompt(days, locale),
+          input: topic,
+          responseFormat: [
+            {
+              type: 'text',
+              mime_type: 'application/json',
+              schema: {
+                type: 'OBJECT',
+                properties: {
+                  title: { type: 'STRING' },
+                  description: { type: 'STRING' },
+                  days: {
+                    type: 'ARRAY',
+                    items: {
+                      type: 'OBJECT',
+                      properties: {
+                        day: { type: 'INTEGER' },
+                        book_id: { type: 'INTEGER' },
+                        chapter_start: { type: 'INTEGER' },
+                        chapter_end: { type: 'INTEGER' },
+                      },
+                      required: ['day', 'book_id', 'chapter_start', 'chapter_end'],
+                    },
+                  },
+                },
+                required: ['title', 'description', 'days'],
+              },
+            },
+          ],
+          generationConfig: {
+            max_output_tokens: 2400,
+            temperature: 0.8,
+            thinking_level: 'low',
+          },
+        })
+      ),
     });
 
     if (!geminiRes.ok) {
@@ -241,10 +276,10 @@ async function handleRequest(req) {
     }
 
     const geminiJson = await geminiRes.json();
-    const candidate = geminiJson?.candidates?.[0];
-    const text = candidate?.content?.parts?.[0]?.text;
-    inputTokens = geminiJson?.usageMetadata?.promptTokenCount ?? null;
-    outputTokens = geminiJson?.usageMetadata?.candidatesTokenCount ?? null;
+    const text = extractTextFromInteraction(geminiJson);
+    const usage = extractUsageFromInteraction(geminiJson);
+    inputTokens = usage.inputTokens;
+    outputTokens = usage.outputTokens;
 
     if (!text) {
       console.error('Unexpected Gemini response shape', JSON.stringify(geminiJson));
@@ -282,7 +317,7 @@ async function handleRequest(req) {
   });
 
   // 6. Charge both counters (generation cost is real even if the user discards the preview)
-  const callCost = (inputTokens ?? 0) * GEMINI_INPUT_COST_PER_TOKEN + (outputTokens ?? 0) * GEMINI_OUTPUT_COST_PER_TOKEN;
+  const callCost = calculateGeminiCost(inputTokens, outputTokens);
   const [planUsageResult, costUsageResult] = await Promise.all([
     adminClient.rpc('increment_ai_plan_usage', { p_user_id: user.id, p_cycle_start: cycleKey }),
     adminClient.rpc('increment_ai_usage', { p_user_id: user.id, p_month: cycleKey, p_cost_usd: callCost }),

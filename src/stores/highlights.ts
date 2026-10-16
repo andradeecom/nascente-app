@@ -9,6 +9,7 @@ import {
   markRowSynced,
   migrateSyncMeta,
   pruneTombstones,
+  hardDeleteAllForUser,
   softDeleteAllForUser,
 } from '@/services/sync/store-helpers';
 
@@ -28,6 +29,8 @@ type HighlightsState = {
   removeHighlight: (userId: string, bookId: number, chapter: number, verse: number) => void;
   /** Soft-delete every highlight for the user (bulk tombstone; the delete syncs). */
   clearAllHighlights: (userId: string) => void;
+  /** Hard-remove every row for the user (tombstones included) — account deletion only. */
+  purgeUser: (userId: string) => void;
   setHasHydrated: (value: boolean) => void;
   // Sync engine seams (src/services/sync). Never set `dirty`.
   applyPulled: (key: string, incoming: Highlight) => void;
@@ -71,6 +74,7 @@ export const useHighlightsStore = create<HighlightsState>()(
           return { byKey: { ...state.byKey, [key]: next } };
         }),
       clearAllHighlights: (userId) => set((state) => ({ byKey: softDeleteAllForUser(state.byKey, userId) })),
+      purgeUser: (userId) => set((state) => ({ byKey: hardDeleteAllForUser(state.byKey, userId) })),
       setHasHydrated: (value) => set({ hasHydrated: value }),
       applyPulled: (key, incoming) => set((state) => ({ byKey: applyPulledRow(state.byKey, key, incoming) })),
       applyPulledMany: (rows) =>

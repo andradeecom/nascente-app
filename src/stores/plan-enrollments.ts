@@ -25,6 +25,8 @@ type EnrollmentsState = {
   start: (userId: string, planId: string) => LocalEnrollment;
   archive: (userId: string, planId: string) => void;
   markComplete: (userId: string, planId: string) => void;
+  /** Hard-remove every enrollment for the user — account deletion only. */
+  purgeUser: (userId: string) => void;
   setHasHydrated: (value: boolean) => void;
   // Sync engine seams (never set `dirty`).
   applyPulled: (key: string, incoming: LocalEnrollment) => void;
@@ -76,6 +78,19 @@ export const usePlanEnrollmentsStore = create<EnrollmentsState>()(
           const now = new Date().toISOString();
           const next: LocalEnrollment = { ...existing, status: 'completed', updatedAt: now, dirty: true };
           return { byKey: { ...state.byKey, [key]: next } };
+        }),
+      purgeUser: (userId) =>
+        set((state) => {
+          const next: Record<string, LocalEnrollment> = {};
+          let changed = false;
+          for (const [key, row] of Object.entries(state.byKey)) {
+            if (row.userId === userId) {
+              changed = true;
+              continue;
+            }
+            next[key] = row;
+          }
+          return changed ? { byKey: next } : state;
         }),
       setHasHydrated: (value) => set({ hasHydrated: value }),
       applyPulled: (key, incoming) => set((state) => ({ byKey: mergeEnrollment(state.byKey, key, incoming) })),

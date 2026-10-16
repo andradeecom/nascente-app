@@ -8,6 +8,7 @@ import {
   markRowSynced,
   migrateSyncMeta,
   pruneTombstones,
+  hardDeleteAllForUser,
   softDeleteAllForUser,
 } from '@/services/sync/store-helpers';
 
@@ -35,6 +36,8 @@ type NotesState = {
   removeNote: (userId: string, bookId: number, chapter: number, verse: number) => void;
   /** Soft-delete every note for the user (bulk tombstone; the delete syncs). */
   clearAllNotes: (userId: string) => void;
+  /** Hard-remove every row for the user (tombstones included) — account deletion only. */
+  purgeUser: (userId: string) => void;
   setHasHydrated: (value: boolean) => void;
   // Sync engine seams (src/services/sync). Never set `dirty`.
   applyPulled: (key: string, incoming: Note) => void;
@@ -78,6 +81,7 @@ export const useNotesStore = create<NotesState>()(
           return { byKey: { ...state.byKey, [key]: next } };
         }),
       clearAllNotes: (userId) => set((state) => ({ byKey: softDeleteAllForUser(state.byKey, userId) })),
+      purgeUser: (userId) => set((state) => ({ byKey: hardDeleteAllForUser(state.byKey, userId) })),
       setHasHydrated: (value) => set({ hasHydrated: value }),
       applyPulled: (key, incoming) => set((state) => ({ byKey: applyPulledRow(state.byKey, key, incoming) })),
       applyPulledMany: (rows) =>

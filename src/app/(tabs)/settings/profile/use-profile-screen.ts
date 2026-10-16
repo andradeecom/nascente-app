@@ -6,7 +6,7 @@ import Toast from 'react-native-toast-message';
 import { router } from 'expo-router';
 import { useAuthStore } from '@/stores/auth';
 import { useIsPro } from '@/hooks/use-profile';
-import { useLogout, useResetPassword, useUpdateProfile } from '@/hooks/use-auth';
+import { useDeleteAccount, useLogout, useResetPassword, useUpdateProfile } from '@/hooks/use-auth';
 import { uploadAvatar } from '@/lib/avatar-storage';
 import { createProfileSchema, type ProfileFormData } from '@/schemas/profile';
 import { translate } from '@/i18n';
@@ -52,6 +52,40 @@ export default function useProfileScreen() {
         Toast.show({
           type: 'error',
           text1: translate('changePassword.failedTitle'),
+          text2: error instanceof Error ? error.message : translate('errors.generic'),
+        });
+      },
+    });
+  };
+
+  const [isDeleteAccountVisible, setIsDeleteAccountVisible] = useState(false);
+  const deleteAccountMutation = useDeleteAccount();
+
+  const openDeleteAccount = () => setIsDeleteAccountVisible(true);
+  // Ignore dismiss attempts while the deletion is in flight — the confirm button
+  // is already disabled, and closing mid-request would hide an operation the user
+  // can neither cancel nor observe the result of.
+  const closeDeleteAccount = () => {
+    if (deleteAccountMutation.isPending) return;
+    setIsDeleteAccountVisible(false);
+  };
+
+  // On success `useDeleteAccount` has already signed the user out, so this screen
+  // (and the whole Settings stack) is now a guest view — send them to Home, per
+  // the "land somewhere neutral after destroying your session" rule that `logout`
+  // above follows too.
+  const handleDeleteAccount = () => {
+    deleteAccountMutation.mutate(undefined, {
+      onSuccess: () => {
+        setIsDeleteAccountVisible(false);
+        router.replace('/(tabs)');
+        Toast.show({ type: 'success', text1: translate('deleteAccount.successTitle') });
+      },
+      onError: (error) => {
+        setIsDeleteAccountVisible(false);
+        Toast.show({
+          type: 'error',
+          text1: translate('deleteAccount.failedTitle'),
           text2: error instanceof Error ? error.message : translate('errors.generic'),
         });
       },
@@ -119,7 +153,9 @@ export default function useProfileScreen() {
     try {
       let profileImageUrl = user.profileImageUrl ?? null;
       if (pendingPhotoUri) {
-        profileImageUrl = await uploadAvatar(pendingPhotoUri);
+        // Pass the current photo so the uploader can delete it once the new one is
+        // stored — otherwise every change orphans an object in the bucket.
+        profileImageUrl = await uploadAvatar(pendingPhotoUri, user.profileImageUrl);
       }
 
       await updateProfile.mutateAsync({
@@ -164,5 +200,10 @@ export default function useProfileScreen() {
     closeChangePassword,
     handleChangePassword,
     isChangingPassword: changePasswordMutation.isPending,
+    isDeleteAccountVisible,
+    openDeleteAccount,
+    closeDeleteAccount,
+    handleDeleteAccount,
+    isDeletingAccount: deleteAccountMutation.isPending,
   };
 }

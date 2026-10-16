@@ -93,6 +93,31 @@ export function softDeleteAllForUser<T extends SyncableRecord>(
   return changed ? next : byKey;
 }
 
+/**
+ * Hard-remove every row belonging to `userId` — tombstones included — with no
+ * sync metadata left behind. This is the **account-deletion** counterpart to
+ * `softDeleteAllForUser`: a soft delete exists so a delete can propagate to the
+ * server, but once the account itself is gone there is nothing left to sync to,
+ * and keeping tombstones would strand that user's rows on the device forever.
+ * Rows for other users are left untouched. Returns the same reference when
+ * nothing matched.
+ */
+export function hardDeleteAllForUser<T extends SyncableRecord>(
+  byKey: Record<string, T>,
+  userId: string
+): Record<string, T> {
+  let changed = false;
+  const next: Record<string, T> = {};
+  for (const [key, row] of Object.entries(byKey)) {
+    if (row.userId === userId) {
+      changed = true;
+      continue;
+    }
+    next[key] = row;
+  }
+  return changed ? next : byKey;
+}
+
 /** Default tombstone retention — mirrors the server `purge_study_tombstones` cron (90 days). */
 export const TOMBSTONE_TTL_DAYS = 90;
 

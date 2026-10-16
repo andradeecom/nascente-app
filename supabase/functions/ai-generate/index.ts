@@ -2,6 +2,13 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { createPostHog, captureAiGeneration, flushPostHog } from '../_shared/posthog.ts';
+import {
+  GEMINI_ENDPOINT,
+  buildInteractionsRequest,
+  calculateGeminiCost,
+  extractTextFromInteraction,
+  extractUsageFromInteraction,
+} from '../_shared/gemini-interactions.ts';
 
 /**
  * AI content generation — scripture-keyed, shared-cached, Pro-only.
@@ -12,7 +19,7 @@ import { createPostHog, captureAiGeneration, flushPostHog } from '../_shared/pos
  *   3. Check profiles.tier === 'pro'
  *   4. Check this month's ai_usage cost ceiling → reject if already at/over ceiling
  *   5. Check shared ai_cache table (scripture-keyed) → return at $0 on hit
- *   6. Call Gemini 2.5 Flash REST API
+ *   6. Call Gemini 3.8 Flash REST API
  *   7. Upsert into ai_cache (idempotent on race conditions)
  *   8. Record cost into ai_usage (cache misses only — hits are $0 and exempt)
  *   9. Return { content, fromCache: false }
@@ -30,8 +37,7 @@ import { createPostHog, captureAiGeneration, flushPostHog } from '../_shared/pos
  *   - SUPABASE_ANON_KEY       (auto-injected)
  */
 
-const GEMINI_MODEL = 'gemini-2.5-flash';
-const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+const GEMINI_MODEL = 'gemini-3.8-flash';
 
 const PROMPT_TYPES = ['explain', 'explain_simple', 'chapter_summary', 'devotional', 'prayer_prompt'];
 // Cache-invalidation token for the shared `ai_cache` table — part of the cache
@@ -50,10 +56,6 @@ const MAX_PASSAGE_TEXT_LENGTH = 20000; // generous cap for a full chapter; block
 const MAX_TRANSLATION_ID_LENGTH = 64;
 const MAX_REFERENCE_LENGTH = 128; // e.g. "1 Coríntios 13:4-7" — a label, not free text
 
-// Gemini 2.5 Flash pricing (per .docs/ai-features.md §4) — used only to estimate
-// spend for the cost-ceiling backstop, not billed anywhere else.
-const GEMINI_INPUT_COST_PER_TOKEN = 0.3 / 1_000_000;
-const GEMINI_OUTPUT_COST_PER_TOKEN = 2.5 / 1_000_000;
 const MONTHLY_COST_CEILING_USD = 1.5; // .docs/ai-features.md §3 "soft monthly cost ceiling"
 
 // ── System prompts ──────────────────────────────────────────────────────────
@@ -252,18 +254,24 @@ async function handleRequest(req) {
   const aiContext = { distinctId: user.id, model: GEMINI_MODEL, promptType, locale };
 
   try {
-    const geminiRes = await fetch(`${GEMINI_ENDPOINT}?key=${geminiKey}`, {
+    const geminiRes = await fetch(GEMINI_ENDPOINT, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: systemPrompt(promptType, locale, referenceLabel) }] },
-        contents: [{ role: 'user', parts: [{ text: passageText }] }],
-        generationConfig: {
-          maxOutputTokens: maxOutputTokens(promptType),
-          temperature: 0.7,
-          thinkingConfig: { thinkingBudget: 0 },
-        },
-      }),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': geminiKey,
+      },
+      body: JSON.stringify(
+        buildInteractionsRequest({
+          model: GEMINI_MODEL,
+          systemInstruction: systemPrompt(promptType, locale, referenceLabel),
+          input: passageText,
+          generationConfig: {
+            max_output_tokens: maxOutputTokens(promptType),
+            temperature: 0.7,
+            thinking_level: 'low',
+          },
+        })
+      ),
     });
 
     if (!geminiRes.ok) {
@@ -280,14 +288,14 @@ async function handleRequest(req) {
     }
 
     const geminiJson = await geminiRes.json();
-    const candidate = geminiJson?.candidates?.[0];
-    geminiContent = candidate?.content?.parts?.[0]?.text;
-    inputTokens = geminiJson?.usageMetadata?.promptTokenCount ?? null;
-    outputTokens = geminiJson?.usageMetadata?.candidatesTokenCount ?? null;
+    geminiContent = extractTextFromInteraction(geminiJson);
+    const usage = extractUsageFromInteraction(geminiJson);
+    inputTokens = usage.inputTokens;
+    outputTokens = usage.outputTokens;
 
-    const finishReason = candidate?.finishReason;
-    if (finishReason && finishReason !== 'STOP') {
-      console.warn(`Gemini finishReason=${finishReason} outputTokens=${outputTokens} promptType=${promptType}`);
+    const stepStatus = geminiJson?.steps?.findLast?.((step) => step.type === 'model_output')?.status;
+    if (stepStatus && stepStatus !== 'done') {
+      console.warn(`Gemini model_output status=${stepStatus} outputTokens=${outputTokens} promptType=${promptType}`);
     }
 
     if (!geminiContent) {
@@ -298,7 +306,7 @@ async function handleRequest(req) {
         outputTokens,
         latencySeconds: elapsedSeconds(),
         isError: true,
-        error: `Empty response (finishReason=${finishReason ?? 'unknown'})`,
+        error: `Empty response (model_output status=${stepStatus ?? 'unknown'})`,
       });
       await flushPostHog(posthog);
       return json({ error: 'GEMINI_ERROR', message: 'Empty AI response' }, 503);
@@ -349,7 +357,7 @@ async function handleRequest(req) {
   }
 
   // 8. Record cost toward this cycle's ceiling (cache misses only — hits never reach here)
-  const callCost = (inputTokens ?? 0) * GEMINI_INPUT_COST_PER_TOKEN + (outputTokens ?? 0) * GEMINI_OUTPUT_COST_PER_TOKEN;
+  const callCost = calculateGeminiCost(inputTokens, outputTokens);
 
   const { error: usageError } = await adminClient.rpc('increment_ai_usage', {
     p_user_id: user.id,

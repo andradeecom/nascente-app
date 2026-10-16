@@ -70,7 +70,7 @@ module.exports = {
       // `.test.ts` only — the extension IS the project boundary. Pure tests must
       // not reach into the RN runtime; anything needing `renderHook` or the
       // `jest-expo` preset goes in a `.test.tsx` file and lands in `hooks`.
-      testMatch: ['<rootDir>/src/**/__tests__/**/*.test.ts'],
+      testMatch: ['<rootDir>/src/**/__tests__/**/*.test.ts', '<rootDir>/supabase/functions/**/__tests__/**/*.test.ts'],
       transform: {
         '^.+\\.[jt]sx?$': ['babel-jest', { presets: [['babel-preset-expo', { jsxRuntime: 'automatic' }]] }],
       },

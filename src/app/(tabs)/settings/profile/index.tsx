@@ -4,7 +4,7 @@ import { PressableScale } from 'pressto';
 import { Controller } from 'react-hook-form';
 import { Camera } from 'lucide-react-native';
 import { Avatar, Button, ProBadge, SafeAreaView, Switch, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
-import { InputField, KeyboardAwareScreen } from '@/components/molecules';
+import { AppModal, InputField, KeyboardAwareScreen } from '@/components/molecules';
 import { ChangePasswordModal, ScreenHeader } from '@/components/organisms';
 import { BUTTON_SIZES, BUTTON_VARIANTS } from '@/components/atoms/Button';
 import { hapticSelect } from '@/lib/haptics';
@@ -32,6 +32,11 @@ export default function ProfileScreen() {
     closeChangePassword,
     handleChangePassword,
     isChangingPassword,
+    isDeleteAccountVisible,
+    openDeleteAccount,
+    closeDeleteAccount,
+    handleDeleteAccount,
+    isDeletingAccount,
   } = useProfileScreen();
 
   return (
@@ -126,6 +131,16 @@ export default function ProfileScreen() {
                   onPress={openChangePassword}
                 />
                 <Button label={t('common.signOut')} variant={BUTTON_VARIANTS.Secondary} fullWidth onPress={logout} />
+                {/* Account deletion — required in-app by App Store Guideline 5.1.1(v).
+                    Ghost (not Destructive) so the entry point stays low-emphasis;
+                    the danger weight belongs on the confirm step, not on a button
+                    that merely opens a dialog. */}
+                <Button
+                  label={t('deleteAccount.entryLabel')}
+                  variant={BUTTON_VARIANTS.Ghost}
+                  fullWidth
+                  onPress={openDeleteAccount}
+                />
               </View>
             )}
           </View>
@@ -138,6 +153,36 @@ export default function ProfileScreen() {
         onSubmit={handleChangePassword}
         isLoading={isChangingPassword}
       />
+
+      {/* Destructive confirmation. Backdrop dismissal stays on (the hook ignores it
+          while the request is in flight), and the copy spells out exactly what is
+          erased — the Apple guideline asks for deletion to be deliberate, not just
+          reachable. */}
+      <AppModal visible={isDeleteAccountVisible} onClose={closeDeleteAccount}>
+        <View style={styles.confirm}>
+          <Text variant={TEXT_VARIANTS.Title3} style={styles.confirmText}>
+            {t('deleteAccount.title')}
+          </Text>
+          <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary} style={styles.confirmText}>
+            {t('deleteAccount.message')}
+          </Text>
+          <Button
+            label={isDeletingAccount ? t('deleteAccount.deleting') : t('deleteAccount.confirm')}
+            variant={BUTTON_VARIANTS.Destructive}
+            fullWidth
+            disabled={isDeletingAccount}
+            onPress={handleDeleteAccount}
+            style={styles.confirmButton}
+          />
+          <Button
+            label={t('deleteAccount.cancel')}
+            variant={BUTTON_VARIANTS.Ghost}
+            fullWidth
+            disabled={isDeletingAccount}
+            onPress={closeDeleteAccount}
+          />
+        </View>
+      </AppModal>
     </SafeAreaView>
   );
 }
@@ -186,6 +231,15 @@ const styles = StyleSheet.create((theme) => ({
     alignSelf: 'stretch',
     gap: theme.spacing[3],
     marginTop: theme.spacing[6],
+  },
+  confirm: {
+    gap: theme.spacing[3],
+  },
+  confirmText: {
+    textAlign: 'center',
+  },
+  confirmButton: {
+    marginTop: theme.spacing[2],
   },
 }));
 

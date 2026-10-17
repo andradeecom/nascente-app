@@ -56,6 +56,17 @@ platform :ios do
     cert(api_key: api_key)
     sigh(api_key: api_key, app_identifier: 'com.andradee.nascenteapp')
 
+    # Expo's generated project uses automatic signing, which looks for a
+    # *development* profile at archive time and fails on CI. Switch the app
+    # target to manual signing pinned to the App Store profile sigh installed.
+    update_code_signing_settings(
+      path: 'ios/Nascente.xcodeproj',
+      use_automatic_signing: false,
+      team_id: 'URV3D9PRX2',
+      profile_name: lane_context[SharedValues::SIGH_NAME],
+      code_sign_identity: 'Apple Distribution'
+    )
+
     build_app(
       workspace: WORKSPACE,
       scheme: SCHEME,
@@ -64,8 +75,7 @@ platform :ios do
       output_name: 'Nascente.ipa',
       clean: true,
       export_method: 'app-store',
-      # Expo's generated project uses automatic signing; force manual so the
-      # profile sigh just installed is the one actually used.
+      # Manual at export too, matching the project-level override above.
       export_options: {
         signingStyle: 'manual',
         provisioningProfiles: {

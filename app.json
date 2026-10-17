@@ -2,20 +2,24 @@
   "expo": {
     "name": "Nascente",
     "slug": "nascente",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "scheme": "nascenteapp",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/images/nascente.icon",
       "infoPlist": {
-        "CFBundleLocalizations": ["en", "es", "pt"],
+        "CFBundleLocalizations": [
+          "en",
+          "es",
+          "pt"
+        ],
         "ITSAppUsesNonExemptEncryption": false
       },
       "bundleIdentifier": "com.andradee.nascenteapp",
       "supportsTablet": false,
       "appleTeamId": "URV3D9PRX2",
-      "buildNumber": "4"
+      "buildNumber": "2"
     },
     "android": {
       "adaptiveIcon": {
@@ -26,7 +30,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.andradee.nascenteapp",
-      "versionCode": 1
+      "versionCode": 2
     },
     "web": {
       "output": "static",
@@ -56,8 +60,16 @@
         "expo-localization",
         {
           "supportedLocales": {
-            "ios": ["en", "es", "pt"],
-            "android": ["en", "es", "pt"]
+            "ios": [
+              "en",
+              "es",
+              "pt"
+            ],
+            "android": [
+              "en",
+              "es",
+              "pt"
+            ]
           }
         }
       ],

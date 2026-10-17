@@ -96,13 +96,20 @@ jobs:
         env:
           VERSION: ${{ steps.bump.outputs.version }}
 
+      # Hot Updater fingerprint strategy (see .docs/ota-updates.md): regenerate
+      # fingerprint.json so the committed hash matches exactly the native inputs
+      # of the binary being built — OTA deploys check against this file.
+      - name: Generate native fingerprint
+        run: pnpm exec hot-updater fingerprint create
+
       # Committed BEFORE the build so the tag always points at the exact source
-      # the uploaded binary was built from.
+      # the uploaded binary was built from — fingerprint.json included, so a
+      # release's OTA compatibility boundary is traceable back to its tag.
       - name: Commit, tag and push
         run: |
           VERSION="${{ steps.bump.outputs.version }}"
           BUILD="${{ steps.sync.outputs.build }}"
-          git add package.json app.json
+          git add package.json app.json fingerprint.json
           git commit -m "chore: release ${VERSION} (build ${BUILD})"
           git tag "${VERSION}"
           git push origin HEAD --tags
@@ -131,6 +138,10 @@ jobs:
           EXPO_PUBLIC_PRIVACY_URL: ${{ secrets.EXPO_PUBLIC_PRIVACY_URL }}
           EXPO_PUBLIC_POSTHOG_API_KEY: ${{ secrets.EXPO_PUBLIC_POSTHOG_API_KEY }}
           EXPO_PUBLIC_POSTHOG_HOST: ${{ secrets.EXPO_PUBLIC_POSTHOG_HOST }}
+          # OTA client config (publishable per-app key — see .docs/ota-updates.md).
+          # Required in the store binary or the app boots with OTA disabled.
+          EXPO_PUBLIC_HOT_UPDATER_BASE_URL: ${{ secrets.EXPO_PUBLIC_HOT_UPDATER_BASE_URL }}
+          EXPO_PUBLIC_HOT_UPDATER_API_KEY: ${{ secrets.EXPO_PUBLIC_HOT_UPDATER_API_KEY }}
 
       - name: Submit to App Store review
         if: ${{ inputs.submit_for_review }}

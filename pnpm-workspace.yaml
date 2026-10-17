@@ -1,6 +1,8 @@
 allowBuilds:
   better-sqlite3: true
+  esbuild: true
   unrs-resolver: true
+  workerd: true
 
 minimumReleaseAgeExclude:
   - '@expo/cli@56.1.18 || 57.0.11'
@@ -36,6 +38,22 @@ minimumReleaseAgeExclude:
   - eslint-config-expo@57.0.1
   - '@expo/metro-runtime@57.0.8'
   - expo-build-properties@57.0.8
+  - '@hot-updater/plugin-insights@1.0.7'
+  - '@hot-updater/plugin-remote-config@1.0.7'
+  - '@hot-updater/protocol@1.0.7'
+  - '@hot-updater/react-native@1.0.7'
+  - '@hot-updater/android-helper@1.0.7'
+  - '@hot-updater/apple-helper@1.0.7'
+  - '@hot-updater/bare@1.0.7'
+  - '@hot-updater/bsdiff@1.0.7'
+  - '@hot-updater/cli-tools@1.0.7'
+  - '@hot-updater/cloudflare@1.0.7'
+  - '@hot-updater/console@1.0.7'
+  - '@hot-updater/expo@1.0.7'
+  - '@hot-updater/plugin-api-keys@1.0.7'
+  - '@hot-updater/plugin-core@1.0.7'
+  - '@hot-updater/server@1.0.7'
+  - hot-updater@1.0.7
 
 overrides:
   "@expo/dom-webview": "56.0.5"

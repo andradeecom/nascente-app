@@ -139,7 +139,14 @@
       "expo-asset",
       "expo-sqlite",
       "expo-status-bar",
-      "react-native-quick-crypto"
+      "react-native-quick-crypto",
+      [
+        "@hot-updater/expo",
+        {
+          "channel": "production",
+          "publicKeyPath": "./keys/public-key.pem"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

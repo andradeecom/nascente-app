@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Stack, ThemeProvider, DarkTheme, DefaultTheme } from 'expo-router';
 import * as NativeSplash from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useAnalytics, useHydrate, useSync } from '@/hooks';
+import { useAnalytics, useHydrate, useOtaUpdate, useSync } from '@/hooks';
 import { useOnboardingStore } from '@/stores/onboarding';
 import { SplashScreen } from '@/components/organisms';
 import { useThemeStore } from '@/stores/theme';
@@ -20,6 +20,10 @@ export function RootNavigator() {
   const hasCompletedOnboarding = useOnboardingStore((s) => s.hasCompleted);
   const themeName = useThemeStore((s) => s.theme);
   const [splashDone, setSplashDone] = useState(false);
+  // Background OTA check (Hot Updater → Cloudflare). Fires only after the
+  // animated splash finishes, stages updates for the next cold launch, and
+  // no-ops in dev / without envs — it can never delay or break startup.
+  useOtaUpdate(splashDone);
   const shouldShowOnboarding = FORCE_ONBOARDING || !hasCompletedOnboarding;
   // Hold on the native splash (no JS render) until resources are ready.
   if (!isHydrated) {

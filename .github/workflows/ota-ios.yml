@@ -1,0 +1,145 @@
+name: OTA iOS
+
+# Signed OTA delivery via Hot Updater → Cloudflare Worker/D1/R2
+# (see .docs/ota-updates.md). iOS only — Android is deferred.
+#
+# Manual trigger only: an OTA rewrites what installed apps run, so publishing
+# must always be a deliberate, gated action — never automatic on merge.
+# Roll out via the QA cohort / staged percentages and monitor PostHog +
+# Cloudflare between stages (rollout % can be raised without re-deploying —
+# see `hot-updater bundle` commands).
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Git ref/commit to deploy (defaults to the workflow branch)'
+        required: false
+        default: ''
+        type: string
+      channel:
+        description: 'Update channel'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - qa
+      rollout:
+        description: 'Rollout percentage for the new bundle (0 = QA/disabled staging)'
+        required: true
+        default: 0
+        type: choice
+        options:
+          - '0'
+          - '5'
+          - '25'
+          - '100'
+      force_update:
+        description: 'Force-update flag — reloads the app immediately. Emergencies only.'
+        required: true
+        default: false
+        type: boolean
+      message:
+        description: 'Deployment message (defaults to the latest commit message)'
+        required: false
+        default: ''
+        type: string
+
+# One deployment per channel at a time. No cancel-in-progress: a half-uploaded
+# bundle must be allowed to finish rather than leave partial state in R2/D1.
+concurrency:
+  group: ota-ios-${{ inputs.channel }}
+  cancel-in-progress: false
+
+jobs:
+  # Gate publishing on the same checks that guard main — reuse ci.yml via its
+  # workflow_call trigger rather than duplicating typecheck/lint/test here.
+  verify:
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    name: Sign and deploy OTA bundle
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # `production` is a protected GitHub Environment: the signing private key
+    # and Cloudflare credentials must be stored as Environment secrets so a
+    # required reviewer gates access to the signing authority.
+    environment: production
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # The private key is materialized only under runner.temp for the duration
+      # of this job and removed even on failure. It is never committed.
+      - name: Materialize the signing key
+        env:
+          HOT_UPDATER_SIGNING_PRIVATE_KEY: ${{ secrets.HOT_UPDATER_SIGNING_PRIVATE_KEY }}
+        run: |
+          echo "HOT_UPDATER_SIGNING_PRIVATE_KEY_PATH=$RUNNER_TEMP/hot-updater-signing/private-key.pem" >> "$GITHUB_ENV"
+          install -m 700 -d "$(dirname "$HOT_UPDATER_SIGNING_PRIVATE_KEY_PATH")"
+          printf '%s' "$HOT_UPDATER_SIGNING_PRIVATE_KEY" > "$HOT_UPDATER_SIGNING_PRIVATE_KEY_PATH"
+          chmod 600 "$HOT_UPDATER_SIGNING_PRIVATE_KEY_PATH"
+
+      # Verifies fingerprint.json is current, the embedded public key matches
+      # the signer, and the provider credentials/resources resolve — fails
+      # closed before anything is uploaded.
+      - name: Preflight (doctor)
+        run: pnpm exec hot-updater doctor
+        env:
+          HOT_UPDATER_CLOUDFLARE_ACCOUNT_ID: ${{ secrets.HOT_UPDATER_CLOUDFLARE_ACCOUNT_ID }}
+          HOT_UPDATER_CLOUDFLARE_API_TOKEN: ${{ secrets.HOT_UPDATER_CLOUDFLARE_API_TOKEN }}
+          HOT_UPDATER_CLOUDFLARE_D1_DATABASE_ID: ${{ secrets.HOT_UPDATER_CLOUDFLARE_D1_DATABASE_ID }}
+          HOT_UPDATER_CLOUDFLARE_R2_BUCKET_NAME: ${{ secrets.HOT_UPDATER_CLOUDFLARE_R2_BUCKET_NAME }}
+          HOT_UPDATER_CLOUDFLARE_R2_ACCESS_KEY_ID: ${{ secrets.HOT_UPDATER_CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          HOT_UPDATER_CLOUDFLARE_R2_SECRET_ACCESS_KEY: ${{ secrets.HOT_UPDATER_CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+
+      # The EXPO_PUBLIC_* values are compiled into the OTA bundle — they must
+      # match the store binary's build environment or the update would ship a
+      # different Supabase/PostHog/RevenueCat configuration than the app.
+      - name: Deploy signed OTA bundle
+        run: |
+          ARGS="-p ios -c ${{ inputs.channel }} -r ${{ inputs.rollout }}"
+          if [ "${{ inputs.force_update }}" = "true" ]; then ARGS="$ARGS -f"; fi
+          if [ -n "${{ inputs.message }}" ]; then ARGS="$ARGS -m \"${{ inputs.message }}\""; fi
+          pnpm exec hot-updater deploy $ARGS
+        env:
+          HOT_UPDATER_CLOUDFLARE_ACCOUNT_ID: ${{ secrets.HOT_UPDATER_CLOUDFLARE_ACCOUNT_ID }}
+          HOT_UPDATER_CLOUDFLARE_API_TOKEN: ${{ secrets.HOT_UPDATER_CLOUDFLARE_API_TOKEN }}
+          HOT_UPDATER_CLOUDFLARE_D1_DATABASE_ID: ${{ secrets.HOT_UPDATER_CLOUDFLARE_D1_DATABASE_ID }}
+          HOT_UPDATER_CLOUDFLARE_R2_BUCKET_NAME: ${{ secrets.HOT_UPDATER_CLOUDFLARE_R2_BUCKET_NAME }}
+          HOT_UPDATER_CLOUDFLARE_R2_ACCESS_KEY_ID: ${{ secrets.HOT_UPDATER_CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          HOT_UPDATER_CLOUDFLARE_R2_SECRET_ACCESS_KEY: ${{ secrets.HOT_UPDATER_CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+          EXPO_PUBLIC_REVENUECAT_IOS_API_KEY: ${{ secrets.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY }}
+          EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY: ${{ secrets.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY }}
+          EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID: ${{ secrets.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID }}
+          EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID: ${{ secrets.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID }}
+          EXPO_PUBLIC_TERMS_URL: ${{ secrets.EXPO_PUBLIC_TERMS_URL }}
+          EXPO_PUBLIC_PRIVACY_URL: ${{ secrets.EXPO_PUBLIC_PRIVACY_URL }}
+          EXPO_PUBLIC_POSTHOG_API_KEY: ${{ secrets.EXPO_PUBLIC_POSTHOG_API_KEY }}
+          EXPO_PUBLIC_POSTHOG_HOST: ${{ secrets.EXPO_PUBLIC_POSTHOG_HOST }}
+          EXPO_PUBLIC_HOT_UPDATER_BASE_URL: ${{ secrets.EXPO_PUBLIC_HOT_UPDATER_BASE_URL }}
+          EXPO_PUBLIC_HOT_UPDATER_API_KEY: ${{ secrets.EXPO_PUBLIC_HOT_UPDATER_API_KEY }}
+
+      - name: Remove the signing key
+        if: always()
+        run: rm -f "$HOT_UPDATER_SIGNING_PRIVATE_KEY_PATH"

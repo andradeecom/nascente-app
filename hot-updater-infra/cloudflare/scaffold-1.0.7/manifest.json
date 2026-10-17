@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "provider": "cloudflare",
+  "cliVersion": "1.0.7",
+  "providerVersion": "1.0.7",
+  "serverVersion": "1.0.7",
+  "infrastructureGeneration": 1,
+  "clientAuth": {
+    "plugin": "apiKeys",
+    "varyHeaders": [
+      "x-api-key"
+    ],
+    "credential": {
+      "label": "API key",
+      "header": "x-api-key",
+      "env": "HOT_UPDATER_API_KEY"
+    }
+  },
+  "clientPlugins": [
+    {
+      "module": "@hot-updater/react-native",
+      "name": "insights"
+    }
+  ],
+  "requiredInputs": {
+    "workerName": null,
+    "accountId": null,
+    "d1DatabaseId": null,
+    "d1DatabaseName": null,
+    "bucketName": null
+  },
+  "upgradeRequirements": [
+    "1.0.0"
+  ],
+  "operation": "scaffold",
+  "files": {
+    ".gitignore": "1ca9035e99b2a41ab5f188d79b45569d5ca88e7271d60bb493845e8a142097e0",
+    "upgrades/1.0.0.md": "42c3424ffb0a286fdc0253afad2b31e8abc34d2fb7a060fc5818b5be2d6a76d5",
+    "upgrades/README.md": "341e428565e35666b427f53e27ad97428183729f1aba21825b5bcfaa00bef770",
+    "worker/dist/index.js": "9dbe9bbd7f25a0ddf2c64764dd24927ecc0cd05f956c07d8023f433008e0caab",
+    "worker/dist/index.js.map": "ee3a807e8c461687e1a77b0e50cf7b80c8ce2999319d66293062a6e8a4b8d267",
+    "worker/dist/README.md": "03824cf99b64e98adac91a09af4dda942864b43ccde3b78f69c3633ed9a4e7e4",
+    "worker/migrations/0001_hot-updater_1.0.0.sql": "ed96ee68fe1511d77fcec2cdd704389a68f13976814467b45a07fbfae4b3612f",
+    "worker/package.json": "f5c51eff03c6bba7c761a556932a9ab6f06cbb3c188d3e7224e52da8f19857e2",
+    "worker/wrangler.json": "fc08283babe060a4e307c8d3cbcb53742f6c4301fdd3ae228939ecf068b4fbd9"
+  }
+}

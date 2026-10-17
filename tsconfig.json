@@ -13,5 +13,8 @@
     }
   },
   "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
-  "exclude": ["supabase/functions/**", "node_modules"]
+  // hot-updater.config.ts is a Node-side CLI/deploy config (node:fs,
+  // process.loadEnvFile) — not app code — so it stays out of the RN tsconfig,
+  // same rationale as supabase/functions.
+  "exclude": ["supabase/functions/**", "node_modules", "hot-updater.config.ts"]
 }

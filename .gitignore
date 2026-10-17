@@ -63,3 +63,14 @@ supabase/.temp/*
 supabase/.env
 supabase/.env.local
 supabase/.env.*.local
+
+# Hot Updater (OTA) — provider credentials and signing keys never enter git.
+# The public key IS committed: it is the trust anchor embedded in the binary.
+.env.hotupdater
+keys/*
+!keys/public-key.pem
+# hot-updater
+keys/private-key.pem
+# hot-updater
+.hot-updater/output
+.hot-updater/log

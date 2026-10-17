@@ -27,6 +27,11 @@ on:
         required: true
         default: false
         type: boolean
+      skip_version_bump:
+        description: 'Skip bump/tag/commit — reuse the version already on the branch (for re-runs after a failed build)'
+        required: true
+        default: false
+        type: boolean
 
 # Never let two releases build at once — they would race on the version bump
 # and could push conflicting commits. No cancel-in-progress: a half-finished
@@ -47,6 +52,9 @@ jobs:
     # silently change the build; revisit deliberately.
     runs-on: macos-15
     timeout-minutes: 60
+    # Secrets (App Store Connect key, EXPO_PUBLIC_*, OTA signing) live in the
+    # protected `production` environment.
+    environment: production
     permissions:
       contents: write
 
@@ -81,6 +89,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Bump package.json version
+        if: ${{ !inputs.skip_version_bump }}
         id: bump
         run: |
           pnpm version ${{ inputs.bump }} --no-git-tag-version
@@ -91,6 +100,7 @@ jobs:
       # The Android field is bumped in lockstep even though Android does not
       # ship, so its history stays consistent for whenever it is picked up.
       - name: Sync version and build number to app.json
+        if: ${{ !inputs.skip_version_bump }}
         id: sync
         run: node scripts/sync-version.mjs "${VERSION#v}"
         env:
@@ -100,12 +110,14 @@ jobs:
       # fingerprint.json so the committed hash matches exactly the native inputs
       # of the binary being built — OTA deploys check against this file.
       - name: Generate native fingerprint
+        if: ${{ !inputs.skip_version_bump }}
         run: pnpm exec hot-updater fingerprint create
 
       # Committed BEFORE the build so the tag always points at the exact source
       # the uploaded binary was built from — fingerprint.json included, so a
       # release's OTA compatibility boundary is traceable back to its tag.
       - name: Commit, tag and push
+        if: ${{ !inputs.skip_version_bump }}
         run: |
           VERSION="${{ steps.bump.outputs.version }}"
           BUILD="${{ steps.sync.outputs.build }}"

@@ -15,6 +15,10 @@
 #    there is no second certificates repo to maintain and no Apple ID password
 #    or 2FA session in CI. The key is passed as base64 through a single secret.
 
+require 'base64'
+require 'json'
+require 'tmpdir'
+
 default_platform(:ios)
 
 # The workspace/scheme names prebuild generates from app.json's `name`.
@@ -50,11 +54,43 @@ platform :ios do
 
     prebuild
 
-    # Manual signing with a downloaded App Store profile. `get_provisioning_profile`
-    # (sigh) creates or reuses an App Store distribution profile for the bundle id
-    # and installs it on the runner.
-    cert(api_key: api_key)
+    # Signing identity. Apple never returns a certificate's private key, so
+    # `cert` cannot reuse an existing certificate on a fresh runner — it would
+    # create a new Apple Distribution certificate every run until the account
+    # limit is hit. Instead CI imports ONE stable certificate (.p12 exported
+    # once from a Mac) from secrets into a temporary keychain.
+    #
+    # setup_ci (no-op off CI) creates `fastlane_tmp_keychain` with an empty
+    # password and makes it the default keychain so xcodebuild finds the
+    # identity. Locally, the certificate is expected in the login keychain.
+    setup_ci
+    if ENV['IOS_DIST_CERT_P12_BASE64']
+      Dir.mktmpdir do |dir|
+        p12_path = File.join(dir, 'distribution.p12')
+        File.binwrite(p12_path, Base64.decode64(ENV.fetch('IOS_DIST_CERT_P12_BASE64')))
+        import_certificate(
+          certificate_path: p12_path,
+          certificate_password: ENV.fetch('IOS_DIST_CERT_P12_PASSWORD'),
+          keychain_name: 'fastlane_tmp_keychain',
+          keychain_password: ''
+        )
+      end
+    end
+
+    # sigh reuses the App Store profile bound to the installed certificate
+    # (or creates one if none exists yet) and installs it on the runner.
     sigh(api_key: api_key, app_identifier: 'com.andradee.nascenteapp')
+
+    # Expo's generated project uses automatic signing, which looks for a
+    # *development* profile at archive time and fails on CI. Switch the app
+    # target to manual signing pinned to the App Store profile sigh installed.
+    update_code_signing_settings(
+      path: 'ios/Nascente.xcodeproj',
+      use_automatic_signing: false,
+      team_id: 'URV3D9PRX2',
+      profile_name: lane_context[SharedValues::SIGH_NAME],
+      code_sign_identity: 'Apple Distribution'
+    )
 
     build_app(
       workspace: WORKSPACE,
@@ -64,8 +100,7 @@ platform :ios do
       output_name: 'Nascente.ipa',
       clean: true,
       export_method: 'app-store',
-      # Expo's generated project uses automatic signing; force manual so the
-      # profile sigh just installed is the one actually used.
+      # Manual at export too, matching the project-level override above.
       export_options: {
         signingStyle: 'manual',
         provisioningProfiles: {
@@ -90,9 +125,16 @@ platform :ios do
     api_key = asc_api_key
 
     # Does NOT rebuild — promotes what `beta` already uploaded, so the binary
-    # that went through TestFlight is the exact one submitted.
+    # that went through TestFlight is the exact one submitted. Version and
+    # build come from the checked-out app.json (the release tag), so the
+    # submission is pinned to that exact TestFlight build instead of
+    # "whatever was uploaded last".
+    app_config = JSON.parse(File.read('../app.json'))['expo']
+
     upload_to_app_store(
       api_key: api_key,
+      app_version: app_config['version'],
+      build_number: app_config['ios']['buildNumber'].to_s,
       skip_binary_upload: true,
       skip_screenshots: true,
       skip_metadata: true,

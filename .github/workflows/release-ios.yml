@@ -23,7 +23,7 @@ on:
           - minor
           - major
       submit_for_review:
-        description: 'Also submit the build to App Store review (otherwise TestFlight only)'
+        description: 'Also submit to App Store review right away (prefer TestFlight-only, then submit-ios.yml after QA)'
         required: true
         default: false
         type: boolean

@@ -48,6 +48,20 @@ supabase/
   functions/    # Edge Functions (AI generation, auth emails, RevenueCat webhook)
 ```
 
+## Releases & OTA updates
+
+iOS ships through GitHub Actions: Fastlane builds for TestFlight/App Store, and [Hot Updater](https://hot-updater.dev) on dedicated Cloudflare infrastructure handles signed over-the-air JS updates. Android is deferred.
+
+- **[Release runbook](.docs/release-runbook.md)**: step-by-step guides for deploying an OTA update, shipping a TestFlight build, submitting to the App Store, and rolling back.
+- **[OTA updates: architecture & decisions](.docs/ota-updates.md)**: why Hot Updater + Cloudflare, the fingerprint/signing model, rollout policy, quotas, and the current implementation.
+
+| Workflow                            | Does                                                               |
+| ----------------------------------- | ------------------------------------------------------------------ |
+| `.github/workflows/ci.yml`          | Typecheck, lint, tests (PRs + gate for the workflows below)        |
+| `.github/workflows/ota-ios.yml`     | Builds, signs and deploys an OTA bundle (manual)                   |
+| `.github/workflows/release-ios.yml` | Bumps version, tags, builds and uploads to TestFlight (manual)     |
+| `.github/workflows/submit-ios.yml`  | Submits an existing TestFlight build for App Store review (manual) |
+
 ## Contributing
 
 To contribute, fork the repo, create a feature branch, and open a pull request against `main`. Direct pushes to `main` are disabled, so all changes (including from maintainers) go through PR review and must pass CI (typecheck, lint, tests) before merging. Please run `pnpm typecheck && pnpm lint && pnpm test` locally before opening a PR.

@@ -1,13 +1,18 @@
 name: OTA iOS
 
 # Signed OTA delivery via Hot Updater → Cloudflare Worker/D1/R2
-# (see .docs/ota-updates.md). iOS only — Android is deferred.
+# (see .docs/ota-updates.md, step-by-step in .docs/release-runbook.md).
+# iOS only — Android is deferred.
 #
 # Manual trigger only: an OTA rewrites what installed apps run, so publishing
 # must always be a deliberate, gated action — never automatic on merge.
-# Roll out via the QA cohort / staged percentages and monitor PostHog +
-# Cloudflare between stages (rollout % can be raised without re-deploying —
-# see `hot-updater bundle` commands).
+# Roll out via staged percentages and monitor PostHog + Cloudflare between
+# stages (rollout can be raised on the SAME bundle without re-deploying — see
+# `hot-updater bundle update` in the runbook).
+#
+# Only the `production` channel exists: every store/TestFlight binary embeds
+# HOT_UPDATER_CHANNEL=production, so a bundle on any other channel would reach
+# no device. QA happens via rollout 0 + target cohorts (see the runbook).
 on:
   workflow_dispatch:
     inputs:
@@ -16,18 +21,10 @@ on:
         required: false
         default: ''
         type: string
-      channel:
-        description: 'Update channel'
-        required: true
-        default: 'production'
-        type: choice
-        options:
-          - production
-          - qa
       rollout:
-        description: 'Rollout percentage for the new bundle (0 = QA/disabled staging)'
+        description: 'Rollout percentage for the new bundle (0 = nobody until cohorts/rollout are set)'
         required: true
-        default: 0
+        default: '0'
         type: choice
         options:
           - '0'
@@ -39,16 +36,11 @@ on:
         required: true
         default: false
         type: boolean
-      message:
-        description: 'Deployment message (defaults to the latest commit message)'
-        required: false
-        default: ''
-        type: string
 
-# One deployment per channel at a time. No cancel-in-progress: a half-uploaded
-# bundle must be allowed to finish rather than leave partial state in R2/D1.
+# One deployment at a time. No cancel-in-progress: a half-uploaded bundle must
+# be allowed to finish rather than leave partial state in R2/D1.
 concurrency:
-  group: ota-ios-${{ inputs.channel }}
+  group: ota-ios-production
   cancel-in-progress: false
 
 jobs:
@@ -87,22 +79,31 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # ios/ is gitignored (CNG). doctor reads the generated Info.plist and
+      # AppDelegate to verify the embedded channel/fingerprint/public key, so
+      # regenerate it exactly as the release build does. --no-install: no
+      # CocoaPods needed (and none available) on Linux.
+      - name: Generate native iOS project
+        run: pnpm exec expo prebuild --platform ios --no-install
+
       # The private key is materialized only under runner.temp for the duration
       # of this job and removed even on failure. It is never committed.
       - name: Materialize the signing key
         env:
           HOT_UPDATER_SIGNING_PRIVATE_KEY: ${{ secrets.HOT_UPDATER_SIGNING_PRIVATE_KEY }}
         run: |
-          echo "HOT_UPDATER_SIGNING_PRIVATE_KEY_PATH=$RUNNER_TEMP/hot-updater-signing/private-key.pem" >> "$GITHUB_ENV"
-          install -m 700 -d "$(dirname "$HOT_UPDATER_SIGNING_PRIVATE_KEY_PATH")"
-          printf '%s' "$HOT_UPDATER_SIGNING_PRIVATE_KEY" > "$HOT_UPDATER_SIGNING_PRIVATE_KEY_PATH"
-          chmod 600 "$HOT_UPDATER_SIGNING_PRIVATE_KEY_PATH"
+          KEY_PATH="$RUNNER_TEMP/hot-updater-signing/private-key.pem"
+          echo "HOT_UPDATER_SIGNING_PRIVATE_KEY_PATH=$KEY_PATH" >> "$GITHUB_ENV"
+          install -m 700 -d "$(dirname "$KEY_PATH")"
+          printf '%s\n' "$HOT_UPDATER_SIGNING_PRIVATE_KEY" > "$KEY_PATH"
+          chmod 600 "$KEY_PATH"
 
-      # Verifies fingerprint.json is current, the embedded public key matches
-      # the signer, and the provider credentials/resources resolve — fails
-      # closed before anything is uploaded.
+      # Fails closed before anything is uploaded: the source fingerprint must
+      # match fingerprint.json (i.e. the shipped binary), the public key must
+      # match the signer, and the Worker must be current. doctor exits 1 on the
+      # known Android errors (Android is deferred) and exits 0 in --json mode
+      # regardless, so judge the JSON: any non-Android error blocks the deploy.
       - name: Preflight (doctor)
-        run: pnpm exec hot-updater doctor
         env:
           HOT_UPDATER_CLOUDFLARE_ACCOUNT_ID: ${{ secrets.HOT_UPDATER_CLOUDFLARE_ACCOUNT_ID }}
           HOT_UPDATER_CLOUDFLARE_API_TOKEN: ${{ secrets.HOT_UPDATER_CLOUDFLARE_API_TOKEN }}
@@ -110,17 +111,28 @@ jobs:
           HOT_UPDATER_CLOUDFLARE_R2_BUCKET_NAME: ${{ secrets.HOT_UPDATER_CLOUDFLARE_R2_BUCKET_NAME }}
           HOT_UPDATER_CLOUDFLARE_R2_ACCESS_KEY_ID: ${{ secrets.HOT_UPDATER_CLOUDFLARE_R2_ACCESS_KEY_ID }}
           HOT_UPDATER_CLOUDFLARE_R2_SECRET_ACCESS_KEY: ${{ secrets.HOT_UPDATER_CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          SERVER_BASE_URL: ${{ secrets.EXPO_PUBLIC_HOT_UPDATER_BASE_URL }}
+        run: |
+          pnpm --silent exec hot-updater doctor --json --server-base-url "$SERVER_BASE_URL" > "$RUNNER_TEMP/doctor.json"
+          BLOCKING=$(jq '[.. | objects | select(.type? == "error" and (.platform? // "") != "android")]' "$RUNNER_TEMP/doctor.json")
+          echo "$BLOCKING" | jq -r '.[] | "::error::\(.platform // "general"): \(.message)"'
+          if [ "$(echo "$BLOCKING" | jq length)" -ne 0 ]; then exit 1; fi
+          if [ "$(jq -r '.details.infrastructure.needsUpdate' "$RUNNER_TEMP/doctor.json")" != "false" ]; then
+            echo "::error::Worker/D1 infrastructure is missing or needs an upgrade — see .docs/ota-updates.md → Infrastructure upgrades"
+            exit 1
+          fi
+          echo "IOS_FINGERPRINT=$(jq -r '.ios' fingerprint.json)" >> "$GITHUB_ENV"
 
       # The EXPO_PUBLIC_* values are compiled into the OTA bundle — they must
       # match the store binary's build environment or the update would ship a
       # different Supabase/PostHog/RevenueCat configuration than the app.
+      # Inputs are passed through env + a bash array, never interpolated into
+      # the script. The bundle message defaults to the deployed commit's
+      # message, so the commit is the single record of what an OTA contains.
       - name: Deploy signed OTA bundle
-        run: |
-          ARGS="-p ios -c ${{ inputs.channel }} -r ${{ inputs.rollout }}"
-          if [ "${{ inputs.force_update }}" = "true" ]; then ARGS="$ARGS -f"; fi
-          if [ -n "${{ inputs.message }}" ]; then ARGS="$ARGS -m \"${{ inputs.message }}\""; fi
-          pnpm exec hot-updater deploy $ARGS
         env:
+          ROLLOUT: ${{ inputs.rollout }}
+          FORCE_UPDATE: ${{ inputs.force_update }}
           HOT_UPDATER_CLOUDFLARE_ACCOUNT_ID: ${{ secrets.HOT_UPDATER_CLOUDFLARE_ACCOUNT_ID }}
           HOT_UPDATER_CLOUDFLARE_API_TOKEN: ${{ secrets.HOT_UPDATER_CLOUDFLARE_API_TOKEN }}
           HOT_UPDATER_CLOUDFLARE_D1_DATABASE_ID: ${{ secrets.HOT_UPDATER_CLOUDFLARE_D1_DATABASE_ID }}
@@ -139,6 +151,41 @@ jobs:
           EXPO_PUBLIC_POSTHOG_HOST: ${{ secrets.EXPO_PUBLIC_POSTHOG_HOST }}
           EXPO_PUBLIC_HOT_UPDATER_BASE_URL: ${{ secrets.EXPO_PUBLIC_HOT_UPDATER_BASE_URL }}
           EXPO_PUBLIC_HOT_UPDATER_API_KEY: ${{ secrets.EXPO_PUBLIC_HOT_UPDATER_API_KEY }}
+        run: |
+          ARGS=(-p ios -c production -r "$ROLLOUT")
+          if [ "$FORCE_UPDATE" = "true" ]; then ARGS+=(-f); fi
+          pnpm exec hot-updater deploy "${ARGS[@]}"
+
+      # Records what was published so the bundle ID needed for rollout changes,
+      # disable and rollback is visible on the run page.
+      - name: Job summary
+        if: success()
+        env:
+          ROLLOUT: ${{ inputs.rollout }}
+          FORCE_UPDATE: ${{ inputs.force_update }}
+          HOT_UPDATER_CLOUDFLARE_ACCOUNT_ID: ${{ secrets.HOT_UPDATER_CLOUDFLARE_ACCOUNT_ID }}
+          HOT_UPDATER_CLOUDFLARE_API_TOKEN: ${{ secrets.HOT_UPDATER_CLOUDFLARE_API_TOKEN }}
+          HOT_UPDATER_CLOUDFLARE_D1_DATABASE_ID: ${{ secrets.HOT_UPDATER_CLOUDFLARE_D1_DATABASE_ID }}
+          HOT_UPDATER_CLOUDFLARE_R2_BUCKET_NAME: ${{ secrets.HOT_UPDATER_CLOUDFLARE_R2_BUCKET_NAME }}
+          HOT_UPDATER_CLOUDFLARE_R2_ACCESS_KEY_ID: ${{ secrets.HOT_UPDATER_CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          HOT_UPDATER_CLOUDFLARE_R2_SECRET_ACCESS_KEY: ${{ secrets.HOT_UPDATER_CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+        run: |
+          {
+            echo "## OTA deployed (iOS · production)"
+            echo ""
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Commit | \`$(git rev-parse --short HEAD)\` |"
+            echo "| Fingerprint | \`$IOS_FINGERPRINT\` |"
+            echo "| Rollout | ${ROLLOUT}% |"
+            echo "| Force update | $FORCE_UPDATE |"
+            echo "| Signed | yes (RSA-SHA256) |"
+            echo ""
+            echo "### Latest bundles"
+            echo '```'
+            pnpm --silent exec hot-updater bundle list -p ios -c production --limit 3 || echo "(bundle list unavailable)"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Remove the signing key
         if: always()

@@ -15,6 +15,9 @@
 #    there is no second certificates repo to maintain and no Apple ID password
 #    or 2FA session in CI. The key is passed as base64 through a single secret.
 
+require 'base64'
+require 'tmpdir'
+
 default_platform(:ios)
 
 # The workspace/scheme names prebuild generates from app.json's `name`.
@@ -50,19 +53,31 @@ platform :ios do
 
     prebuild
 
-    # Create a temporary unlocked keychain on the CI runner. Without it, cert
-    # imports into the login keychain, hits the UI password popup, and never
-    # installs the certificate — so each run mints a new cert + profile.
+    # Signing identity. Apple never returns a certificate's private key, so
+    # `cert` cannot reuse an existing certificate on a fresh runner — it would
+    # create a new Apple Distribution certificate every run until the account
+    # limit is hit. Instead CI imports ONE stable certificate (.p12 exported
+    # once from a Mac) from secrets into a temporary keychain.
+    #
+    # setup_ci (no-op off CI) creates `fastlane_tmp_keychain` with an empty
+    # password and makes it the default keychain so xcodebuild finds the
+    # identity. Locally, the certificate is expected in the login keychain.
     setup_ci
+    if ENV['IOS_DIST_CERT_P12_BASE64']
+      Dir.mktmpdir do |dir|
+        p12_path = File.join(dir, 'distribution.p12')
+        File.binwrite(p12_path, Base64.decode64(ENV.fetch('IOS_DIST_CERT_P12_BASE64')))
+        import_certificate(
+          certificate_path: p12_path,
+          certificate_password: ENV.fetch('IOS_DIST_CERT_P12_PASSWORD'),
+          keychain_name: 'fastlane_tmp_keychain',
+          keychain_password: ''
+        )
+      end
+    end
 
-    # Manual signing with a downloaded App Store profile. `get_provisioning_profile`
-    # (sigh) creates or reuses an App Store distribution profile for the bundle id
-    # and installs it on the runner.
-    cert(
-      api_key: api_key,
-      keychain_path: lane_context[SharedValues::KEYCHAIN_PATH],
-      keychain_password: lane_context[SharedValues::KEYCHAIN_PASSWORD]
-    )
+    # sigh reuses the App Store profile bound to the installed certificate
+    # (or creates one if none exists yet) and installs it on the runner.
     sigh(api_key: api_key, app_identifier: 'com.andradee.nascenteapp')
 
     # Expo's generated project uses automatic signing, which looks for a

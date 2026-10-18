@@ -132,9 +132,10 @@ jobs:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
-          # Signing certificates are created/downloaded by cert+sigh, which need
-          # a keychain password to import into on a fresh runner.
-          MATCH_KEYCHAIN_PASSWORD: ${{ secrets.MATCH_KEYCHAIN_PASSWORD }}
+          # Stable Apple Distribution certificate (.p12, base64) imported into a
+          # temporary keychain by the lane. Never let CI create certificates.
+          IOS_DIST_CERT_P12_BASE64: ${{ secrets.IOS_DIST_CERT_P12_BASE64 }}
+          IOS_DIST_CERT_P12_PASSWORD: ${{ secrets.IOS_DIST_CERT_P12_PASSWORD }}
           FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: '120'
           # The public EXPO_PUBLIC_* values are compiled into the JS bundle at
           # build time, so they must be present here — they are shipped in the

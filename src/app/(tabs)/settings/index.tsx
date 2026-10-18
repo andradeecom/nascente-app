@@ -21,7 +21,7 @@ export default function SettingsScreen() {
     currentTextSizeLabel,
     handleProfilePress,
     handleTextSizePress,
-    handleNotifications,
+    // handleNotifications,
     handleCreditsPress,
     handleSupportPress,
   } = useSettingsScreen();

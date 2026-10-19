@@ -121,7 +121,7 @@ jobs:
             echo "::error::Worker/D1 infrastructure is missing or needs an upgrade — see .docs/ota-updates.md → Infrastructure upgrades"
             exit 1
           fi
-          echo "IOS_FINGERPRINT=$(jq -r '.ios' fingerprint.json)" >> "$GITHUB_ENV"
+          echo "IOS_FINGERPRINT=$(jq -r '.ios.hash' fingerprint.json)" >> "$GITHUB_ENV"
 
       # The EXPO_PUBLIC_* values are compiled into the OTA bundle — they must
       # match the store binary's build environment or the update would ship a

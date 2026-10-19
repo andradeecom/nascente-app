@@ -1,7 +1,7 @@
 # OTA updates
 
-Status: **Implemented, iOS — infrastructure live, first OTA-capable binary (v1.1.0, build 2) on TestFlight. Pending: device validation (first QA OTA, rollback drills) and App Store release of v1.1.0.**  
-Last reviewed: **2026-10-17**  
+Status: **Implemented, iOS — infrastructure live, v1.1.0 (build 2) on TestFlight, first signed OTA delivered to the QA device. Pending: rollback/incident drills and App Store release of v1.1.0.**  
+Last reviewed: **2026-10-18**  
 Linear project: [Integrate OTA Updates](https://linear.app/nascente/project/integrate-ota-updates-9e81f4ad8603/overview)  
 Operational how-to (deploy an OTA, TestFlight release, App Store submission, rollback): [`release-runbook.md`](./release-runbook.md)
 
@@ -69,7 +69,7 @@ The design must account for the repository's current release architecture:
 
 Hot Updater advertises modern Expo/CNG and RN 0.82+ support, but Expo 57/RN 0.86 compatibility is a project gate rather than an assumption. The first milestone must prove it in a release-mode build.
 
-Build-level compatibility is proven: v1.1.0 (build 2) archived in release mode with Hot Updater 1.0.7 on Xcode 26.6 and shipped to TestFlight. Runtime behavior on a device (update apply, rollback) is still to be validated — see [Definition of done](#definition-of-done).
+Build-level compatibility is proven: v1.1.0 (build 2) archived in release mode with Hot Updater 1.0.7 on Xcode 26.6 and shipped to TestFlight. Runtime update delivery is proven too: the first signed OTA, deployed by `ota-ios.yml`, reached the TestFlight device. Rollback behavior is still to be validated — see [Definition of done](#definition-of-done).
 
 ## Current implementation
 
@@ -286,16 +286,11 @@ The Hot Updater Expo config plugin generates `fingerprint.json` and embeds platf
 
 Consequence: any change to native inputs (dependencies with native code, `app.json`/config plugins, Expo/RN versions, autolinking) changes the fingerprint. Such a change cannot be shipped by OTA. It needs a new store binary, and OTAs built from that source only reach the new binary.
 
-### Open item: cross-OS fingerprint determinism
+### Cross-OS fingerprint determinism (resolved)
 
-**Unverified. Revisit after the first OTA deploy.** The binary's fingerprint is computed on **macOS**: locally and on the `macos-26` runner in `release-ios.yml`. `ota-ios.yml` builds and deploys on **Linux** (`ubuntu-latest`). The fingerprint includes Expo/React Native autolinking output. If that output differs between the two OSes (paths, platform-specific module resolution), the Linux deploy would compute a different fingerprint than the shipped binary. The bundle would then target a fingerprint no device has, and no device would ever receive it.
+**Verified 2026-10-18 with the first OTA deploy.** The binary's fingerprint is computed on **macOS**: locally and on the `macos-26` runner in `release-ios.yml`. `ota-ios.yml` builds and deploys on **Linux** (`ubuntu-latest`). On the first deploy, the Linux runner computed the same iOS fingerprint as the v1.1.0 binary (`7c71857c…`): the `doctor` preflight passed, and the update was delivered to the TestFlight device. **The OTA deploy therefore stays on Linux.**
 
-Current safety net: the `doctor` preflight compares the source fingerprint (computed on the runner) with the committed `fingerprint.json` (computed on macOS). A cross-OS mismatch therefore fails the deploy before anything is uploaded, instead of silently shipping an unreachable bundle.
-
-After the first OTA run:
-
-- **Preflight passes and the device receives the update** → the fingerprint is deterministic across OSes. Record that here and close the item.
-- **Preflight fails with an iOS fingerprint change on an unchanged source** → move the `ota-ios.yml` deploy job to `macos-26`. That runner costs more minutes but matches the release environment exactly.
+The safety net stays in place: the `doctor` preflight compares the fingerprint computed on the runner with the committed `fingerprint.json` (computed on macOS). If a future dependency or toolchain change makes autolinking output differ between OSes, the deploy fails before anything is uploaded, instead of shipping a bundle no device can receive. If that ever happens on a source without native changes, move the `ota-ios.yml` deploy job to `macos-26`.
 
 ## Bundle signing
 
@@ -570,12 +565,12 @@ Deferred until Android distribution starts. Repeat native wiring, fingerprint, s
 
 ## Definition of done
 
-Status at last review: phases 1–3 are built. The first OTA-capable binary is on TestFlight. None of the device checks below have been executed yet.
+Status at last review (2026-10-18): phases 1–3 are built, and the first signed OTA reached the TestFlight device from a Linux deploy. Checks marked ✅ are done. The rest are still pending.
 
-- A TestFlight/release-mode build receives a signed QA OTA.
+- ✅ A TestFlight/release-mode build receives a signed QA OTA. The first deploy via `ota-ios.yml` reached the device, with the Linux-computed fingerprint matching the macOS-built binary.
 - The same build starts normally without a network.
 - Update checks never delay access to the app.
-- JavaScript-only changes preserve the fingerprint.
+- ✅ JavaScript-only changes preserve the fingerprint. The first OTA's JS-only source matched the v1.1.0 fingerprint.
 - Native changes produce a fingerprint mismatch and cannot target the old binary.
 - A startup-crashing update automatically returns to a working bundle.
 - A deployed bundle can be disabled and rolled back manually.

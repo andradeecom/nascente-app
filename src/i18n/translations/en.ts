@@ -289,6 +289,9 @@ const en = {
     books: 'Books',
     close: 'Close',
     back: '← Back',
+    searchBooks: 'Search books',
+    clearSearch: 'Clear search',
+    noBooksFound: 'No books match "{{query}}"',
     translation: 'Translation',
     translationPicker: {
       free: 'Free',

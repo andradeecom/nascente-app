@@ -290,6 +290,9 @@ const es = {
     books: 'Libros',
     close: 'Cerrar',
     back: '← Volver',
+    searchBooks: 'Buscar libros',
+    clearSearch: 'Borrar búsqueda',
+    noBooksFound: 'Ningún libro coincide con "{{query}}"',
     translation: 'Traducción',
     translationPicker: {
       free: 'Gratis',

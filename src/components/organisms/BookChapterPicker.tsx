@@ -1,14 +1,16 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Modal, Pressable, View } from 'react-native';
-import { FlashList } from '@shopify/flash-list';
+import { FlashList, type FlashListRef } from '@shopify/flash-list';
 import { StyleSheet, withUnistyles } from 'react-native-unistyles';
-import { X } from 'lucide-react-native';
-import { SafeAreaView, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
+import { Search, X } from 'lucide-react-native';
+import { Input, SafeAreaView, TEXT_COLORS, TEXT_VARIANTS, Text } from '@/components/atoms';
 import { useBooks, useChapters } from '@/hooks/use-bible';
 import { useTranslate } from '@/i18n';
+import { filterBooks } from '@/lib/book-search';
 import type { TranslationId, Book } from '@/types/bible';
 
 const ThemedX = withUnistyles(X, (theme) => ({ color: theme.colors.semantic.textSecondary }));
+const ThemedSearch = withUnistyles(Search, (theme) => ({ color: theme.colors.semantic.textSecondary }));
 
 type Props = {
   visible: boolean;
@@ -22,12 +24,26 @@ type Props = {
 export function BookChapterPicker({ visible, translationId, currentBookId, currentChapter, onSelect, onClose }: Props) {
   const translate = useTranslate();
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [query, setQuery] = useState('');
+  const bookListRef = useRef<FlashListRef<Book>>(null);
 
   const { data: books = [] } = useBooks(translationId);
+  const filteredBooks = filterBooks(books, query);
+
+  const handleQueryChange = (text: string) => {
+    setQuery(text);
+    bookListRef.current?.scrollToOffset({ offset: 0, animated: false });
+  };
 
   const handleClose = () => {
     setSelectedBook(null);
+    setQuery('');
     onClose();
+  };
+
+  const handleSubmitSearch = () => {
+    const [firstMatch] = filteredBooks;
+    if (query.trim() && firstMatch) setSelectedBook(firstMatch);
   };
 
   const handleBookPress = (book: Book) => {
@@ -38,6 +54,7 @@ export function BookChapterPicker({ visible, translationId, currentBookId, curre
     if (selectedBook) {
       onSelect(selectedBook.id, chapter);
       setSelectedBook(null);
+      setQuery('');
     }
   };
 
@@ -70,25 +87,62 @@ export function BookChapterPicker({ visible, translationId, currentBookId, curre
             onSelect={handleChapterPress}
           />
         ) : (
-          <FlashList
-            data={books}
-            keyExtractor={(item) => String(item.id)}
-            contentContainerStyle={styles.listContent}
-            renderItem={({ item }) => (
-              <Pressable
-                onPress={() => handleBookPress(item)}
-                style={({ pressed }) => [
-                  styles.bookRow,
-                  item.id === currentBookId && styles.activeRow,
-                  pressed && styles.pressed,
-                ]}
-              >
-                <Text variant={TEXT_VARIANTS.Body} style={item.id === currentBookId ? styles.activeText : undefined}>
-                  {item.name}
+          <>
+            <View style={styles.searchContainer}>
+              <Input
+                value={query}
+                onChangeText={handleQueryChange}
+                placeholder={translate('reader.searchBooks')}
+                accessibilityLabel={translate('reader.searchBooks')}
+                leftIcon={<ThemedSearch size={18} />}
+                rightIcon={
+                  query ? (
+                    <Pressable
+                      onPress={() => handleQueryChange('')}
+                      hitSlop={8}
+                      accessibilityRole="button"
+                      accessibilityLabel={translate('reader.clearSearch')}
+                    >
+                      <ThemedX size={18} />
+                    </Pressable>
+                  ) : undefined
+                }
+                autoCorrect={false}
+                autoCapitalize="none"
+                returnKeyType="search"
+                clearButtonMode="never"
+                onSubmitEditing={handleSubmitSearch}
+              />
+            </View>
+            <FlashList
+              ref={bookListRef}
+              data={filteredBooks}
+              keyExtractor={(item) => String(item.id)}
+              contentContainerStyle={styles.listContent}
+              maintainVisibleContentPosition={{ disabled: true }}
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="on-drag"
+              ListEmptyComponent={
+                <Text variant={TEXT_VARIANTS.Callout} color={TEXT_COLORS.TextSecondary} style={styles.emptyText}>
+                  {translate('reader.noBooksFound', { query: query.trim() })}
                 </Text>
-              </Pressable>
-            )}
-          />
+              }
+              renderItem={({ item }) => (
+                <Pressable
+                  onPress={() => handleBookPress(item)}
+                  style={({ pressed }) => [
+                    styles.bookRow,
+                    item.id === currentBookId && styles.activeRow,
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  <Text variant={TEXT_VARIANTS.Body} style={item.id === currentBookId ? styles.activeText : undefined}>
+                    {item.name}
+                  </Text>
+                </Pressable>
+              )}
+            />
+          </>
         )}
       </SafeAreaView>
     </Modal>
@@ -153,6 +207,15 @@ const styles = StyleSheet.create((theme) => ({
   headerTitle: {
     flex: 1,
     textAlign: 'center',
+  },
+  searchContainer: {
+    paddingHorizontal: theme.spacing[4],
+    paddingTop: theme.spacing[3],
+  },
+  emptyText: {
+    textAlign: 'center',
+    paddingHorizontal: theme.spacing[5],
+    paddingVertical: theme.spacing[6],
   },
   listContent: {
     paddingVertical: theme.spacing[2],
